@@ -3,6 +3,7 @@
   "name": "cubic-engine",
   "version": "0.1",
   "dependencies": [
-    "glfw3"
+    "glfw3",
+    "spdlog"
   ]
 }

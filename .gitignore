@@ -12,3 +12,4 @@ _deps
 .vs
 out
 CMakeSettings.json
+.cache

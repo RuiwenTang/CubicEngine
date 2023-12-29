@@ -19,10 +19,18 @@ target_sources(
 	PRIVATE
 	
 	# headers
+	${CMAKE_CURRENT_LIST_DIR}/include/cubic/core/application.h
+	${CMAKE_CURRENT_LIST_DIR}/include/cubic/core/log.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/cubic.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/platform.h
-	${CMAKE_CURRENT_LIST_DIR}/include/cubic/core/application.h
 
 	# sources
 	${CMAKE_CURRENT_LIST_DIR}/src/core/application.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/core/log.cc
 )
+
+# spdlog
+find_package(spdlog CONFIG REQUIRED)
+
+target_link_libraries(CubicEngine PUBLIC spdlog::spdlog)
+

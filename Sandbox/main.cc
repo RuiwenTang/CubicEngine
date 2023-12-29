@@ -1,7 +1,5 @@
 #include <cubic/cubic.h>
 
-#include <iostream>
-
 using namespace cubic;
 
 int main(int argc, const char** argv) {
@@ -10,7 +8,7 @@ int main(int argc, const char** argv) {
 
   auto app = Application::Create(config);
 
-  std::cout << "app name: " << app->GetConfig().name << std::endl;
+  CUB_INFO("App name : [ {} ]", app->GetConfig().name);
 
   Application::Terminate();
 
