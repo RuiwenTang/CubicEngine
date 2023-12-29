@@ -1,14 +1,21 @@
 #include <cubic/core/application.h>
+#include <cubic/core/log.h>
 
 namespace cubic {
 
 Application* g_app = nullptr;
 
-Application* Application::Create(Application::Config config) {
-  g_app = new Application(std::move(config));
-
-  return g_app;
+bool Application::Init(Application::Config config) {
+  if (g_app) {
+    CUB_ERROR("Application already initialied !!");
+    return false;
+  } else {
+    g_app = new Application(std::move(config));
+    return true;
+  }
 }
+
+Application* Application::Get() { return g_app; }
 
 void Application::Terminate() {
   if (g_app == nullptr) {

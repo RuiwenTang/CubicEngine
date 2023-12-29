@@ -13,7 +13,9 @@ class CUBIC_API Application {
     std::string workingDirectory;
   };
 
-  static Application* Create(Application::Config config);
+  static bool Init(Application::Config config);
+
+  static Application* Get();
 
   static void Terminate();
 

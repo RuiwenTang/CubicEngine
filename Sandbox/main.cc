@@ -6,7 +6,12 @@ int main(int argc, const char** argv) {
   Application::Config config;
   config.name = "Sandbox Application";
 
-  auto app = Application::Create(config);
+  if (!Application::Init(config)) {
+    CUB_ERROR("Failed init Application!!");
+    return -1;
+  }
+
+  auto app = Application::Get();
 
   CUB_INFO("App name : [ {} ]", app->GetConfig().name);
 
