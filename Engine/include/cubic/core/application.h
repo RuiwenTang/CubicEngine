@@ -1,7 +1,9 @@
 #pragma once
 
 #include <cubic/platform.h>
+#include <cubic/render/render_system.h>
 
+#include <memory>
 #include <string>
 
 namespace cubic {
@@ -26,8 +28,12 @@ class CUBIC_API Application {
  private:
   Application(Config config);
 
+  bool InitInternal();
+
  private:
   Config mConfig;
+
+  std::unique_ptr<RenderSystem> mRenderSystem = {};
 };
 
 }  // namespace cubic

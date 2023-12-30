@@ -8,6 +8,9 @@ int main(int argc, const char** argv) {
 
   if (!Application::Init(config)) {
     CUB_ERROR("Failed init Application!!");
+
+    Application::Terminate();
+
     return -1;
   }
 

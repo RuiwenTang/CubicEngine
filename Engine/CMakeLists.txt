@@ -21,12 +21,15 @@ target_sources(
 	# headers
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/core/application.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/core/log.h
+	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/render_system.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/cubic.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/platform.h
 
 	# sources
 	${CMAKE_CURRENT_LIST_DIR}/src/core/application.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/core/log.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/render/render_system_priv.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/render/render_system_priv.h
 )
 
 # spdlog
