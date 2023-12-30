@@ -42,16 +42,14 @@ else()
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/render_system_vk.h
 	)
 
-	if (WIN32)
-		target_compile_definitions(CubicEngine PRIVATE VK_USE_PLATFORM_WIN32_KHR=1)
-		find_package(Vulkan REQUIRED)
-
-		target_link_libraries(CubicEngine PRIVATE Vulkan::Vulkan)
-	endif()
 	# volk
 	find_package(volk CONFIG REQUIRED)
 
-	target_link_directories(CubicEngine PRIVATE volk::volk)
+	target_link_libraries(CubicEngine PRIVATE volk::volk)
+
+	if (WIN32)
+		target_compile_definitions(CubicEngine PRIVATE VK_USE_PLATFORM_WIN32_KHR=1)
+	endif()
 endif()
 
 # spdlog
