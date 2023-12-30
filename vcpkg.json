@@ -4,6 +4,10 @@
   "version": "0.1",
   "dependencies": [
     "glfw3",
-    "spdlog"
+    "spdlog",
+    {
+      "name": "volk",
+      "platform": "windows"
+    }
   ]
 }

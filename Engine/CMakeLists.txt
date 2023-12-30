@@ -32,6 +32,28 @@ target_sources(
 	${CMAKE_CURRENT_LIST_DIR}/src/render/render_system_priv.h
 )
 
+if (APPLE)
+	# only apple use Metal
+else()
+	target_sources(CubicEngine
+		PRIVATE
+
+		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/render_system_vk.cc
+		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/render_system_vk.h
+	)
+
+	if (WIN32)
+		target_compile_definitions(CubicEngine PRIVATE VK_USE_PLATFORM_WIN32_KHR=1)
+		find_package(Vulkan REQUIRED)
+
+		target_link_libraries(CubicEngine PRIVATE Vulkan::Vulkan)
+	endif()
+	# volk
+	find_package(volk CONFIG REQUIRED)
+
+	target_link_directories(CubicEngine PRIVATE volk::volk)
+endif()
+
 # spdlog
 find_package(spdlog CONFIG REQUIRED)
 
