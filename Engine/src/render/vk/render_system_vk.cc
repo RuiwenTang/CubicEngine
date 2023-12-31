@@ -6,9 +6,31 @@
 
 namespace cubic {
 
+VKAPI_ATTR VkBool32 VKAPI_CALL _debug_utils_messenger_callback(
+    VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType,
+    const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
+  if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT ||
+      messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT) {
+    CUB_INFO("[ {} ][ {} ] : {}", pCallbackData->messageIdNumber, pCallbackData->pMessageIdName,
+             pCallbackData->pMessage);
+  } else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
+    CUB_WARR("[ {} ][ {} ] : {}", pCallbackData->messageIdNumber, pCallbackData->pMessageIdName,
+             pCallbackData->pMessage);
+  } else {
+    CUB_ERROR("[ {} ][ {} ] : {}", pCallbackData->messageIdNumber, pCallbackData->pMessageIdName,
+              pCallbackData->pMessage);
+  }
+
+  return VK_FALSE;
+}
+
 std::unique_ptr<RenderSystemVk> RenderSystemVk::Create() { return std::make_unique<RenderSystemVk>(); }
 
 RenderSystemVk::~RenderSystemVk() {
+  if (mDebugHandler) {
+    vkDestroyDebugUtilsMessengerEXT(mInstance, mDebugHandler, nullptr);
+  }
+
   if (mInstance) {
     vkDestroyInstance(mInstance, nullptr);
   }
@@ -109,7 +131,41 @@ bool RenderSystemVk::initInstance(bool enableDebug) {
   instance_desc.enabledLayerCount = static_cast<uint32_t>(requiredLayers.size());
   instance_desc.ppEnabledLayerNames = requiredLayers.data();
 
-  return vkCreateInstance(&instance_desc, nullptr, &mInstance) == VK_SUCCESS;
+  VkResult ret = vkCreateInstance(&instance_desc, nullptr, &mInstance);
+
+  if (ret != VK_SUCCESS) {
+    return false;
+  }
+
+  if (enableDebug) {
+    setupValidation();
+  }
+
+  return true;
+}
+
+void RenderSystemVk::setupValidation() {
+  if (vkCreateDebugUtilsMessengerEXT == nullptr) {
+    vkCreateDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(
+        vkGetInstanceProcAddr(mInstance, "vkCreateDebugUtilsMessengerEXT"));
+  }
+
+  if (vkDestroyDebugUtilsMessengerEXT == nullptr) {
+    vkDestroyDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(
+        vkGetInstanceProcAddr(mInstance, "vkDestroyDebugUtilsMessengerEXT"));
+  }
+
+  VkDebugUtilsMessengerCreateInfoEXT create_info{};
+  create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+  create_info.messageSeverity =
+      VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+  create_info.messageType =
+      VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
+  create_info.pfnUserCallback = _debug_utils_messenger_callback;
+
+  if (vkCreateDebugUtilsMessengerEXT(mInstance, &create_info, nullptr, &mDebugHandler) != VK_SUCCESS) {
+    CUB_ERROR("Failed create vulkan debug handler !!");
+  }
 }
 
 }  // namespace cubic

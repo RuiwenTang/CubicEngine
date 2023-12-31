@@ -22,8 +22,12 @@ class RenderSystemVk : public RenderSystem {
  private:
   bool initInstance(bool enableDebug);
 
+  void setupValidation();
+
  private:
   VkInstance mInstance = {};
+
+  VkDebugUtilsMessengerEXT mDebugHandler = {};
 };
 
 }  // namespace cubic
