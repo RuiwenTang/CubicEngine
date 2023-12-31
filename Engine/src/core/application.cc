@@ -39,7 +39,7 @@ void Application::Terminate() {
 Application::Application(Config config) : mConfig(std::move(config)) {}
 
 bool Application::InitInternal() {
-  mRenderSystem = InitRenderSystem();
+  mRenderSystem = InitRenderSystem(mConfig.debugModle);
 
   if (!mRenderSystem) {
     CUB_ERROR("Failed init RenderSystem for CubicEngine !!");

@@ -26,3 +26,4 @@ class CUBIC_API Logger {
 #define CUB_INFO(...) ::cubic::Logger::Get()->GetLogger()->info(__VA_ARGS__)
 #define CUB_WARR(...) ::cubic::Logger::Get()->GetLogger()->warn(__VA_ARGS__)
 #define CUB_ERROR(...) ::cubic::Logger::Get()->GetLogger()->error(__VA_ARGS__)
+#define CUB_DEBUG(...) ::cubic::Logger::Get()->GetLogger()->debug(__VA_ARGS__)

@@ -10,14 +10,14 @@
 
 namespace cubic {
 
-std::unique_ptr<RenderSystem> InitRenderSystem() {
+std::unique_ptr<RenderSystem> InitRenderSystem(bool enableDebug) {
 #if defined(CUBIC_PLATFORM_WINDOWS)
 
   CUB_INFO("Init Vulkan backend...");
 
   auto render_system = RenderSystemVk::Create();
 
-  if (!render_system->Init()) {
+  if (!render_system->Init(enableDebug)) {
     CUB_ERROR("Failed init vulkan backend context !!");
 
     return std::unique_ptr<RenderSystem>();

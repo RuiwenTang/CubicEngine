@@ -6,6 +6,6 @@
 
 namespace cubic {
 
-std::unique_ptr<RenderSystem> InitRenderSystem();
+std::unique_ptr<RenderSystem> InitRenderSystem(bool enableDebug);
 
 }

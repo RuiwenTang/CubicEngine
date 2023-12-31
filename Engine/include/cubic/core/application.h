@@ -13,6 +13,8 @@ class CUBIC_API Application {
   struct Config {
     std::string name = "Cubic Application";
     std::string workingDirectory;
+
+    bool debugModle = true;
   };
 
   static bool Init(Application::Config config);

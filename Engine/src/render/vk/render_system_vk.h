@@ -17,7 +17,10 @@ class RenderSystemVk : public RenderSystem {
 
   Backend GetBackend() const override { return Backend::kVulkan; }
 
-  bool Init();
+  bool Init(bool enableDebug);
+
+ private:
+  bool initInstance(bool enableDebug);
 
  private:
   VkInstance mInstance = {};
