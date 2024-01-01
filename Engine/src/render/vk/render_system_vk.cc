@@ -27,6 +27,8 @@ VKAPI_ATTR VkBool32 VKAPI_CALL _debug_utils_messenger_callback(
 std::unique_ptr<RenderSystemVk> RenderSystemVk::Create() { return std::make_unique<RenderSystemVk>(); }
 
 RenderSystemVk::~RenderSystemVk() {
+  mDevice.reset();
+
   if (mDebugHandler) {
     vkDestroyDebugUtilsMessengerEXT(mInstance, mDebugHandler, nullptr);
   }
@@ -49,6 +51,12 @@ bool RenderSystemVk::Init(bool enableDebug) {
   }
 
   volkLoadInstance(mInstance);
+
+  if (!initDevice()) {
+    CUB_ERROR("No GPU device support Vulkan !!");
+
+    return false;
+  }
 
   return true;
 }
@@ -166,6 +174,26 @@ void RenderSystemVk::setupValidation() {
   if (vkCreateDebugUtilsMessengerEXT(mInstance, &create_info, nullptr, &mDebugHandler) != VK_SUCCESS) {
     CUB_ERROR("Failed create vulkan debug handler !!");
   }
+}
+
+bool RenderSystemVk::initDevice() {
+  uint32_t gpuCount = 0;
+
+  vkEnumeratePhysicalDevices(mInstance, &gpuCount, nullptr);
+
+  if (gpuCount == 0) {
+    return false;
+  }
+
+  std::vector<VkPhysicalDevice> gpuDevice(gpuCount);
+
+  vkEnumeratePhysicalDevices(mInstance, &gpuCount, gpuDevice.data());
+
+  // just pick first device, it should work on almost platform
+
+  mDevice = VulkanDevice::Create(gpuDevice.front());
+
+  return mDevice != nullptr;
 }
 
 }  // namespace cubic

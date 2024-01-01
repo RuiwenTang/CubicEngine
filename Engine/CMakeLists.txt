@@ -40,6 +40,8 @@ else()
 
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/render_system_vk.cc
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/render_system_vk.h
+		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/vulkan_device.cc
+		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/vulkan_device.h
 	)
 
 	# volk
