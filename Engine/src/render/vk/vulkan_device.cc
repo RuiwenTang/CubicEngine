@@ -38,36 +38,44 @@ bool VulkanDevice::Init() {
   std::vector<VkDeviceQueueCreateInfo> queueCreateInfos{};
 
   // graphic queue
-  mGraphicQueueIndex = GetQueueFamilyIndex(VK_QUEUE_GRAPHICS_BIT);
+  uint32_t graphicFamily = GetQueueFamilyIndex(VK_QUEUE_GRAPHICS_BIT);
   {
     VkDeviceQueueCreateInfo create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    create_info.queueFamilyIndex = mGraphicQueueIndex;
+    create_info.queueFamilyIndex = graphicFamily;
     create_info.queueCount = 1;
     create_info.pQueuePriorities = &defaultQueuePriority;
 
     queueCreateInfos.emplace_back(create_info);
+
+    mGraphicQueueIndex = 0;
   }
-  mComputeQueueIndex = GetQueueFamilyIndex(VK_QUEUE_COMPUTE_BIT);
+  uint32_t computeFamily = GetQueueFamilyIndex(VK_QUEUE_COMPUTE_BIT);
   if (mComputeQueueIndex != mGraphicQueueIndex) {
     VkDeviceQueueCreateInfo create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    create_info.queueFamilyIndex = mComputeQueueIndex;
+    create_info.queueFamilyIndex = computeFamily;
     create_info.queueCount = 1;
     create_info.pQueuePriorities = &defaultQueuePriority;
 
     queueCreateInfos.emplace_back(create_info);
+    mComputeQueueIndex = 1;
+  } else {
+    mComputeQueueIndex = mGraphicQueueIndex;
   }
-  mTransferQueueIndex = GetQueueFamilyIndex(VK_QUEUE_TRANSFER_BIT);
 
+  uint32_t transferFamily = GetQueueFamilyIndex(VK_QUEUE_TRANSFER_BIT);
   if (mTransferQueueIndex != mGraphicQueueIndex && mTransferQueueIndex != mComputeQueueIndex) {
     VkDeviceQueueCreateInfo create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    create_info.queueFamilyIndex = mComputeQueueIndex;
+    create_info.queueFamilyIndex = transferFamily;
     create_info.queueCount = 1;
     create_info.pQueuePriorities = &defaultQueuePriority;
 
     queueCreateInfos.emplace_back(create_info);
+    mTransferQueueIndex = 2;
+  } else {
+    mTransferQueueIndex = mGraphicQueueIndex;
   }
 
   VkDeviceCreateInfo create_info{};
