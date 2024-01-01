@@ -1,6 +1,7 @@
 #include <cubic/core/application.h>
 #include <cubic/core/log.h>
 
+#include "core/window_impl.h"
 #include "render/render_system_priv.h"
 
 namespace cubic {
@@ -33,7 +34,13 @@ void Application::Terminate() {
     return;
   }
 
+  WindowImpl::TerminatePlatform();
+
   delete g_app;
+}
+
+std::unique_ptr<Window> Application::CreateWindow(WindowProps props) {
+  return WindowImpl::Create(std::move(props), mRenderSystem.get());
 }
 
 Application::Application(Config config) : mConfig(std::move(config)) {}
@@ -45,6 +52,8 @@ bool Application::InitInternal() {
     CUB_ERROR("Failed init RenderSystem for CubicEngine !!");
     return false;
   }
+
+  WindowImpl::InitPlatform();
 
   return true;
 }

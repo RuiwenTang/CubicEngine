@@ -18,6 +18,17 @@ int main(int argc, const char** argv) {
 
   CUB_INFO("App name : [ {} ]", app->GetConfig().name);
 
+  WindowProps props{};
+
+  props.title = "Hello Sandbox";
+  props.width = 1000;
+  props.height = 1000;
+  props.resizeable = false;
+
+  auto window = app->CreateWindow(props);
+
+  window->Show(nullptr);
+
   Application::Terminate();
 
   return 0;

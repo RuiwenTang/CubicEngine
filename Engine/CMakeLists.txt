@@ -21,6 +21,7 @@ target_sources(
 	# headers
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/core/application.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/core/log.h
+	${CMAKE_CURRENT_LIST_DIR}/include/cubic/core/window.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/render_system.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/cubic.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/platform.h
@@ -28,6 +29,8 @@ target_sources(
 	# sources
 	${CMAKE_CURRENT_LIST_DIR}/src/core/application.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/core/log.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/core/window_impl.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/core/window_impl.h
 	${CMAKE_CURRENT_LIST_DIR}/src/render/render_system_priv.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/render/render_system_priv.h
 )
@@ -37,7 +40,8 @@ if (APPLE)
 else()
 	target_sources(CubicEngine
 		PRIVATE
-
+		${CMAKE_CURRENT_LIST_DIR}/src/core/vk/window_impl_vk.cc
+		${CMAKE_CURRENT_LIST_DIR}/src/core/vk/window_impl_vk.h
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/render_system_vk.cc
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/render_system_vk.h
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/vulkan_device.cc
@@ -58,4 +62,8 @@ endif()
 find_package(spdlog CONFIG REQUIRED)
 
 target_link_libraries(CubicEngine PUBLIC spdlog::spdlog)
+
+# glfw
+find_package(glfw3 CONFIG REQUIRED)
+target_link_libraries(CubicEngine PRIVATE glfw)
 

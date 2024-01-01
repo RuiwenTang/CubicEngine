@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cubic/core/window.h>
 #include <cubic/platform.h>
 #include <cubic/render/render_system.h>
 
@@ -26,6 +27,8 @@ class CUBIC_API Application {
   ~Application();
 
   const Config& GetConfig() const { return mConfig; }
+
+  std::unique_ptr<Window> CreateWindow(WindowProps props);
 
  private:
   Application(Config config);
