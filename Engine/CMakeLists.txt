@@ -17,7 +17,7 @@ target_include_directories(
 target_sources(
 	CubicEngine
 	PRIVATE
-	
+
 	# headers
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/core/application.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/core/log.h
@@ -35,8 +35,25 @@ target_sources(
 	${CMAKE_CURRENT_LIST_DIR}/src/render/render_system_priv.h
 )
 
-if (APPLE)
+if(APPLE)
 	# only apple use Metal
+	target_sources(CubicEngine
+		PRIVATE
+		${CMAKE_CURRENT_LIST_DIR}/src/core/mtl/window_impl_mtl.h
+		${CMAKE_CURRENT_LIST_DIR}/src/core/mtl/window_impl_mtl.mm
+		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/render_system_mtl.h
+		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/render_system_mtl.mm
+	)
+
+	target_link_libraries(
+		CubicEngine
+		PRIVATE
+		"-framework Cocoa"
+		"-framework IOKit"
+		"-framework CoreFoundation"
+		"-framework Metal"
+		"-framework MetalKit"
+	)
 else()
 	target_sources(CubicEngine
 		PRIVATE
@@ -53,7 +70,7 @@ else()
 
 	target_link_libraries(CubicEngine PRIVATE volk::volk)
 
-	if (WIN32)
+	if(WIN32)
 		target_compile_definitions(CubicEngine PRIVATE VK_USE_PLATFORM_WIN32_KHR=1)
 	endif()
 endif()
@@ -66,4 +83,3 @@ target_link_libraries(CubicEngine PUBLIC spdlog::spdlog)
 # glfw
 find_package(glfw3 CONFIG REQUIRED)
 target_link_libraries(CubicEngine PRIVATE glfw)
-

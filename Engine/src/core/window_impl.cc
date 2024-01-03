@@ -4,6 +4,8 @@
 
 #if defined(CUBIC_PLATFORM_WINDOWS)
 #include "core/vk/window_impl_vk.h"
+#elif defined(CUBIC_PLATFORM_MACOS)
+#include "core/mtl/window_impl_mtl.h"
 #endif
 
 namespace cubic {
@@ -25,6 +27,23 @@ std::unique_ptr<Window> WindowImpl::Create(WindowProps props, RenderSystem* rend
   }
 
   auto window = std::make_unique<WindowImplVK>(std::move(props), native_window, renderSystem);
+
+  if (!window->Init()) {
+    return std::unique_ptr<Window>();
+  }
+
+  return window;
+#elif defined(CUBIC_PLATFORM_MACOS)
+  glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+  glfwWindowHint(GLFW_RESIZABLE, props.resizeable ? GLFW_TRUE : GLFW_FALSE);
+
+  auto native_window = glfwCreateWindow(props.width, props.height, props.title.c_str(), nullptr, nullptr);
+
+  if (native_window == nullptr) {
+    return std::unique_ptr<Window>();
+  }
+
+  auto window = std::make_unique<WindowImplMTL>(std::move(props), native_window, renderSystem);
 
   if (!window->Init()) {
     return std::unique_ptr<Window>();
