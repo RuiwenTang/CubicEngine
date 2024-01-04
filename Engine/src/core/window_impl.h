@@ -25,6 +25,8 @@ class WindowImpl : public Window {
 
   GLFWwindow* GetNativeWindow() const { return mNativeWindow; }
 
+  RenderSystem* GetRenderSystem() const { return mRenderSystem; }
+
   virtual bool Init() = 0;
 
  protected:

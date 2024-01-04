@@ -16,6 +16,8 @@ class WindowImplMTL : public WindowImpl {
 
   bool Init() override;
 
+  void Show(WindowClient* client) override;
+
  protected:
   void SwapWindowBuffer() override;
 

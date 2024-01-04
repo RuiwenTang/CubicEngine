@@ -48,11 +48,8 @@ if(APPLE)
 	target_link_libraries(
 		CubicEngine
 		PRIVATE
-		"-framework Cocoa"
-		"-framework IOKit"
-		"-framework CoreFoundation"
 		"-framework Metal"
-		"-framework MetalKit"
+		"-framework QuartzCore"
 	)
 else()
 	target_sources(CubicEngine
