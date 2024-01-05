@@ -46,7 +46,7 @@ std::unique_ptr<Window> Application::CreateWindow(WindowProps props) {
 Application::Application(Config config) : mConfig(std::move(config)) {}
 
 bool Application::InitInternal() {
-  mRenderSystem = InitRenderSystem(mConfig.debugModle);
+  mRenderSystem = RenderSystemPriv::InitRenderSystem(mConfig.debugModle);
 
   if (!mRenderSystem) {
     CUB_ERROR("Failed init RenderSystem for CubicEngine !!");

@@ -14,7 +14,7 @@
 
 namespace cubic {
 
-std::unique_ptr<RenderSystem> InitRenderSystem(bool enableDebug) {
+std::unique_ptr<RenderSystem> RenderSystemPriv::InitRenderSystem(bool enableDebug) {
 #if defined(CUBIC_PLATFORM_WINDOWS)
 
   CUB_INFO("Init Vulkan backend...");

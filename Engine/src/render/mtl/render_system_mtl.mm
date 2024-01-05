@@ -1,6 +1,9 @@
 #include "render/mtl/render_system_mtl.h"
 
 #import <Metal/Metal.h>
+#include "cubic/render/render_system.h"
+#include "render/mtl/render_system_info_mtl.h"
+#include "render/render_system_priv.h"
 
 namespace cubic {
 
@@ -12,12 +15,22 @@ class RenderSystemMTLPriv {
 
   bool Init() {
     mDevice = MTLCreateSystemDefaultDevice();
+    mQueue = [mDevice newCommandQueue];
+
+    mInfo.backend = Backend::kMetal;
+    mInfo.device = mDevice;
+    mInfo.queue = mQueue;
 
     return mDevice != nil;
   }
 
+  RenderSystemInfo* GetBackendInfo() { return &mInfo; }
+
  private:
   id<MTLDevice> mDevice = nil;
+  id<MTLCommandQueue> mQueue = nil;
+
+  RenderSystemInfoMTL mInfo = {};
 };
 
 std::unique_ptr<RenderSystemMTL> RenderSystemMTL::Create() { return std::make_unique<RenderSystemMTL>(); }
@@ -31,5 +44,7 @@ bool RenderSystemMTL::Init() {
 
   return mPriv->Init();
 }
+
+RenderSystemInfo* RenderSystemMTL::GetBackendInfo() { return mPriv->GetBackendInfo(); }
 
 }

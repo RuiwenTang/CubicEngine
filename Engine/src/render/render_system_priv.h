@@ -6,6 +6,19 @@
 
 namespace cubic {
 
-std::unique_ptr<RenderSystem> InitRenderSystem(bool enableDebug);
+struct RenderSystemInfo {
+  Backend backend = Backend::kInvalid;
+};
 
-}
+class RenderSystemPriv : public RenderSystem {
+ public:
+  RenderSystemPriv() = default;
+
+  ~RenderSystemPriv() override = default;
+
+  virtual RenderSystemInfo* GetBackendInfo() = 0;
+
+  static std::unique_ptr<RenderSystem> InitRenderSystem(bool enableDebug);
+};
+
+}  // namespace cubic

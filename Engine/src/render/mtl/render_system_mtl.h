@@ -1,14 +1,14 @@
 #pragma once
 
-#include <cubic/render/render_system.h>
-
 #include <memory>
+
+#include "render/render_system_priv.h"
 
 namespace cubic {
 
 class RenderSystemMTLPriv;
 
-class RenderSystemMTL : public RenderSystem {
+class RenderSystemMTL : public RenderSystemPriv {
  public:
   static std::unique_ptr<RenderSystemMTL> Create();
 
@@ -17,6 +17,8 @@ class RenderSystemMTL : public RenderSystem {
   ~RenderSystemMTL() override;
 
   Backend GetBackend() const override { return Backend::kMetal; }
+
+  RenderSystemInfo* GetBackendInfo() override;
 
   bool Init();
 
