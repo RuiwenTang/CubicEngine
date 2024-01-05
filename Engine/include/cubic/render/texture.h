@@ -20,7 +20,9 @@ class CUBIC_API Texture {
 
   virtual ~Texture() = default;
 
-  virtual void UploadData(void* data, size_t size, uint32_t x, uint32_t y) = 0;
+  virtual void UploadData(void* data, uint32_t w, uint32_t h, uint32_t x, uint32_t y) = 0;
+
+  const TextureDescirptor& GetDescriptor() const { return mDesc; }
 
  private:
   TextureDescirptor mDesc;
