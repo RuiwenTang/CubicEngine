@@ -29,6 +29,8 @@ std::unique_ptr<Window> WindowImpl::Create(WindowProps props, RenderSystem* rend
   auto window = std::make_unique<WindowImplVK>(std::move(props), native_window, renderSystem);
 
   if (!window->Init()) {
+    window->Terminate();
+
     return std::unique_ptr<Window>();
   }
 

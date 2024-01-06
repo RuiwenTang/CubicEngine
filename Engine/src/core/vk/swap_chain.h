@@ -12,7 +12,7 @@ class Swapchain {
 
   ~Swapchain();
 
-  bool Init(uint32_t width, uint32_t height, VkSurfaceFormatKHR format);
+  bool Resize(uint32_t width, uint32_t height, VkSurfaceFormatKHR format);
 
  private:
   VkInstance mInstance;

@@ -27,7 +27,9 @@ int main(int argc, const char** argv) {
 
   auto window = app->CreateWindow(props);
 
-  window->Show(nullptr);
+  if (window) {
+    window->Show(nullptr);
+  }
 
   Application::Terminate();
 

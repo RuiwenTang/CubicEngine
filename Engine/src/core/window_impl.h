@@ -29,10 +29,10 @@ class WindowImpl : public Window {
 
   virtual bool Init() = 0;
 
+  virtual void Terminate() = 0;
+
  protected:
   virtual void SwapWindowBuffer() = 0;
-
-  virtual void Terminate() = 0;
 
  private:
   GLFWwindow* mNativeWindow;

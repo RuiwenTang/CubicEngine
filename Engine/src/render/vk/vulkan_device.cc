@@ -87,6 +87,8 @@ bool VulkanDevice::Init() {
   // TODO enable some advance extensions
   std::vector<const char*> requiredExtensions{};
 
+  requiredExtensions.emplace_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+
   create_info.enabledExtensionCount = static_cast<uint32_t>(requiredExtensions.size());
   create_info.ppEnabledExtensionNames = requiredExtensions.data();
 

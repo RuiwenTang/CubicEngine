@@ -48,6 +48,8 @@ bool WindowImplVK::Init() {
 }
 
 void WindowImplVK::Terminate() {
+  mSwapchain.reset();
+
   if (mSurface) {
     vkDestroySurfaceKHR(mInstance, mSurface, nullptr);
   }
@@ -83,7 +85,15 @@ bool WindowImplVK::ChooseSurfaceFormat() {
   return true;
 }
 
-bool WindowImplVK::CreateSwapchain() { return false; }
+bool WindowImplVK::CreateSwapchain() {
+  mSwapchain = std::make_unique<Swapchain>(mInstance, mSurface, mDevice);
+
+  int32_t w, h;
+
+  glfwGetFramebufferSize(GetNativeWindow(), &w, &h);
+
+  return mSwapchain->Resize(w, h, mSurfaceFormat);
+}
 
 void WindowImplVK::SwapWindowBuffer() {}
 

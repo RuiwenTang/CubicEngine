@@ -2,6 +2,7 @@
 
 #include <volk.h>
 
+#include "core/vk/swap_chain.h"
 #include "core/window_impl.h"
 
 namespace cubic {
@@ -16,10 +17,10 @@ class WindowImplVK : public WindowImpl {
 
   bool Init() override;
 
+  void Terminate() override;
+
  protected:
   void SwapWindowBuffer() override;
-
-  void Terminate() override;
 
   bool ChooseSurfaceFormat();
 
@@ -30,6 +31,8 @@ class WindowImplVK : public WindowImpl {
   VulkanDevice* mDevice = nullptr;
   VkSurfaceKHR mSurface = nullptr;
   VkSurfaceFormatKHR mSurfaceFormat = {};
+
+  std::unique_ptr<Swapchain> mSwapchain = {};
 };
 
 }  // namespace cubic

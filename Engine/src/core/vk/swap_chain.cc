@@ -15,7 +15,7 @@ Swapchain::~Swapchain() {
   }
 }
 
-bool Swapchain::Init(uint32_t width, uint32_t height, VkSurfaceFormatKHR format) {
+bool Swapchain::Resize(uint32_t width, uint32_t height, VkSurfaceFormatKHR format) {
   VkSurfaceCapabilitiesKHR surface_props{};
 
   if (vkGetPhysicalDeviceSurfaceCapabilitiesKHR(mDevice->GetPhysicalDevice(), mSurface, &surface_props) != VK_SUCCESS) {
