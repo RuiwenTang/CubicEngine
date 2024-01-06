@@ -11,6 +11,7 @@ Swapchain::Swapchain(VkInstance instance, VkSurfaceKHR surface, VulkanDevice* de
 
 Swapchain::~Swapchain() {
   if (mSwapchain) {
+    CleanBuffers();
     vkDestroySwapchainKHR(mDevice->GetLogicalDevice(), mSwapchain, nullptr);
   }
 }
@@ -79,9 +80,74 @@ bool Swapchain::Resize(uint32_t width, uint32_t height, VkSurfaceFormatKHR forma
   create_info.clipped = true;
   create_info.oldSwapchain = old_swapchain;
 
+  if (surface_props.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_SRC_BIT) {
+    create_info.imageUsage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+  }
+
+  if (surface_props.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_DST_BIT) {
+    create_info.imageUsage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+  }
+
   if (vkCreateSwapchainKHR(mDevice->GetLogicalDevice(), &create_info, nullptr, &mSwapchain) != VK_SUCCESS) {
     CUB_ERROR("Failed create vulkan swapchain !!");
     return false;
+  }
+
+  if (old_swapchain) {
+    CleanBuffers();
+
+    vkDestroySwapchainKHR(mDevice->GetLogicalDevice(), old_swapchain, nullptr);
+  }
+
+  mFormat = format;
+
+  return InitBuffers();
+}
+
+void Swapchain::CleanBuffers() {
+  for (const auto& buffer : mBuffers) {
+    vkDestroyImageView(mDevice->GetLogicalDevice(), buffer.view, nullptr);
+  }
+}
+
+bool Swapchain::InitBuffers() {
+  uint32_t image_count;
+  vkGetSwapchainImagesKHR(mDevice->GetLogicalDevice(), mSwapchain, &image_count, nullptr);
+
+  if (image_count == 0) {
+    return false;
+  }
+
+  std::vector<VkImage> images(image_count);
+  vkGetSwapchainImagesKHR(mDevice->GetLogicalDevice(), mSwapchain, &image_count, images.data());
+
+  mBuffers.resize(image_count);
+
+  for (uint32_t i = 0; i < image_count; i++) {
+    mBuffers[i].image = images[i];
+
+    VkImageViewCreateInfo create_info{};
+    create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    create_info.format = mFormat.format;
+    create_info.components = {
+        VK_COMPONENT_SWIZZLE_R,
+        VK_COMPONENT_SWIZZLE_G,
+        VK_COMPONENT_SWIZZLE_B,
+        VK_COMPONENT_SWIZZLE_A,
+    };
+    create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    create_info.subresourceRange.baseMipLevel = 0;
+    create_info.subresourceRange.levelCount = 1;
+    create_info.subresourceRange.baseArrayLayer = 0;
+    create_info.subresourceRange.layerCount = 1;
+    create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    create_info.flags = 0;
+
+    create_info.image = images[i];
+
+    if (vkCreateImageView(mDevice->GetLogicalDevice(), &create_info, nullptr, &mBuffers[i].view) != VK_SUCCESS) {
+      return false;
+    }
   }
 
   return true;
