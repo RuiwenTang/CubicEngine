@@ -58,8 +58,13 @@ bool RenderSystemVk::Init(bool enableDebug) {
     return false;
   }
 
+  mInfo.backend = Backend::kVulkan;
+  mInfo.device = mDevice.get();
+
   return true;
 }
+
+RenderSystemInfo* RenderSystemVk::GetBackendInfo() { return &mInfo; }
 
 bool RenderSystemVk::initInstance(bool enableDebug) {
   VkApplicationInfo app_info{};

@@ -5,11 +5,13 @@
 
 #include <memory>
 
+#include "render/render_system_priv.h"
+#include "render/vk/render_system_info_vk.h"
 #include "render/vk/vulkan_device.h"
 
 namespace cubic {
 
-class RenderSystemVk : public RenderSystem {
+class RenderSystemVk : public RenderSystemPriv {
  public:
   static std::unique_ptr<RenderSystemVk> Create();
 
@@ -20,6 +22,8 @@ class RenderSystemVk : public RenderSystem {
   Backend GetBackend() const override { return Backend::kVulkan; }
 
   bool Init(bool enableDebug);
+
+  RenderSystemInfo* GetBackendInfo() override;
 
  private:
   bool initInstance(bool enableDebug);
@@ -34,6 +38,8 @@ class RenderSystemVk : public RenderSystem {
   VkDebugUtilsMessengerEXT mDebugHandler = {};
 
   std::unique_ptr<VulkanDevice> mDevice = {};
+
+  RenderSystemInfoVK mInfo = {};
 };
 
 }  // namespace cubic
