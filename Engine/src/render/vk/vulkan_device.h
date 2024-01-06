@@ -15,6 +15,10 @@ class VulkanDevice {
 
   static std::unique_ptr<VulkanDevice> Create(VkPhysicalDevice gpu);
 
+  VkDevice GetLogicalDevice() const { return mDevice; }
+
+  VkPhysicalDevice GetPhysicalDevice() const { return mGPUDevice; }
+
  private:
   bool Init();
 

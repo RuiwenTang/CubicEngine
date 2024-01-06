@@ -6,6 +6,8 @@
 
 namespace cubic {
 
+class VulkanDevice;
+
 class WindowImplVK : public WindowImpl {
  public:
   WindowImplVK(WindowProps props, GLFWwindow* nativeWindow, RenderSystem* renderSystem);
@@ -19,9 +21,15 @@ class WindowImplVK : public WindowImpl {
 
   void Terminate() override;
 
+  bool ChooseSurfaceFormat();
+
+  bool CreateSwapchain();
+
  private:
   VkInstance mInstance = nullptr;
+  VulkanDevice* mDevice = nullptr;
   VkSurfaceKHR mSurface = nullptr;
+  VkSurfaceFormatKHR mSurfaceFormat = {};
 };
 
 }  // namespace cubic
