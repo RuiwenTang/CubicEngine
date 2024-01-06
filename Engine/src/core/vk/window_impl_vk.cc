@@ -44,10 +44,22 @@ bool WindowImplVK::Init() {
     return false;
   }
 
+  if (!CreateSemaphore()) {
+    return false;
+  }
+
   return true;
 }
 
 void WindowImplVK::Terminate() {
+  if (mRenderComplete) {
+    vkDestroySemaphore(mDevice->GetLogicalDevice(), mRenderComplete, nullptr);
+  }
+
+  if (mPresentComplete) {
+    vkDestroySemaphore(mDevice->GetLogicalDevice(), mPresentComplete, nullptr);
+  }
+
   mSwapchain.reset();
 
   if (mSurface) {
@@ -93,6 +105,21 @@ bool WindowImplVK::CreateSwapchain() {
   glfwGetFramebufferSize(GetNativeWindow(), &w, &h);
 
   return mSwapchain->Resize(w, h, mSurfaceFormat);
+}
+
+bool WindowImplVK::CreateSemaphore() {
+  VkSemaphoreCreateInfo create_info{};
+  create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+  if (vkCreateSemaphore(mDevice->GetLogicalDevice(), &create_info, nullptr, &mRenderComplete) != VK_SUCCESS) {
+    return false;
+  }
+
+  if (vkCreateSemaphore(mDevice->GetLogicalDevice(), &create_info, nullptr, &mPresentComplete) != VK_SUCCESS) {
+    return false;
+  }
+
+  return true;
 }
 
 void WindowImplVK::SwapWindowBuffer() {}

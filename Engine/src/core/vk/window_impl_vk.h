@@ -26,6 +26,8 @@ class WindowImplVK : public WindowImpl {
 
   bool CreateSwapchain();
 
+  bool CreateSemaphore();
+
  private:
   VkInstance mInstance = nullptr;
   VulkanDevice* mDevice = nullptr;
@@ -33,6 +35,9 @@ class WindowImplVK : public WindowImpl {
   VkSurfaceFormatKHR mSurfaceFormat = {};
 
   std::unique_ptr<Swapchain> mSwapchain = {};
+
+  VkSemaphore mPresentComplete = VK_NULL_HANDLE;
+  VkSemaphore mRenderComplete = VK_NULL_HANDLE;
 };
 
 }  // namespace cubic
