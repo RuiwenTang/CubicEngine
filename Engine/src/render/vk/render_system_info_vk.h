@@ -9,6 +9,7 @@ namespace cubic {
 class VulkanDevice;
 
 struct RenderSystemInfoVK : public RenderSystemInfo {
+  VkInstance instance = VK_NULL_HANDLE;
   VulkanDevice* device = nullptr;
 };
 

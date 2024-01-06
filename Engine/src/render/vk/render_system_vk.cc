@@ -59,6 +59,7 @@ bool RenderSystemVk::Init(bool enableDebug) {
   }
 
   mInfo.backend = Backend::kVulkan;
+  mInfo.instance = mInstance;
   mInfo.device = mDevice.get();
 
   return true;

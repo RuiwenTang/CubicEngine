@@ -32,6 +32,8 @@ class WindowImpl : public Window {
  protected:
   virtual void SwapWindowBuffer() = 0;
 
+  virtual void Terminate() = 0;
+
  private:
   GLFWwindow* mNativeWindow;
   RenderSystem* mRenderSystem;

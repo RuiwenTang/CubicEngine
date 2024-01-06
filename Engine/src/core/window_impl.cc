@@ -74,6 +74,8 @@ void WindowImpl::Show(WindowClient* client) {
 
     SwapWindowBuffer();
   }
+
+  Terminate();
 }
 
 }  // namespace cubic
