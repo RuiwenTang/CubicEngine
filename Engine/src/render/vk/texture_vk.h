@@ -3,11 +3,14 @@
 #include <cubic/render/texture.h>
 #include <volk.h>
 
+#include <memory>
+
 namespace cubic {
 
 class VulkanDevice;
 
 struct TextureDescriptorVK {
+  VkFormat format = VK_FORMAT_UNDEFINED;
   VkImage image = VK_NULL_HANDLE;
   VkImageView view = VK_NULL_HANDLE;
   VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -28,6 +31,11 @@ class TextureVK : public Texture {
   VkImageView GetImageView() const { return mView; }
 
   VkImageLayout GetImageLayout() const { return mLayout; }
+
+  void SetImageLayout(VkImageLayout layout) { mLayout = layout; }
+
+  static std::shared_ptr<TextureVK> WrapSwapchainTexture(uint32_t width, uint32_t height,
+                                                         const TextureDescriptorVK& vk_desc, VulkanDevice* device);
 
  private:
   VkImage mImage = VK_NULL_HANDLE;

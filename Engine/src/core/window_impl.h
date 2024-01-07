@@ -9,6 +9,8 @@
 
 namespace cubic {
 
+class Texture;
+
 class WindowImpl : public Window {
  public:
   static void InitPlatform();
@@ -32,6 +34,8 @@ class WindowImpl : public Window {
   virtual void Terminate() = 0;
 
  protected:
+  virtual std::shared_ptr<Texture> AcquireTexture() = 0;
+
   virtual void SwapWindowBuffer() = 0;
 
  private:

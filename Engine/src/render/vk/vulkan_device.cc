@@ -4,9 +4,17 @@
 
 #include <vector>
 
+#include "render/vk/command_queue_vk.h"
+
 namespace cubic {
 
 VulkanDevice::~VulkanDevice() {
+  vkDeviceWaitIdle(mDevice);
+
+  mGraphicProxy.reset();
+  mComputeProxy.reset();
+  mTransferProxy.reset();
+
   if (mDevice) {
     vkDestroyDevice(mDevice, nullptr);
   }
@@ -102,6 +110,26 @@ bool VulkanDevice::Init() {
   volkLoadDevice(mDevice);
 
   CUB_DEBUG("Success init vulkan context on GPU: {}", mGPUProps.deviceName);
+
+  vkGetDeviceQueue(mDevice, graphicFamily, mGraphicQueueIndex, &mGraphicQueue);
+  vkGetDeviceQueue(mDevice, computeFamily, mComputeQueueIndex, &mComputeQueue);
+  vkGetDeviceQueue(mDevice, transferFamily, mTransferQueueIndex, &mTransferQueue);
+
+  mGraphicProxy = std::make_unique<CommandQueueVK>(this, mGraphicQueue, graphicFamily);
+  mComputeProxy = std::make_unique<CommandQueueVK>(this, mComputeQueue, computeFamily);
+  mTransferProxy = std::make_unique<CommandQueueVK>(this, mTransferQueue, transferFamily);
+
+  if (!mGraphicProxy->Init()) {
+    return false;
+  }
+
+  if (!mComputeProxy->Init()) {
+    return false;
+  }
+
+  if (!mTransferProxy->Init()) {
+    return false;
+  }
 
   return true;
 }

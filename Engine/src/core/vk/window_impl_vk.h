@@ -4,6 +4,7 @@
 
 #include "core/vk/swap_chain.h"
 #include "core/window_impl.h"
+#include "render/vk/texture_vk.h"
 
 namespace cubic {
 
@@ -20,6 +21,8 @@ class WindowImplVK : public WindowImpl {
   void Terminate() override;
 
  protected:
+  std::shared_ptr<Texture> AcquireTexture() override;
+
   void SwapWindowBuffer() override;
 
   bool ChooseSurfaceFormat();
@@ -38,6 +41,8 @@ class WindowImplVK : public WindowImpl {
 
   VkSemaphore mPresentComplete = VK_NULL_HANDLE;
   VkSemaphore mRenderComplete = VK_NULL_HANDLE;
+
+  std::shared_ptr<TextureVK> mCurrentFrame = {};
 };
 
 }  // namespace cubic

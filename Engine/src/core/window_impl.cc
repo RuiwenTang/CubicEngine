@@ -1,5 +1,6 @@
 #include "core/window_impl.h"
 
+#include <cubic/core/log.h>
 #include <cubic/platform.h>
 
 #if defined(CUBIC_PLATFORM_WINDOWS)
@@ -69,6 +70,13 @@ WindowImpl::~WindowImpl() {
 void WindowImpl::Show(WindowClient* client) {
   while (!glfwWindowShouldClose(mNativeWindow)) {
     glfwPollEvents();
+
+    auto texture = AcquireTexture();
+
+    if (texture == nullptr) {
+      CUB_ERROR("Failed get next framebuffer from window !!");
+      break;
+    }
 
     if (client) {
       client->OnWindowUpdate(this, mRenderSystem);

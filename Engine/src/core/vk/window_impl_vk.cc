@@ -5,6 +5,8 @@
 #include <vector>
 
 #include "render/vk/render_system_vk.h"
+#include "render/vk/vulkan_device.h"
+#include "render/vk/command_queue_vk.h"
 
 namespace cubic {
 
@@ -67,6 +69,22 @@ void WindowImplVK::Terminate() {
   }
 }
 
+std::shared_ptr<Texture> WindowImplVK::AcquireTexture() {
+  auto state = mSwapchain->AcquireNextFrame(mPresentComplete, VK_NULL_HANDLE);
+
+  if (state.state != VK_SUCCESS) {
+    return std::shared_ptr<Texture>();
+  }
+
+  mCurrentFrame = state.texture;
+
+  mDevice->GetGraphicQueue()->ResetPool();
+  mDevice->GetComputeQueue()->ResetPool();
+  mDevice->GetTransferQueue()->ResetPool();
+
+  return state.texture;
+}
+
 bool WindowImplVK::ChooseSurfaceFormat() {
   uint32_t format_count = 0;
 
@@ -122,6 +140,14 @@ bool WindowImplVK::CreateSemaphore() {
   return true;
 }
 
-void WindowImplVK::SwapWindowBuffer() {}
+void WindowImplVK::SwapWindowBuffer() {
+  if (mCurrentFrame == nullptr) {
+    return;
+  }
+
+  auto vk_texture = dynamic_cast<TextureVK*>(mCurrentFrame.get());
+
+  mSwapchain->SubmitFrame(mDevice->GetTransferQueue(), std::move(mCurrentFrame), mPresentComplete);
+}
 
 }  // namespace cubic

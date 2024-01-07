@@ -2,6 +2,8 @@
 
 #include <cubic/core/log.h>
 
+#include "render/vk/command_buffer_vk.h"
+#include "render/vk/command_queue_vk.h"
 #include "render/vk/vulkan_device.h"
 
 namespace cubic {
@@ -24,13 +26,11 @@ bool Swapchain::Resize(uint32_t width, uint32_t height, VkSurfaceFormatKHR forma
     return false;
   }
 
-  VkExtent2D swapchain_size;
-
   if (surface_props.currentExtent.width == 0xFFFFFFFF) {
-    swapchain_size.width = width;
-    swapchain_size.height = height;
+    mSwapchainSize.width = width;
+    mSwapchainSize.height = height;
   } else {
-    swapchain_size = surface_props.currentExtent;
+    mSwapchainSize = surface_props.currentExtent;
   }
 
   // supported by all implementations
@@ -69,8 +69,8 @@ bool Swapchain::Resize(uint32_t width, uint32_t height, VkSurfaceFormatKHR forma
   create_info.minImageCount = desired_swapchain_images;
   create_info.imageFormat = format.format;
   create_info.imageColorSpace = format.colorSpace;
-  create_info.imageExtent.width = swapchain_size.width;
-  create_info.imageExtent.height = swapchain_size.height;
+  create_info.imageExtent.width = mSwapchainSize.width;
+  create_info.imageExtent.height = mSwapchainSize.height;
   create_info.imageArrayLayers = 1;
   create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
   create_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -102,6 +102,72 @@ bool Swapchain::Resize(uint32_t width, uint32_t height, VkSurfaceFormatKHR forma
   mFormat = format;
 
   return InitBuffers();
+}
+
+SwapchainResult Swapchain::AcquireNextFrame(VkSemaphore signal_semaphore, VkFence signal_fence) {
+  auto state = vkAcquireNextImageKHR(mDevice->GetLogicalDevice(), mSwapchain, UINT64_MAX, signal_semaphore,
+                                     signal_fence, &mCurrentFrameIndex);
+
+  if (state != VK_SUCCESS) {
+    return SwapchainResult(state);
+  }
+
+  TextureDescriptorVK desc{};
+  desc.format = mFormat.format;
+  desc.image = mBuffers[mCurrentFrameIndex].image;
+  desc.view = mBuffers[mCurrentFrameIndex].view;
+  desc.layout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+  return SwapchainResult(TextureVK::WrapSwapchainTexture(mSwapchainSize.width, mSwapchainSize.height, desc, mDevice),
+                         state);
+}
+
+VkResult Swapchain::SubmitFrame(CommandQueueVK* queue, std::shared_ptr<TextureVK> texture, VkSemaphore wait_semaphore) {
+  if (texture->GetImageLayout() != VK_IMAGE_LAYOUT_PRESENT_SRC_KHR) {
+    // maybe has empty render loop or some thing is wrong during the root render pass
+    auto cmd = queue->GenCommandBuffer();
+
+    auto vk_cmd = dynamic_cast<CommandBufferVK*>(cmd.get())->GetNativeBuffer();
+
+    VkImageMemoryBarrier image_barrier{};
+    image_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    image_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    image_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+    image_barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    image_barrier.subresourceRange.baseMipLevel = 0;
+    image_barrier.subresourceRange.levelCount = 1;
+    image_barrier.subresourceRange.baseArrayLayer = 0;
+    image_barrier.subresourceRange.layerCount = 1;
+
+    image_barrier.srcAccessMask = 0;
+    image_barrier.dstAccessMask = 0;
+    image_barrier.oldLayout = texture->GetImageLayout();
+    image_barrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+    image_barrier.image = texture->GetImage();
+
+    vkCmdPipelineBarrier(vk_cmd, VK_PIPELINE_STAGE_HOST_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr,
+                         1, &image_barrier);
+
+    queue->Submit(std::move(cmd));
+
+    texture->SetImageLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+  }
+
+  VkPresentInfoKHR preseint_info = {};
+  preseint_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+  preseint_info.pNext = NULL;
+  preseint_info.swapchainCount = 1;
+  preseint_info.pSwapchains = &mSwapchain;
+  preseint_info.pImageIndices = &mCurrentFrameIndex;
+
+  if (wait_semaphore != VK_NULL_HANDLE) {
+    preseint_info.pWaitSemaphores = &wait_semaphore;
+    preseint_info.waitSemaphoreCount = 1;
+  }
+
+  return vkQueuePresentKHR(queue->GetNativeQueue(), &preseint_info);
 }
 
 void Swapchain::CleanBuffers() {

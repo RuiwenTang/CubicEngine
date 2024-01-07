@@ -5,6 +5,7 @@
 namespace cubic {
 
 enum class TextureFormat {
+  kInvalid,
   kR8Unorm,
   kRGB8Unorm,
   kRGBA8Unorm,

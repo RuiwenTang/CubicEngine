@@ -65,6 +65,10 @@ else()
 		${CMAKE_CURRENT_LIST_DIR}/src/core/vk/swap_chain.h
 		${CMAKE_CURRENT_LIST_DIR}/src/core/vk/window_impl_vk.cc
 		${CMAKE_CURRENT_LIST_DIR}/src/core/vk/window_impl_vk.h
+		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/command_buffer_vk.cc
+		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/command_buffer_vk.h
+		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/command_queue_vk.cc
+		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/command_queue_vk.h
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/render_system_info_vk.h
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/render_system_vk.cc
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/render_system_vk.h
@@ -72,6 +76,8 @@ else()
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/texture_vk.cc
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/vulkan_device.cc
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/vulkan_device.h
+		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/vulkan_types.cc
+		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/vulkan_types.h
 	)
 
 	# volk
