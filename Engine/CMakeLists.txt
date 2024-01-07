@@ -22,6 +22,8 @@ target_sources(
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/core/application.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/core/log.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/core/window.h
+	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/command_buffer.h
+	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/command_queue.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/render_system.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/texture.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/types.h

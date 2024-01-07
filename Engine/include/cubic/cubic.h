@@ -12,3 +12,7 @@
 #include <cubic/render/texture.h>
 // render
 #include <cubic/render/render_system.h>
+// command buffer
+#include <cubic/render/command_buffer.h>
+// queue
+#include <cubic/render/command_queue.h>
