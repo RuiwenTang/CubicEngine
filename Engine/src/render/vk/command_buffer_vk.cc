@@ -2,6 +2,6 @@
 
 namespace cubic {
 
-CommandBufferVK::CommandBufferVK(VkCommandBuffer cmd) : mCmd(cmd) {}
+CommandBufferVK::CommandBufferVK(VkCommandBuffer cmd, uint64_t value) : mCmd(cmd), mSignalValue(value) {}
 
 }  // namespace cubic

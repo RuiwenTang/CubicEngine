@@ -3,6 +3,8 @@
 #include <cubic/render/command_queue.h>
 #include <volk.h>
 
+#include <vector>
+
 namespace cubic {
 
 class VulkanDevice;
@@ -29,6 +31,11 @@ class CommandQueueVK : public CommandQueue {
   uint32_t mQueueFamily;
 
   VkCommandPool mPool = VK_NULL_HANDLE;
+  VkSemaphore mTimelineSemaphore = VK_NULL_HANDLE;
+
+  uint64_t mCmdID = 0;
+
+  std::vector<VkCommandBuffer> mPendingCMD = {};
 };
 
 }  // namespace cubic

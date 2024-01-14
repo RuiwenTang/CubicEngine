@@ -27,6 +27,13 @@ std::unique_ptr<VulkanDevice> VulkanDevice::Create(VkPhysicalDevice gpu) {
 
   vkGetPhysicalDeviceProperties(gpu, &device->mGPUProps);
   vkGetPhysicalDeviceFeatures(gpu, &device->mGPUFeatures);
+
+  device->mGPUExtFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+  device->mGPU12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+
+  device->mGPUExtFeatures.pNext = &device->mGPU12Features;
+  vkGetPhysicalDeviceFeatures2(gpu, &device->mGPUExtFeatures);
+
   vkGetPhysicalDeviceMemoryProperties(gpu, &device->mGPUMemoryProps);
 
   if (!device->Init()) {
@@ -90,12 +97,15 @@ bool VulkanDevice::Init() {
   create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
   create_info.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
   create_info.pQueueCreateInfos = queueCreateInfos.data();
-  create_info.pEnabledFeatures = &mGPUFeatures;
+  create_info.pNext = &mGPUExtFeatures;
 
   // TODO enable some advance extensions
   std::vector<const char*> requiredExtensions{};
 
+  // swapchain
   requiredExtensions.emplace_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+  // timeline semaphore
+  requiredExtensions.emplace_back(VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME);
 
   create_info.enabledExtensionCount = static_cast<uint32_t>(requiredExtensions.size());
   create_info.ppEnabledExtensionNames = requiredExtensions.data();

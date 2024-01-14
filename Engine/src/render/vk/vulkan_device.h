@@ -38,6 +38,8 @@ class VulkanDevice {
   VkPhysicalDevice mGPUDevice = {};
   VkPhysicalDeviceProperties mGPUProps = {};
   VkPhysicalDeviceFeatures mGPUFeatures = {};
+  VkPhysicalDeviceFeatures2 mGPUExtFeatures = {};
+  VkPhysicalDeviceVulkan12Features mGPU12Features = {};
   VkPhysicalDeviceMemoryProperties mGPUMemoryProps = {};
 
   std::vector<VkQueueFamilyProperties> mGPUQueueProps = {};

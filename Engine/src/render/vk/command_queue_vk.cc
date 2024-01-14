@@ -9,8 +9,14 @@ CommandQueueVK::CommandQueueVK(VulkanDevice* device, VkQueue queue, uint32_t que
     : mDevice(device), mQueue(queue), mQueueFamily(queueFamily) {}
 
 CommandQueueVK::~CommandQueueVK() {
+  vkQueueWaitIdle(mQueue);
+
   if (mPool) {
     vkDestroyCommandPool(mDevice->GetLogicalDevice(), mPool, nullptr);
+  }
+
+  if (mTimelineSemaphore) {
+    vkDestroySemaphore(mDevice->GetLogicalDevice(), mTimelineSemaphore, nullptr);
   }
 }
 
@@ -38,7 +44,9 @@ std::unique_ptr<CommandBuffer> CommandQueueVK::GenCommandBuffer() {
     return std::unique_ptr<CommandBuffer>();
   }
 
-  return std::make_unique<CommandBufferVK>(cmd);
+  mCmdID++;
+
+  return std::make_unique<CommandBufferVK>(cmd, mTimelineSemaphore, mCmdID);
 }
 
 void CommandQueueVK::Submit(std::unique_ptr<CommandBuffer> cmd) {
@@ -61,7 +69,19 @@ void CommandQueueVK::Submit(std::unique_ptr<CommandBuffer> cmd) {
   submit_info.commandBufferCount = 1;
   submit_info.pCommandBuffers = &native_cmd;
 
+  VkTimelineSemaphoreSubmitInfo timeline_info{};
+  timeline_info.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
+  timeline_info.signalSemaphoreValueCount = 1;
+  auto value = vk_cmd->GetSignalValue();
+  timeline_info.pSignalSemaphoreValues = &value;
+
+  submit_info.pNext = &timeline_info;
+  submit_info.signalSemaphoreCount = 1;
+  submit_info.pSignalSemaphores = &mTimelineSemaphore;
+
   vkQueueSubmit(mQueue, 1, &submit_info, VK_NULL_HANDLE);
+
+  mPendingCMD.emplace_back(native_cmd);
 }
 
 bool CommandQueueVK::Init() {
@@ -70,12 +90,46 @@ bool CommandQueueVK::Init() {
   create_info.queueFamilyIndex = mQueueFamily;
   create_info.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
 
-  return vkCreateCommandPool(mDevice->GetLogicalDevice(), &create_info, nullptr, &mPool) == VK_SUCCESS;
+  if (vkCreateCommandPool(mDevice->GetLogicalDevice(), &create_info, nullptr, &mPool) != VK_SUCCESS) {
+    return false;
+  }
+
+  VkSemaphoreTypeCreateInfo timeline_create_info{};
+  timeline_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO;
+  timeline_create_info.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE;
+  timeline_create_info.initialValue = 0;
+
+  VkSemaphoreCreateInfo semaphore_create_info{};
+  semaphore_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+  semaphore_create_info.pNext = &timeline_create_info;
+  semaphore_create_info.flags = 0;
+
+  if (vkCreateSemaphore(mDevice->GetLogicalDevice(), &semaphore_create_info, nullptr, &mTimelineSemaphore) !=
+      VK_SUCCESS) {
+    return false;
+  }
+
+  return true;
 }
 
 void CommandQueueVK::ResetPool() {
-  vkQueueWaitIdle(mQueue);
+  if (mPendingCMD.empty()) {
+    return;
+  }
+
+  VkSemaphoreWaitInfo wait_info{};
+  wait_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
+  wait_info.semaphoreCount = 1;
+  wait_info.pSemaphores = &mTimelineSemaphore;
+  wait_info.pValues = &mCmdID;
+
+  vkWaitSemaphores(mDevice->GetLogicalDevice(), &wait_info, UINT16_MAX);
+
   vkResetCommandPool(mDevice->GetLogicalDevice(), mPool, VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT);
+
+  vkFreeCommandBuffers(mDevice->GetLogicalDevice(), mPool, mPendingCMD.size(), mPendingCMD.data());
+
+  mPendingCMD.clear();
 }
 
 }  // namespace cubic
