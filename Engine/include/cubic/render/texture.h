@@ -10,6 +10,7 @@ namespace cubic {
 struct TextureDescirptor {
   TextureFormat format = TextureFormat::kRGBA8Unorm;
   TextureUsageMask usage = TextureUsage::kShaderRead;
+  uint32_t sample_count = 1;
   uint32_t width = 0;
   uint32_t height = 0;
 };

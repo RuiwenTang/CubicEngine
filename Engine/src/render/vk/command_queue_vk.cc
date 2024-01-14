@@ -46,7 +46,7 @@ std::unique_ptr<CommandBuffer> CommandQueueVK::GenCommandBuffer() {
 
   mCmdID++;
 
-  return std::make_unique<CommandBufferVK>(cmd, mTimelineSemaphore, mCmdID);
+  return std::make_unique<CommandBufferVK>(cmd, mCmdID);
 }
 
 void CommandQueueVK::Submit(std::unique_ptr<CommandBuffer> cmd) {

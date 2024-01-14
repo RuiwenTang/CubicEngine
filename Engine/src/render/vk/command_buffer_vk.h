@@ -11,6 +11,10 @@ class CommandBufferVK : public CommandBuffer {
 
   ~CommandBufferVK() override = default;
 
+  std::unique_ptr<RenderPass> BeginRenderPass(const RenderPassDescriptor& desc) override;
+
+  void EndRenderPass(std::unique_ptr<RenderPass> render_pass) override;
+
   VkCommandBuffer GetNativeBuffer() const { return mCmd; }
 
   uint64_t GetSignalValue() const { return mSignalValue; }

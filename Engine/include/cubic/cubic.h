@@ -16,3 +16,5 @@
 #include <cubic/render/command_buffer.h>
 // queue
 #include <cubic/render/command_queue.h>
+// render pass
+#include <cubic/render/render_pass.h>

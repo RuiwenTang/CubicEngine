@@ -22,4 +22,23 @@ enum TextureUsage : TextureUsageMask {
   kRenderTarget = (0x1 << 4),
 };
 
+enum class LoadOp {
+  kUndefined,
+  kClear,
+  kLoad,
+};
+
+enum class StoreOp {
+  kUndefined,
+  kStore,
+  kDiscard,
+};
+
+struct GPUColor {
+  float r = 0.0;
+  float g = 0.0;
+  float b = 0.0;
+  float a = 0.0;
+};
+
 }  // namespace cubic
