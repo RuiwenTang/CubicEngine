@@ -1,5 +1,9 @@
 #include "core/mtl/window_impl_mtl.h"
 #include <GLFW/glfw3.h>
+#include "render/mtl/mtl_types.h"
+#include "render/mtl/render_system_info_mtl.h"
+#include "render/mtl/texture_mtl.h"
+#include "render/render_system_priv.h"
 
 #define GLFW_EXPOSE_NATIVE_COCOA
 #include <GLFW/glfw3native.h>
@@ -15,7 +19,7 @@ class WindowMTLPriv {
 
   ~WindowMTLPriv() = default;
 
-  bool Init() {
+  bool Init(RenderSystemInfoMTL* info) {
     mLayer = [CAMetalLayer new];
 
     if (mLayer == nil) {
@@ -28,15 +32,63 @@ class WindowMTLPriv {
       return false;
     }
 
+    mLayer.device = MTLCreateSystemDefaultDevice();
+    mLayer.opaque = YES;
+    mLayer.pixelFormat = MTLPixelFormatBGRA8Unorm;
+    mLayer.contentsScale = [[NSScreen mainScreen] backingScaleFactor];
+    mLayer.colorspace = CGColorSpaceCreateDeviceRGB();
+
     ns_window.contentView.layer = mLayer;
     ns_window.contentView.wantsLayer = YES;
+
+    mDevice = info->device;
+    mQueue = info->queue;
 
     return true;
   }
 
+  std::shared_ptr<Texture> AcquireTexture() {
+    mDrawable = [mLayer nextDrawable];
+
+    if (mDrawable == nil) {
+      return {};
+    }
+
+    id<MTLTexture> texture = mDrawable.texture;
+
+    TextureDescirptor desc{};
+    desc.format = TypeConvert(mLayer.pixelFormat);
+    desc.usage = TextureUsage::kRenderTarget;
+    desc.sample_count = 1;
+    desc.width = texture.width;
+    desc.height = texture.height;
+
+    return std::make_shared<TextureMTL>(desc, texture, mDevice, mQueue);
+  }
+
+  void SwapWindowBuffer() {
+    if (mDrawable == nil) {
+      return;
+    }
+
+    id<MTLCommandBuffer> cmd = [mQueue commandBuffer];
+
+    [cmd presentDrawable:mDrawable];
+
+    [cmd commit];
+    
+    [cmd release];
+
+    mDrawable = nil;
+  }
+
  private:
   GLFWwindow* mNativeWindow;
+  id<MTLDevice> mDevice = nil;
+  id<MTLCommandQueue> mQueue = nil;
   CAMetalLayer* mLayer = nil;
+
+  id<CAMetalDrawable> mDrawable = nil;
 };
 
 WindowImplMTL::WindowImplMTL(WindowProps props, GLFWwindow* nativeWindow, RenderSystem* renderSystem)
@@ -47,23 +99,15 @@ WindowImplMTL::~WindowImplMTL() {}
 bool WindowImplMTL::Init() {
   mPriv = std::make_unique<WindowMTLPriv>(GetNativeWindow());
 
-  return mPriv->Init();
+  auto info = dynamic_cast<RenderSystemPriv*>(GetRenderSystem())->GetBackendInfo();
+
+  return mPriv->Init(static_cast<RenderSystemInfoMTL*>(info));
 }
 
-void WindowImplMTL::Show(WindowClient* client) {
-  while (!glfwWindowShouldClose(GetNativeWindow())) {
-    glfwPollEvents();
+void WindowImplMTL::Terminate() {}
 
-    @autoreleasepool {
-      if (client) {
-        client->OnWindowUpdate(this, GetRenderSystem());
-      }
+std::shared_ptr<Texture> WindowImplMTL::AcquireTexture() { return mPriv->AcquireTexture(); }
 
-      SwapWindowBuffer();
-    }
-  }
-}
-
-void WindowImplMTL::SwapWindowBuffer() {}
+void WindowImplMTL::SwapWindowBuffer() { mPriv->SwapWindowBuffer(); }
 
 }

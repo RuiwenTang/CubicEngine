@@ -46,6 +46,8 @@ if(APPLE)
 		PRIVATE
 		${CMAKE_CURRENT_LIST_DIR}/src/core/mtl/window_impl_mtl.h
 		${CMAKE_CURRENT_LIST_DIR}/src/core/mtl/window_impl_mtl.mm
+		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/mtl_types.h
+		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/mtl_types.mm
 		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/render_system_info_mtl.h
 		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/render_system_mtl.h
 		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/render_system_mtl.mm

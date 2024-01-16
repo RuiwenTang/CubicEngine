@@ -16,9 +16,11 @@ class WindowImplMTL : public WindowImpl {
 
   bool Init() override;
 
-  void Show(WindowClient* client) override;
+  void Terminate() override;
 
  protected:
+  std::shared_ptr<Texture> AcquireTexture() override;
+
   void SwapWindowBuffer() override;
 
  private:
