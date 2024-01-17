@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cubic/platform.h>
+#include <cubic/render/command_queue.h>
 
 namespace cubic {
 
@@ -18,6 +19,8 @@ class CUBIC_API RenderSystem {
   virtual ~RenderSystem() = default;
 
   virtual Backend GetBackend() const = 0;
+
+  virtual CommandQueue* GetCommandQueue(QueueType type) = 0;
 };
 
 }  // namespace cubic

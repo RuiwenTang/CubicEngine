@@ -20,6 +20,8 @@ class RenderSystemMTL : public RenderSystemPriv {
 
   RenderSystemInfo* GetBackendInfo() override;
 
+  CommandQueue* GetCommandQueue(QueueType type) override;
+
   bool Init();
 
  private:
