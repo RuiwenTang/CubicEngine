@@ -14,14 +14,14 @@ struct WindowProps {
   bool resizeable = false;
 };
 
-class Window;
 class RenderSystem;
+class Texture;
 
 class WindowClient {
  public:
   virtual ~WindowClient() = default;
 
-  virtual void OnWindowUpdate(Window* window, RenderSystem* renderSystem) = 0;
+  virtual void OnWindowUpdate(const std::shared_ptr<Texture>& surfaceTexture, RenderSystem* renderSystem) = 0;
 };
 
 class Window {

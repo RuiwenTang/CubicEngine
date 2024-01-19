@@ -1,8 +1,47 @@
 #include <cubic/cubic.h>
 
+#include <cmath>
+
 using namespace cubic;
 
-int main(int argc, const char** argv) {
+class SandboxClient : public WindowClient {
+ public:
+  SandboxClient() = default;
+  ~SandboxClient() override = default;
+
+  void OnWindowUpdate(const std::shared_ptr<Texture> &surfaceTexture, RenderSystem *renderSystem) override {
+    auto queue = renderSystem->GetCommandQueue(QueueType::kGraphic);
+
+    auto cmd = queue->GenCommandBuffer();
+
+    RenderPassDescriptor desc{};
+
+    ColorAttachment color_attachment{};
+
+    float flash = std::abs(std::sin(mFrameNum / 120.f));
+
+    color_attachment.clearValue = GPUColor{0.0, 0.0, flash, 1.0};
+    color_attachment.loadOp = LoadOp::kClear;
+    color_attachment.storeOp = StoreOp::kStore;
+    color_attachment.target = surfaceTexture;
+
+    desc.colorAttachmentCount = 1;
+    desc.pColorAttachments = &color_attachment;
+
+    auto render_pass = cmd->BeginRenderPass(desc);
+
+    cmd->EndRenderPass(std::move(render_pass));
+
+    queue->Submit(std::move(cmd));
+
+    mFrameNum++;
+  }
+
+ private:
+  uint32_t mFrameNum = 0;
+};
+
+int main(int argc, const char **argv) {
   Application::Config config;
   config.name = "Sandbox Application";
 
@@ -27,8 +66,10 @@ int main(int argc, const char** argv) {
 
   auto window = app->CreateWindow(props);
 
+  SandboxClient client{};
+
   if (window) {
-    window->Show(nullptr);
+    window->Show(&client);
   }
 
   Application::Terminate();

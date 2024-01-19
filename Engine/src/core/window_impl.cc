@@ -79,7 +79,7 @@ void WindowImpl::Show(WindowClient* client) {
     }
 
     if (client) {
-      client->OnWindowUpdate(this, mRenderSystem);
+      client->OnWindowUpdate(texture, mRenderSystem);
     }
 
     SwapWindowBuffer();

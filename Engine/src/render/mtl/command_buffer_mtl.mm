@@ -69,6 +69,14 @@ std::unique_ptr<RenderPass> CommandBufferMTL::BeginRenderPass(const RenderPassDe
   return std::make_unique<RenderPassMTL>(encoder);
 }
 
-void CommandBufferMTL::EndRenderPass(std::unique_ptr<RenderPass> render_pass) {}
+void CommandBufferMTL::EndRenderPass(std::unique_ptr<RenderPass> render_pass) {
+  auto native_render_pass = dynamic_cast<RenderPassMTL*>(render_pass.get());
+
+  if (native_render_pass == nullptr) {
+    return;
+  }
+
+  [native_render_pass->GetNativeEncoder() endEncoding];
+}
 
 }
