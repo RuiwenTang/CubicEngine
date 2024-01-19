@@ -20,6 +20,7 @@ struct ColorAttachment {
 
 struct DepthStencilAttachment {
   std::shared_ptr<Texture> target = {};
+  std::shared_ptr<Texture> resolveTarget = {};
   LoadOp depthLoadOp = LoadOp::kUndefined;
   StoreOp depthStoreOp = StoreOp::kUndefined;
   float depthClearValue = 0.f;

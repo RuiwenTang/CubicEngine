@@ -10,6 +10,9 @@ enum class TextureFormat {
   kRGB8Unorm,
   kRGBA8Unorm,
   kBGRA8Unorm,
+  kStencil8,
+  kDepth24,
+  kDepth24Stencil8,
 };
 
 using TextureUsageMask = uint32_t;
@@ -32,6 +35,7 @@ enum class StoreOp {
   kUndefined,
   kStore,
   kDiscard,
+  kMSAAResolve,
 };
 
 struct GPUColor {
