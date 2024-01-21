@@ -46,7 +46,7 @@ std::unique_ptr<CommandBuffer> CommandQueueVK::GenCommandBuffer() {
 
   mCmdID++;
 
-  return std::make_unique<CommandBufferVK>(cmd, mCmdID);
+  return std::make_unique<CommandBufferVK>(mDevice, cmd, mCmdID);
 }
 
 void CommandQueueVK::Submit(std::unique_ptr<CommandBuffer> cmd) {
@@ -81,7 +81,7 @@ void CommandQueueVK::Submit(std::unique_ptr<CommandBuffer> cmd) {
 
   vkQueueSubmit(mQueue, 1, &submit_info, VK_NULL_HANDLE);
 
-  mPendingCMD.emplace_back(native_cmd);
+  mPendingCMD.emplace_back(std::move(cmd));
 }
 
 bool CommandQueueVK::Init() {
@@ -127,7 +127,12 @@ void CommandQueueVK::ResetPool() {
 
   vkResetCommandPool(mDevice->GetLogicalDevice(), mPool, VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT);
 
-  vkFreeCommandBuffers(mDevice->GetLogicalDevice(), mPool, mPendingCMD.size(), mPendingCMD.data());
+  std::vector<VkCommandBuffer> vk_cmds{};
+  for (auto const& cmd : mPendingCMD) {
+    vk_cmds.emplace_back(dynamic_cast<CommandBufferVK*>(cmd.get())->GetNativeBuffer());
+  }
+
+  vkFreeCommandBuffers(mDevice->GetLogicalDevice(), mPool, vk_cmds.size(), vk_cmds.data());
 
   mPendingCMD.clear();
 }

@@ -5,13 +5,15 @@
 
 namespace cubic {
 
-TextureVK::TextureVK(const TextureDescirptor& desc, const TextureDescriptorVK& vk_desc, VulkanDevice* device)
+TextureVK::TextureVK(const TextureDescirptor& desc, const TextureDescriptorVK& vk_desc, VulkanDevice* device,
+                     Source source)
     : Texture(desc),
       mImage(vk_desc.image),
       mView(vk_desc.view),
       mLayout(vk_desc.layout),
       mOwned(vk_desc.owned),
-      mDevice(device) {}
+      mDevice(device),
+      mSource(source) {}
 
 TextureVK::~TextureVK() {
   if (!mOwned) {
@@ -30,14 +32,14 @@ TextureVK::~TextureVK() {
 void TextureVK::UploadData(void* data, uint32_t w, uint32_t h, uint32_t x, uint32_t y) {}
 
 std::shared_ptr<TextureVK> TextureVK::WrapSwapchainTexture(uint32_t width, uint32_t height,
-                                                         const TextureDescriptorVK& vk_desc, VulkanDevice* device) {
+                                                           const TextureDescriptorVK& vk_desc, VulkanDevice* device) {
   TextureDescirptor desc{};
   desc.width = width;
   desc.height = height;
   desc.usage = TextureUsage::kRenderTarget;
   desc.format = vk::TypeConvert(vk_desc.format);
 
-  return std::make_shared<TextureVK>(desc, vk_desc, device);
+  return std::make_shared<TextureVK>(desc, vk_desc, device, TextureVK::Source::kSwapchain);
 }
 
 }  // namespace cubic

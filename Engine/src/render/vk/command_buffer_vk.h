@@ -3,13 +3,18 @@
 #include <cubic/render/command_buffer.h>
 #include <volk.h>
 
+#include <memory>
+#include <vector>
+
 namespace cubic {
+
+class VulkanDevice;
 
 class CommandBufferVK : public CommandBuffer {
  public:
-  CommandBufferVK(VkCommandBuffer cmd, uint64_t value);
+  CommandBufferVK(VulkanDevice* device, VkCommandBuffer cmd, uint64_t value);
 
-  ~CommandBufferVK() override = default;
+  ~CommandBufferVK() override;
 
   std::unique_ptr<RenderPass> BeginRenderPass(const RenderPassDescriptor& desc) override;
 
@@ -20,9 +25,12 @@ class CommandBufferVK : public CommandBuffer {
   uint64_t GetSignalValue() const { return mSignalValue; }
 
  private:
+  VulkanDevice* mDevice;
   VkCommandBuffer mCmd;
   // signaled value when cmd finished
   uint64_t mSignalValue;
+
+  std::vector<std::unique_ptr<RenderPass>> mPendingRenderPass = {};
 };
 
 }  // namespace cubic

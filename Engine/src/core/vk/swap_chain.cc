@@ -12,6 +12,8 @@ Swapchain::Swapchain(VkInstance instance, VkSurfaceKHR surface, VulkanDevice* de
     : mInstance(instance), mSurface(surface), mDevice(device) {}
 
 Swapchain::~Swapchain() {
+  vkDeviceWaitIdle(mDevice->GetLogicalDevice());
+
   if (mSwapchain) {
     CleanBuffers();
     vkDestroySwapchainKHR(mDevice->GetLogicalDevice(), mSwapchain, nullptr);

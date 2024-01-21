@@ -20,7 +20,12 @@ struct TextureDescriptorVK {
 
 class TextureVK : public Texture {
  public:
-  TextureVK(const TextureDescirptor& desc, const TextureDescriptorVK& vk_desc, VulkanDevice* device);
+  enum class Source {
+    kSwapchain,
+    kUser,
+  };
+
+  TextureVK(const TextureDescirptor& desc, const TextureDescriptorVK& vk_desc, VulkanDevice* device, Source source);
 
   ~TextureVK() override;
 
@@ -31,6 +36,8 @@ class TextureVK : public Texture {
   VkImageView GetImageView() const { return mView; }
 
   VkImageLayout GetImageLayout() const { return mLayout; }
+
+  Source GetTextureSource() const { return mSource; }
 
   void SetImageLayout(VkImageLayout layout) { mLayout = layout; }
 
@@ -43,6 +50,8 @@ class TextureVK : public Texture {
   VkImageLayout mLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
   VulkanDevice* mDevice = nullptr;
+
+  Source mSource;
 
   bool mOwned = false;
 };
