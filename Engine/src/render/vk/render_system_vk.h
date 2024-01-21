@@ -25,6 +25,8 @@ class RenderSystemVk : public RenderSystemPriv {
 
   RenderSystemInfo* GetBackendInfo() override;
 
+  CommandQueue* GetCommandQueue(QueueType type) override;
+
  private:
   bool initInstance(bool enableDebug);
 

@@ -4,6 +4,8 @@
 
 #include <vector>
 
+#include "render/vk/command_queue_vk.h"
+
 namespace cubic {
 
 VKAPI_ATTR VkBool32 VKAPI_CALL _debug_utils_messenger_callback(
@@ -66,6 +68,19 @@ bool RenderSystemVk::Init(bool enableDebug) {
 }
 
 RenderSystemInfo* RenderSystemVk::GetBackendInfo() { return &mInfo; }
+
+CommandQueue* RenderSystemVk::GetCommandQueue(QueueType type) {
+  switch (type) {
+    case QueueType::kGraphic:
+      return mDevice->GetGraphicQueue();
+    case QueueType::kCompute:
+      return mDevice->GetComputeQueue();
+    case QueueType::kTransfer:
+      return mDevice->GetTransferQueue();
+    default:
+      return nullptr;
+  }
+}
 
 bool RenderSystemVk::initInstance(bool enableDebug) {
   VkApplicationInfo app_info{};
