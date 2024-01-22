@@ -2,6 +2,8 @@
 
 #include <cubic/core/log.h>
 
+#include "render/shader_compiler.h"
+
 #if defined(CUBIC_PLATFORM_WINDOWS)
 
 #include "render/vk/render_system_vk.h"
@@ -44,6 +46,19 @@ std::unique_ptr<RenderSystem> RenderSystemPriv::InitRenderSystem(bool enableDebu
 #endif
 
   return std::unique_ptr<RenderSystem>();
+}
+
+std::shared_ptr<ShaderModule> RenderSystemPriv::CreateShaderModule(ShaderModuleDescriptor* desc) {
+  ShaderCompiler compiler{};
+  compiler.SetTargetStage(desc->stage);
+
+  auto result = compiler.Compile(desc->label, desc->code);
+
+  if (result.empty()) {
+    return {};
+  }
+
+  return std::make_shared<ShaderModule>(desc->stage, desc->label);
 }
 
 }  // namespace cubic

@@ -26,6 +26,7 @@ target_sources(
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/command_queue.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/render_pass.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/render_system.h
+	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/shader_module.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/texture.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/types.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/cubic.h
@@ -38,6 +39,8 @@ target_sources(
 	${CMAKE_CURRENT_LIST_DIR}/src/core/window_impl.h
 	${CMAKE_CURRENT_LIST_DIR}/src/render/render_system_priv.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/render/render_system_priv.h
+	${CMAKE_CURRENT_LIST_DIR}/src/render/shader_compiler.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/render/shader_compiler.h
 )
 
 if(APPLE)
@@ -111,3 +114,7 @@ target_link_libraries(CubicEngine PUBLIC spdlog::spdlog)
 # glfw
 find_package(glfw3 CONFIG REQUIRED)
 target_link_libraries(CubicEngine PRIVATE glfw)
+
+# shaderc
+find_package(unofficial-shaderc CONFIG REQUIRED)
+target_link_libraries(CubicEngine PRIVATE unofficial::shaderc::shaderc)

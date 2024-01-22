@@ -10,6 +10,8 @@ class SandboxClient : public WindowClient {
   ~SandboxClient() override = default;
 
   void OnWindowUpdate(const std::shared_ptr<Texture> &surfaceTexture, RenderSystem *renderSystem) override {
+    InitPipelineIfNeed(renderSystem);
+
     auto queue = renderSystem->GetCommandQueue(QueueType::kGraphic);
 
     auto cmd = queue->GenCommandBuffer();
@@ -37,8 +39,33 @@ class SandboxClient : public WindowClient {
     mFrameNum++;
   }
 
+  void InitPipelineIfNeed(RenderSystem *renderSystem) {
+    if (mVertexShader) {
+      return;
+    }
+
+    const char *vertex_code = R"(#version 450
+        vec2  positions[3] = vec2[](
+            vec2(0.0, -0.5),
+            vec2(0.5, 0.5),
+            vec2(-0.5, 0.5)
+        );
+        void main() {
+            gl_Position = vec4(positions[gl_VertexIndex], 0.0, 1.0);
+        }
+    )";
+
+    ShaderModuleDescriptor desc{};
+    desc.stage = ShaderStage::kVertex;
+    desc.code = vertex_code;
+    desc.label = "basic vertex";
+
+    mVertexShader = renderSystem->CreateShaderModule(&desc);
+  }
+
  private:
   uint32_t mFrameNum = 0;
+  std::shared_ptr<ShaderModule> mVertexShader = {};
 };
 
 int main(int argc, const char **argv) {

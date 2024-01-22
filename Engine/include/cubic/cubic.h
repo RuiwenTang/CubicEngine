@@ -18,3 +18,5 @@
 #include <cubic/render/command_queue.h>
 // render pass
 #include <cubic/render/render_pass.h>
+// shader module
+#include <cubic/render/shader_module.h>
