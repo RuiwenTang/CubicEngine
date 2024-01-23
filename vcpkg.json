@@ -9,6 +9,10 @@
     {
       "name": "volk",
       "platform": "windows"
+    },
+    {
+      "name": "spirv-cross",
+      "platform": "osx"
     }
   ]
 }
