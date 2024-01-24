@@ -58,7 +58,7 @@ std::shared_ptr<ShaderModule> RenderSystemPriv::CreateShaderModule(ShaderModuleD
     return {};
   }
 
-  return std::make_shared<ShaderModule>(desc->stage, desc->label);
+  return CompileBackendShader(desc, result);
 }
 
 }  // namespace cubic

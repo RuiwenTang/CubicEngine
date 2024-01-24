@@ -60,6 +60,8 @@ if(APPLE)
 		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/render_system_info_mtl.h
 		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/render_system_mtl.h
 		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/render_system_mtl.mm
+		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/shader_module_mtl.h
+		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/shader_module_mtl.mm
 		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/texture_mtl.h
 		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/texture_mtl.mm
 	)

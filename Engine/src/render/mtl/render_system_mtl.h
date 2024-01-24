@@ -24,6 +24,10 @@ class RenderSystemMTL : public RenderSystemPriv {
 
   bool Init();
 
+ protected:
+  std::shared_ptr<ShaderModule> CompileBackendShader(ShaderModuleDescriptor* desc,
+                                                     const std::vector<uint32_t>& spv) override;
+
  private:
   std::unique_ptr<RenderSystemMTLPriv> mPriv = {};
 };

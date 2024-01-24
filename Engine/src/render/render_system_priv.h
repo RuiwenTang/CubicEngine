@@ -21,6 +21,10 @@ class RenderSystemPriv : public RenderSystem {
   static std::unique_ptr<RenderSystem> InitRenderSystem(bool enableDebug);
 
   std::shared_ptr<ShaderModule> CreateShaderModule(ShaderModuleDescriptor* desc) override;
+
+ protected:
+  virtual std::shared_ptr<ShaderModule> CompileBackendShader(ShaderModuleDescriptor* desc,
+                                                             const std::vector<uint32_t>& spv) = 0;
 };
 
 }  // namespace cubic

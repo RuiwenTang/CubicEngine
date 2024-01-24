@@ -31,7 +31,7 @@ std::vector<uint32_t> ShaderCompiler::Compile(const std::string& label, const st
 
   shaderc::Compiler compiler{};
 
-  auto result = compiler.PreprocessGlsl(source, GetShadercStage(), label.c_str(), mOptions);
+  auto result = compiler.CompileGlslToSpv(source, GetShadercStage(), label.c_str(), mOptions);
 
   CUB_DEBUG("Compile shader: [ {} ] with source: {}", label, source);
 
