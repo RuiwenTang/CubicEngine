@@ -45,4 +45,86 @@ struct GPUColor {
   float a = 0.0;
 };
 
+enum class BlendOp {
+  kAdd,
+  kSubtract,
+  kReverseSubtract,
+  kMin,
+  kMax,
+};
+
+enum class BlendFactor {
+  kZero,
+  kOne,
+  kSrc,
+  kOneMinusSrc,
+  kSrcAlpha,
+  kOneMinusSrcAlpha,
+  kDst,
+  kOneMinusDst,
+  kDstAlpha,
+  kOneMinusDstAlpha,
+};
+
+enum class CompareFunction {
+  kUndefined,
+  kNever,
+  kLess,
+  kLessEqual,
+  kGreater,
+  kGreaterEqual,
+  kEqual,
+  kNotEqual,
+  kAlways,
+};
+
+enum class FrontFace {
+  kCCW,
+  kCW,
+};
+
+enum class FaceCullMode {
+  kNone,
+  kFront,
+  kBack,
+};
+
+enum ColorWriteMask : uint32_t {
+  kNone = 0x0,
+  kRed = 0x1,
+  kGreen = 0x2,
+  kBlue = 0x4,
+  kAlpha = 0x8,
+  kAll = kRed | kGreen | kBlue | kAlpha,
+};
+
+enum class StencilOp {
+  kKeep,
+  kZero,
+  kReplace,
+  kInvert,
+  kIncrementClamp,
+  kDecrementClamp,
+  kIncrementWrap,
+  kDecrementWrap,
+};
+
+struct BlendComponent {
+  BlendOp operation = BlendOp::kAdd;
+  BlendFactor srcFactor = BlendFactor::kSrc;
+  BlendFactor dstFactor = BlendFactor::kOneMinusSrc;
+};
+
+struct BlendState {
+  BlendComponent color = {};
+  BlendComponent alpha = {};
+};
+
+struct StencilFaceState {
+  CompareFunction compare = CompareFunction::kAlways;
+  StencilOp failOp = StencilOp::kKeep;
+  StencilOp depthFailOp = StencilOp::kKeep;
+  StencilOp passOp = StencilOp::kKeep;
+};
+
 }  // namespace cubic

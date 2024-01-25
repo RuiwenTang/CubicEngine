@@ -25,6 +25,7 @@ target_sources(
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/command_buffer.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/command_queue.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/render_pass.h
+	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/render_pipeline.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/render_system.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/shader_module.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/texture.h
