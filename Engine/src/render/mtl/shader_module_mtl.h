@@ -11,11 +11,14 @@ class ShaderModuleMTL : public ShaderModule {
 
   id<MTLLibrary> GetNativeShader() const;
 
+  id<MTLFunction> GetEntryPoint() const;
+
   static std::shared_ptr<ShaderModule> Compile(id<MTLDevice> gpu, ShaderModuleDescriptor* desc,
                                                const std::vector<uint32_t>& spv);
 
  private:
   id<MTLLibrary> mNativeShader;
+  id<MTLFunction> mEntryPoint = nil;
 };
 
 }  // namespace cubic

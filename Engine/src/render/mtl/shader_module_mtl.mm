@@ -22,11 +22,22 @@ static void setup_compiler(spirv_cross::CompilerMSL& compiler) {
 }
 
 ShaderModuleMTL::ShaderModuleMTL(ShaderStage stage, std::string label, id<MTLLibrary> shader)
-    : ShaderModule(stage, std::move(label)), mNativeShader(shader) {}
+    : ShaderModule(stage, std::move(label)), mNativeShader(shader) {
+  NSString* name = @"main0";
 
-ShaderModuleMTL::~ShaderModuleMTL() { [mNativeShader release]; }
+  mEntryPoint = [mNativeShader newFunctionWithName:name];
+
+  [name release];
+}
+
+ShaderModuleMTL::~ShaderModuleMTL() {
+  [mEntryPoint release];
+  [mNativeShader release];
+}
 
 id<MTLLibrary> ShaderModuleMTL::GetNativeShader() const { return mNativeShader; }
+
+id<MTLFunction> ShaderModuleMTL::GetEntryPoint() const { return mEntryPoint; }
 
 std::shared_ptr<ShaderModule> ShaderModuleMTL::Compile(id<MTLDevice> gpu, ShaderModuleDescriptor* desc,
                                                        const std::vector<uint32_t>& spv) {
@@ -42,7 +53,33 @@ std::shared_ptr<ShaderModule> ShaderModuleMTL::Compile(id<MTLDevice> gpu, Shader
 
   CUB_DEBUG("Metal backend shader compiler:\n result shader for : [ {} ] is : \n {} ", desc->label, result);
 
-  return std::make_shared<ShaderModuleMTL>(desc->stage, desc->label, nil);
+  // compile MSl shader
+  MTLCompileOptions* option = [MTLCompileOptions new];
+  option.languageVersion = MTLLanguageVersion2_0;
+
+  NSError* err = nil;
+  NSString* msl_source = [NSString stringWithCString:result.c_str() encoding:NSUTF8StringEncoding];
+
+  id<MTLLibrary> lib = [gpu newLibraryWithSource:msl_source options:option error:&err];
+
+  [msl_source release];
+
+  if (err != nil) {
+    const char* msg = [[err localizedDescription] UTF8String];
+
+    CUB_ERROR("[Metal backend] compile shader : [ {} ] meet error: {}", desc->label, msg);
+
+    return {};
+  }
+
+  auto shader_module = std::make_shared<ShaderModuleMTL>(desc->stage, desc->label, lib);
+
+  if (shader_module->GetEntryPoint() == nil) {
+    CUB_ERROR("[Metal backend] can not found entry point in shader: [ {} ]", desc->label);
+    return {};
+  }
+
+  return shader_module;
 }
 
 }
