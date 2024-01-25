@@ -40,11 +40,11 @@ class SandboxClient : public WindowClient {
   }
 
   void InitPipelineIfNeed(RenderSystem *renderSystem) {
-    if (mVertexShader) {
+    if (mVertexShader && mFragmentShader) {
       return;
     }
 
-    const char *vertex_code = R"(#version 450
+    const char *vertex_code = R"(#version 450 core
         vec2  positions[3] = vec2[](
             vec2(0.0, -0.5),
             vec2(0.5, 0.5),
@@ -55,17 +55,32 @@ class SandboxClient : public WindowClient {
         }
     )";
 
-    ShaderModuleDescriptor desc{};
-    desc.stage = ShaderStage::kVertex;
-    desc.code = vertex_code;
-    desc.label = "basic vertex";
+    ShaderModuleDescriptor vs_desc{};
+    vs_desc.stage = ShaderStage::kVertex;
+    vs_desc.code = vertex_code;
+    vs_desc.label = "basic vertex";
 
-    mVertexShader = renderSystem->CreateShaderModule(&desc);
+    mVertexShader = renderSystem->CreateShaderModule(&vs_desc);
+
+    const char *frag_code = R"(#version 450 core
+      layout(location = 0) out vec4 outColor;
+      void main() {
+        outColor = vec4(1.0, 0.0, 0.0, 1.0);
+      }
+    )";
+
+    ShaderModuleDescriptor fs_desc{};
+    fs_desc.stage = ShaderStage::kFragment;
+    fs_desc.code = frag_code;
+    fs_desc.label = "basic fragment";
+
+    mFragmentShader = renderSystem->CreateShaderModule(&fs_desc);
   }
 
  private:
   uint32_t mFrameNum = 0;
   std::shared_ptr<ShaderModule> mVertexShader = {};
+  std::shared_ptr<ShaderModule> mFragmentShader = {};
 };
 
 int main(int argc, const char **argv) {
