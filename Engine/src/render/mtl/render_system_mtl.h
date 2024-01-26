@@ -22,6 +22,8 @@ class RenderSystemMTL : public RenderSystemPriv {
 
   CommandQueue* GetCommandQueue(QueueType type) override;
 
+  std::shared_ptr<RenderPipeline> CreateRenderPipeline(RenderPipelineDescriptor* desc) override;
+
   bool Init();
 
  protected:

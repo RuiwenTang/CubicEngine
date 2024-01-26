@@ -17,6 +17,26 @@ TextureFormat TypeConvert(MTLPixelFormat format) {
   }
 }
 
+MTLPixelFormat TypeConvert(TextureFormat format) {
+  switch (format) {
+    case TextureFormat::kInvalid:
+      return MTLPixelFormatInvalid;
+    case TextureFormat::kR8Unorm:
+      return MTLPixelFormatR8Unorm;
+    case TextureFormat::kRGB8Unorm:
+      return MTLPixelFormatRGBA8Unorm_sRGB;
+    case TextureFormat::kRGBA8Unorm:
+      return MTLPixelFormatRGBA8Unorm;
+    case TextureFormat::kBGRA8Unorm:
+      return MTLPixelFormatBGRA8Unorm;
+    case TextureFormat::kStencil8:
+      return MTLPixelFormatStencil8;
+    case TextureFormat::kDepth24:
+    case TextureFormat::kDepth24Stencil8:
+      return MTLPixelFormatDepth24Unorm_Stencil8;
+  }
+}
+
 MTLClearColor TypeConvert(const GPUColor& color) { return MTLClearColorMake(color.r, color.g, color.b, color.a); }
 
 MTLLoadAction TypeConvert(LoadOp op) {
@@ -40,6 +60,46 @@ MTLStoreAction TypeConvert(StoreOp op) {
       return MTLStoreActionDontCare;
     case StoreOp::kMSAAResolve:
       return MTLStoreActionMultisampleResolve;
+  }
+}
+
+MTLBlendOperation TypeConvert(BlendOp op) {
+  switch (op) {
+    case BlendOp::kAdd:
+      return MTLBlendOperationAdd;
+    case BlendOp::kSubtract:
+      return MTLBlendOperationSubtract;
+    case BlendOp::kReverseSubtract:
+      return MTLBlendOperationReverseSubtract;
+    case BlendOp::kMin:
+      return MTLBlendOperationMin;
+    case BlendOp::kMax:
+      return MTLBlendOperationMax;
+  }
+}
+
+MTLBlendFactor TypeConvert(BlendFactor factor) {
+  switch (factor) {
+    case BlendFactor::kZero:
+      return MTLBlendFactorZero;
+    case BlendFactor::kOne:
+      return MTLBlendFactorOne;
+    case BlendFactor::kSrc:
+      return MTLBlendFactorSourceColor;
+    case BlendFactor::kOneMinusSrc:
+      return MTLBlendFactorOneMinusSourceColor;
+    case BlendFactor::kSrcAlpha:
+      return MTLBlendFactorSourceAlpha;
+    case BlendFactor::kOneMinusSrcAlpha:
+      return MTLBlendFactorOneMinusSourceAlpha;
+    case BlendFactor::kDst:
+      return MTLBlendFactorDestinationColor;
+    case BlendFactor::kOneMinusDst:
+      return MTLBlendFactorOneMinusDestinationColor;
+    case BlendFactor::kDstAlpha:
+      return MTLBlendFactorDestinationAlpha;
+    case BlendFactor::kOneMinusDstAlpha:
+      return MTLBlendFactorOneMinusDestinationAlpha;
   }
 }
 

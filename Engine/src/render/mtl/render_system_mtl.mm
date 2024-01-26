@@ -3,6 +3,7 @@
 #import <Metal/Metal.h>
 #include "cubic/render/render_system.h"
 #include "render/mtl/command_queue_mtl.h"
+#include "render/mtl/render_pipeline_mtl.h"
 #include "render/mtl/render_system_info_mtl.h"
 #include "render/mtl/shader_module_mtl.h"
 #include "render/render_system_priv.h"
@@ -57,6 +58,10 @@ bool RenderSystemMTL::Init() {
 RenderSystemInfo* RenderSystemMTL::GetBackendInfo() { return mPriv->GetBackendInfo(); }
 
 CommandQueue* RenderSystemMTL::GetCommandQueue(QueueType type) { return mPriv->GetQueueProxy(); }
+
+std::shared_ptr<RenderPipeline> RenderSystemMTL::CreateRenderPipeline(RenderPipelineDescriptor* desc) {
+  return RenderPipelineMTL::Create(desc, mPriv->GetNativeGPU());
+}
 
 std::shared_ptr<ShaderModule> RenderSystemMTL::CompileBackendShader(ShaderModuleDescriptor* desc,
                                                                     const std::vector<uint32_t>& spv) {

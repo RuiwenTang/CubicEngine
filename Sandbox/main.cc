@@ -10,7 +10,7 @@ class SandboxClient : public WindowClient {
   ~SandboxClient() override = default;
 
   void OnWindowUpdate(const std::shared_ptr<Texture> &surfaceTexture, RenderSystem *renderSystem) override {
-    InitPipelineIfNeed(renderSystem);
+    InitPipelineIfNeed(renderSystem, surfaceTexture->GetDescriptor().format);
 
     auto queue = renderSystem->GetCommandQueue(QueueType::kGraphic);
 
@@ -39,8 +39,8 @@ class SandboxClient : public WindowClient {
     mFrameNum++;
   }
 
-  void InitPipelineIfNeed(RenderSystem *renderSystem) {
-    if (mVertexShader && mFragmentShader) {
+  void InitPipelineIfNeed(RenderSystem *renderSystem, TextureFormat format) {
+    if (mPipeline) {
       return;
     }
 
@@ -60,7 +60,7 @@ class SandboxClient : public WindowClient {
     vs_desc.code = vertex_code;
     vs_desc.label = "basic vertex";
 
-    mVertexShader = renderSystem->CreateShaderModule(&vs_desc);
+    auto vs_shader = renderSystem->CreateShaderModule(&vs_desc);
 
     const char *frag_code = R"(#version 450 core
       layout(location = 0) out vec4 outColor;
@@ -74,13 +74,24 @@ class SandboxClient : public WindowClient {
     fs_desc.code = frag_code;
     fs_desc.label = "basic fragment";
 
-    mFragmentShader = renderSystem->CreateShaderModule(&fs_desc);
+    auto fs_shader = renderSystem->CreateShaderModule(&fs_desc);
+
+    RenderPipelineDescriptor desc{};
+    desc.vertexShader = vs_shader;
+    desc.fragmentShader = fs_shader;
+
+    ColorTargetState color1{};
+    color1.format = format;
+
+    desc.colorCount = 1;
+    desc.pColorTargets = &color1;
+
+    mPipeline = renderSystem->CreateRenderPipeline(&desc);
   }
 
  private:
   uint32_t mFrameNum = 0;
-  std::shared_ptr<ShaderModule> mVertexShader = {};
-  std::shared_ptr<ShaderModule> mFragmentShader = {};
+  std::shared_ptr<RenderPipeline> mPipeline = {};
 };
 
 int main(int argc, const char **argv) {
