@@ -18,7 +18,9 @@ RenderPipelineMTL::~RenderPipelineMTL() {
 
 void RenderPipelineMTL::BindToEncoder(id<MTLRenderCommandEncoder> encoder) {
   [encoder setRenderPipelineState:mNativePipeline];
-  [encoder setDepthStencilState:mDepthStencilState];
+  if (mDepthStencilState) {
+    [encoder setDepthStencilState:mDepthStencilState];
+  }
 }
 
 std::shared_ptr<RenderPipelineMTL> RenderPipelineMTL::Create(RenderPipelineDescriptor* desc, id<MTLDevice> device) {

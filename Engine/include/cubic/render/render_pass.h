@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cubic/platform.h>
+#include <cubic/render/render_pipeline.h>
 #include <cubic/render/texture.h>
 #include <cubic/render/types.h>
 
@@ -39,6 +40,10 @@ struct RenderPassDescriptor {
 class CUBIC_API RenderPass {
  public:
   virtual ~RenderPass() = default;
+
+  virtual void BindPipeline(const std::shared_ptr<RenderPipeline>& pipeline) = 0;
+
+  virtual void Draw(uint32_t numVertex, uint32_t firstVertex) = 0;
 };
 
 }  // namespace cubic

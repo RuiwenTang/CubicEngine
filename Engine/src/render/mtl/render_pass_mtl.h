@@ -11,6 +11,10 @@ class RenderPassMTL : public RenderPass {
 
   ~RenderPassMTL() override;
 
+  void BindPipeline(const std::shared_ptr<RenderPipeline> &pipeline) override;
+
+  void Draw(uint32_t numVertex, uint32_t firstVertex) override;
+
   id<MTLRenderCommandEncoder> GetNativeEncoder() { return mEncoder; }
 
  private:

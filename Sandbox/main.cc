@@ -32,6 +32,10 @@ class SandboxClient : public WindowClient {
 
     auto render_pass = cmd->BeginRenderPass(desc);
 
+    render_pass->BindPipeline(mPipeline);
+
+    render_pass->Draw(3, 0);
+
     cmd->EndRenderPass(std::move(render_pass));
 
     queue->Submit(std::move(cmd));
