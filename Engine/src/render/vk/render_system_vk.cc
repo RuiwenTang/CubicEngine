@@ -82,6 +82,15 @@ CommandQueue* RenderSystemVk::GetCommandQueue(QueueType type) {
   }
 }
 
+std::shared_ptr<RenderPipeline> RenderSystemVk::CreateRenderPipeline(RenderPipelineDescriptor* desc) {
+  return std::shared_ptr<RenderPipeline>();
+}
+
+std::shared_ptr<ShaderModule> RenderSystemVk::CompileBackendShader(ShaderModuleDescriptor* desc,
+                                                                   const std::vector<uint32_t>& spv) {
+  return std::shared_ptr<ShaderModule>();
+}
+
 bool RenderSystemVk::initInstance(bool enableDebug) {
   VkApplicationInfo app_info{};
   app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;

@@ -3,6 +3,7 @@
 #include <cubic/render/render_system.h>
 
 #include <memory>
+#include <vector>
 
 namespace cubic {
 

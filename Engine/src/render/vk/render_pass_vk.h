@@ -13,6 +13,10 @@ class RenderPassVK : public RenderPass {
 
   ~RenderPassVK() override;
 
+  void BindPipeline(const std::shared_ptr<RenderPipeline>& pipeline) override;
+
+  void Draw(uint32_t numVertex, uint32_t firstVertex) override;
+
   VkCommandBuffer GetNativeCMD() const { return mCMD; }
 
  private:

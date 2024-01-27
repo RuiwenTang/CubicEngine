@@ -27,6 +27,12 @@ class RenderSystemVk : public RenderSystemPriv {
 
   CommandQueue* GetCommandQueue(QueueType type) override;
 
+  std::shared_ptr<RenderPipeline> CreateRenderPipeline(RenderPipelineDescriptor* desc) override;
+
+ protected:
+  std::shared_ptr<ShaderModule> CompileBackendShader(ShaderModuleDescriptor* desc,
+                                                     const std::vector<uint32_t>& spv) override;
+
  private:
   bool initInstance(bool enableDebug);
 

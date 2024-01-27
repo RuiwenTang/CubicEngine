@@ -18,4 +18,8 @@ RenderPassVK::~RenderPassVK() {
   }
 }
 
+void RenderPassVK::BindPipeline(const std::shared_ptr<RenderPipeline>& pipeline) {}
+
+void RenderPassVK::Draw(uint32_t numVertex, uint32_t firstVertex) {}
+
 }  // namespace cubic
