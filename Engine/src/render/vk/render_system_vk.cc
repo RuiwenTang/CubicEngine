@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "render/vk/command_queue_vk.h"
+#include "render/vk/render_pipeline_vk.h"
 #include "render/vk/shader_module_vk.h"
 
 namespace cubic {
@@ -84,7 +85,7 @@ CommandQueue* RenderSystemVk::GetCommandQueue(QueueType type) {
 }
 
 std::shared_ptr<RenderPipeline> RenderSystemVk::CreateRenderPipeline(RenderPipelineDescriptor* desc) {
-  return std::shared_ptr<RenderPipeline>();
+  return RenderPipelineVK::Create(mDevice.get(), desc);
 }
 
 std::shared_ptr<ShaderModule> RenderSystemVk::CompileBackendShader(ShaderModuleDescriptor* desc,

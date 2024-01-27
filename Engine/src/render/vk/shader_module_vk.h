@@ -13,6 +13,8 @@ class ShaderModuleVK : public ShaderModule {
   static std::shared_ptr<ShaderModule> Compile(VulkanDevice* device, const std::vector<uint32_t>& code,
                                                ShaderModuleDescriptor* desc);
 
+  VkShaderModule GetNativeShader() const { return mShader; }
+
  private:
   VulkanDevice* mDevice;
   VkShaderModule mShader;

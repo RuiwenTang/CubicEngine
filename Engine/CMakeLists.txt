@@ -90,6 +90,8 @@ else()
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/command_queue_vk.h
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/render_pass_vk.cc
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/render_pass_vk.h
+		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/render_pipeline_vk.cc
+		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/render_pipeline_vk.h
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/render_system_info_vk.h
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/render_system_vk.cc
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/render_system_vk.h

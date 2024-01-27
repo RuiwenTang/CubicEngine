@@ -21,6 +21,12 @@ VkClearValue TypeConvert(const GPUColor& color);
 
 VkClearValue TypeConvert(float depth, uint32_t stencil);
 
+VkColorComponentFlags TypeConvert(ColorWriteMask mask);
+
+VkBlendFactor TypeConvert(BlendFactor factor);
+
+VkBlendOp TypeConvert(BlendOp op);
+
 }  // namespace vk
 
 }  // namespace cubic
