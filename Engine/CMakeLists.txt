@@ -93,6 +93,8 @@ else()
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/render_system_info_vk.h
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/render_system_vk.cc
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/render_system_vk.h
+		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/shader_module_vk.cc
+		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/shader_module_vk.h
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/texture_vk.h
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/texture_vk.cc
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/vulkan_device.cc
