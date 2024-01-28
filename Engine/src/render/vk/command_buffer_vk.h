@@ -29,8 +29,6 @@ class CommandBufferVK : public CommandBuffer {
   VkCommandBuffer mCmd;
   // signaled value when cmd finished
   uint64_t mSignalValue;
-
-  std::vector<std::unique_ptr<RenderPass>> mPendingRenderPass = {};
 };
 
 }  // namespace cubic

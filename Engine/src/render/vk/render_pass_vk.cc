@@ -1,25 +1,18 @@
 #include "render/vk/render_pass_vk.h"
 
+#include "render/vk/render_pipeline_vk.h"
 #include "render/vk/vulkan_device.h"
 
 namespace cubic {
 
-RenderPassVK::RenderPassVK(VulkanDevice* device, VkFramebuffer framebuffer, VkRenderPass renderPass,
-                           VkCommandBuffer cmd)
-    : mDevice(device), mFramebuffer(framebuffer), mRenderPass(renderPass), mCMD(cmd) {}
+RenderPassVK::RenderPassVK(VulkanDevice* device, VkCommandBuffer cmd) : mDevice(device), mCMD(cmd) {}
 
-RenderPassVK::~RenderPassVK() {
-  if (mRenderPass) {
-    vkDestroyRenderPass(mDevice->GetLogicalDevice(), mRenderPass, nullptr);
-  }
+void RenderPassVK::BindPipeline(const std::shared_ptr<RenderPipeline>& pipeline) {
+  auto vk_pipeline = dynamic_cast<RenderPipelineVK*>(pipeline.get());
 
-  if (mFramebuffer) {
-    vkDestroyFramebuffer(mDevice->GetLogicalDevice(), mFramebuffer, nullptr);
-  }
+  vk_pipeline->Bind(mCMD);
 }
 
-void RenderPassVK::BindPipeline(const std::shared_ptr<RenderPipeline>& pipeline) {}
-
-void RenderPassVK::Draw(uint32_t numVertex, uint32_t firstVertex) {}
+void RenderPassVK::Draw(uint32_t numVertex, uint32_t firstVertex) { vkCmdDraw(mCMD, numVertex, 1, firstVertex, 0); }
 
 }  // namespace cubic

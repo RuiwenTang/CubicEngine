@@ -123,10 +123,12 @@ int main(int argc, const char **argv) {
 
   auto window = app->CreateWindow(props);
 
-  SandboxClient client{};
+  {
+    SandboxClient client{};
 
-  if (window) {
-    window->Show(&client);
+    if (window) {
+      window->Show(&client);
+    }
   }
 
   Application::Terminate();

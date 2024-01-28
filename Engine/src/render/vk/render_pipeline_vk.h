@@ -15,6 +15,8 @@ class RenderPipelineVK : public RenderPipeline {
 
   static std::shared_ptr<RenderPipelineVK> Create(VulkanDevice* device, RenderPipelineDescriptor* desc);
 
+  void Bind(VkCommandBuffer cmd);
+
  private:
   VulkanDevice* mDevice;
   VkPipeline mPipeline;

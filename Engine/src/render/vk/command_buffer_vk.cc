@@ -2,6 +2,7 @@
 
 #include <cubic/core/log.h>
 
+#include <optional>
 #include <vector>
 
 #include "render/vk/render_pass_vk.h"
@@ -18,129 +19,50 @@ CommandBufferVK::CommandBufferVK(VulkanDevice* device, VkCommandBuffer cmd, uint
 CommandBufferVK::~CommandBufferVK() {}
 
 std::unique_ptr<RenderPass> CommandBufferVK::BeginRenderPass(const RenderPassDescriptor& desc) {
-  std::vector<VkAttachmentDescription> attachments{};
-  std::vector<VkAttachmentReference> attachment_refs{};
-  std::vector<VkAttachmentReference> resolve_refs{};
-
   uint32_t width = 0;
   uint32_t height = 0;
 
-  for (size_t i = 0; i < desc.colorAttachmentCount; i++) {
-    vk::AttachmentBuilder builder(dynamic_cast<TextureVK*>(desc.pColorAttachments[i].target.get()),
-                                  dynamic_cast<TextureVK*>(desc.pColorAttachments[i].resolveTarget.get()));
+  std::vector<VkRenderingAttachmentInfo> attachment_infos{};
+  std::optional<VkRenderingAttachmentInfo> depth_attachment_info{};
+  std::optional<VkRenderingAttachmentInfo> stencil_attachment_info{};
 
-    width = desc.pColorAttachments[0].target->GetDescriptor().width;
-    height = desc.pColorAttachments[0].target->GetDescriptor().height;
-
-    builder.SetLoadOp(desc.pColorAttachments[i].loadOp)
-        .SetStoreOp(desc.pColorAttachments[i].storeOp)
-        .Build(attachments, attachment_refs, resolve_refs);
-  }
-
-  if (desc.pDepthStencilAttachment) {
-    vk::AttachmentBuilder builder(dynamic_cast<TextureVK*>(desc.pDepthStencilAttachment->target.get()),
-                                  dynamic_cast<TextureVK*>(desc.pDepthStencilAttachment->resolveTarget.get()));
-
-    builder.SetLoadOp(desc.pDepthStencilAttachment->depthLoadOp)
-        .SetStoreOp(desc.pDepthStencilAttachment->depthStoreOp)
-        .SetStencilLoadOp(desc.pDepthStencilAttachment->stencilLoadOp)
-        .SetStencilStoreOp(desc.pDepthStencilAttachment->stencilStoreOp)
-        .Build(attachments, attachment_refs, resolve_refs);
-
-    if (width == 0) {
-      width = desc.pDepthStencilAttachment->target->GetDescriptor().width;
-      height = desc.pDepthStencilAttachment->target->GetDescriptor().height;
-    }
-  }
-
-  VkSubpassDescription subpass{};
-  subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-
-  subpass.colorAttachmentCount = desc.colorAttachmentCount;
-  subpass.pColorAttachments = attachment_refs.data();
-  subpass.pResolveAttachments = resolve_refs.data();
-
-  if (desc.pDepthStencilAttachment) {
-    subpass.pDepthStencilAttachment = attachment_refs.data() + (attachment_refs.size() - 1);
-  }
-
-  VkRenderPassCreateInfo render_pass_info{};
-  render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-  render_pass_info.attachmentCount = attachments.size();
-  render_pass_info.pAttachments = attachments.data();
-
-  render_pass_info.subpassCount = 1;
-  render_pass_info.pSubpasses = &subpass;
-
-  VkRenderPass vk_render_pass = VK_NULL_HANDLE;
-
-  if (vkCreateRenderPass(mDevice->GetLogicalDevice(), &render_pass_info, nullptr, &vk_render_pass) != VK_SUCCESS) {
-    CUB_ERROR("Failed create VkRenderPass ... ");
-    return {};
-  }
-
-  std::vector<VkImageView> framebuffer_views{};
+  std::vector<VkViewport> viewports{};
+  std::vector<VkRect2D> scissors{};
 
   for (size_t i = 0; i < desc.colorAttachmentCount; i++) {
     auto attachment = desc.pColorAttachments + i;
 
-    if (attachment->resolveTarget) {
-      framebuffer_views.emplace_back(dynamic_cast<TextureVK*>(attachment->resolveTarget.get())->GetImageView());
-    }
+    width = attachment->target->GetDescriptor().width;
+    height = attachment->target->GetDescriptor().height;
 
-    framebuffer_views.emplace_back(dynamic_cast<TextureVK*>(attachment->target.get())->GetImageView());
+    viewports.emplace_back(VkViewport{0, 0, width * 1.f, height * 1.f, 0.f, 1.f});
+
+    scissors.emplace_back(VkRect2D{{0, 0}, {width, height}});
+
+    vk::AttachmentBuilder builder(dynamic_cast<TextureVK*>(attachment->target.get()),
+                                  dynamic_cast<TextureVK*>(attachment->resolveTarget.get()));
+
+    builder.SetLoadOp(attachment->loadOp).SetStoreOp(attachment->storeOp);
+
+    attachment_infos.emplace_back(builder.Build());
+
+    attachment_infos.back().clearValue = vk::TypeConvert(attachment->clearValue);
   }
 
-  if (desc.pDepthStencilAttachment) {
-    if (desc.pDepthStencilAttachment->resolveTarget) {
-      framebuffer_views.emplace_back(
-          dynamic_cast<TextureVK*>(desc.pDepthStencilAttachment->resolveTarget.get())->GetImageView());
-    }
+  VkRenderingInfo rendering_info{};
+  rendering_info.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+  rendering_info.renderArea.extent.width = width;
+  rendering_info.renderArea.extent.height = height;
+  rendering_info.layerCount = 1;
+  rendering_info.colorAttachmentCount = static_cast<uint32_t>(attachment_infos.size());
+  rendering_info.pColorAttachments = attachment_infos.data();
 
-    framebuffer_views.emplace_back(
-        dynamic_cast<TextureVK*>(desc.pDepthStencilAttachment->target.get())->GetImageView());
-  }
+  vkCmdBeginRendering(mCmd, &rendering_info);
 
-  VkFramebufferCreateInfo fb_info{};
-  fb_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-  fb_info.renderPass = vk_render_pass;
-  fb_info.attachmentCount = framebuffer_views.size();
-  fb_info.pAttachments = framebuffer_views.data();
-  fb_info.width = width;
-  fb_info.height = height;
-  fb_info.layers = 1;
+  vkCmdSetViewport(mCmd, 0, static_cast<uint32_t>(viewports.size()), viewports.data());
+  vkCmdSetScissor(mCmd, 0, static_cast<uint32_t>(scissors.size()), scissors.data());
 
-  VkFramebuffer vk_fbo = VK_NULL_HANDLE;
-
-  if (vkCreateFramebuffer(mDevice->GetLogicalDevice(), &fb_info, nullptr, &vk_fbo) != VK_SUCCESS) {
-    CUB_ERROR("Failed create VkFramebuffer ... ");
-    return {};
-  }
-
-  std::vector<VkClearValue> clear_values{};
-
-  for (size_t i = 0; i < desc.colorAttachmentCount; i++) {
-    clear_values.emplace_back(vk::TypeConvert(desc.pColorAttachments[i].clearValue));
-  }
-
-  if (desc.pDepthStencilAttachment) {
-    clear_values.emplace_back(vk::TypeConvert(desc.pDepthStencilAttachment->depthClearValue,
-                                              desc.pDepthStencilAttachment->stencilClearValue));
-  }
-
-  VkRenderPassBeginInfo begin_info{};
-  begin_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-  begin_info.renderPass = vk_render_pass;
-  begin_info.framebuffer = vk_fbo;
-  begin_info.renderArea.offset = {0, 0};
-  begin_info.renderArea.extent.width = width;
-  begin_info.renderArea.extent.height = height;
-  begin_info.clearValueCount = clear_values.size();
-  begin_info.pClearValues = clear_values.data();
-
-  vkCmdBeginRenderPass(mCmd, &begin_info, VK_SUBPASS_CONTENTS_INLINE);
-
-  return std::make_unique<RenderPassVK>(mDevice, vk_fbo, vk_render_pass, mCmd);
+  return std::make_unique<RenderPassVK>(mDevice, mCmd);
 }
 
 void CommandBufferVK::EndRenderPass(std::unique_ptr<RenderPass> render_pass) {
@@ -154,9 +76,7 @@ void CommandBufferVK::EndRenderPass(std::unique_ptr<RenderPass> render_pass) {
     return;
   }
 
-  vkCmdEndRenderPass(mCmd);
-
-  mPendingRenderPass.emplace_back(std::move(render_pass));
+  vkCmdEndRendering(mCmd);
 }
 
 }  // namespace cubic

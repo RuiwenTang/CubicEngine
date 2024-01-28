@@ -9,9 +9,9 @@ class VulkanDevice;
 
 class RenderPassVK : public RenderPass {
  public:
-  RenderPassVK(VulkanDevice* device, VkFramebuffer framebuffer, VkRenderPass renderPass, VkCommandBuffer cmd);
+  RenderPassVK(VulkanDevice* device, VkCommandBuffer cmd);
 
-  ~RenderPassVK() override;
+  ~RenderPassVK() override = default;
 
   void BindPipeline(const std::shared_ptr<RenderPipeline>& pipeline) override;
 
@@ -21,8 +21,6 @@ class RenderPassVK : public RenderPass {
 
  private:
   VulkanDevice* mDevice;
-  VkFramebuffer mFramebuffer;
-  VkRenderPass mRenderPass;
   VkCommandBuffer mCMD;
 };
 

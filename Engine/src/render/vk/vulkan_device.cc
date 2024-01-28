@@ -30,8 +30,10 @@ std::unique_ptr<VulkanDevice> VulkanDevice::Create(VkPhysicalDevice gpu) {
 
   device->mGPUExtFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
   device->mGPU12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+  device->mGPU13Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
 
   device->mGPUExtFeatures.pNext = &device->mGPU12Features;
+  device->mGPU12Features.pNext = &device->mGPU13Features;
   vkGetPhysicalDeviceFeatures2(gpu, &device->mGPUExtFeatures);
 
   vkGetPhysicalDeviceMemoryProperties(gpu, &device->mGPUMemoryProps);

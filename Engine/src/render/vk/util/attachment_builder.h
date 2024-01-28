@@ -18,19 +18,14 @@ class AttachmentBuilder {
 
   AttachmentBuilder& SetLoadOp(LoadOp op);
   AttachmentBuilder& SetStoreOp(StoreOp op);
-  AttachmentBuilder& SetStencilLoadOp(LoadOp op);
-  AttachmentBuilder& SetStencilStoreOp(StoreOp op);
 
-  void Build(std::vector<VkAttachmentDescription>& attachments, std::vector<VkAttachmentReference>& attachmentRefs,
-             std::vector<VkAttachmentReference>& resolveRefs);
+  VkRenderingAttachmentInfo Build();
 
  private:
   TextureVK* mTarget;
   TextureVK* mResolveTarget;
   LoadOp mLoadOp = LoadOp::kClear;
   StoreOp mStoreOp = StoreOp::kDiscard;
-  LoadOp mStencilLoadOp = LoadOp::kUndefined;
-  StoreOp mStencilStoreOp = StoreOp::kUndefined;
 };
 
 }  // namespace vk

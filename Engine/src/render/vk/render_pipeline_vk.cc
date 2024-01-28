@@ -147,8 +147,7 @@ std::shared_ptr<RenderPipelineVK> RenderPipelineVK::Create(VulkanDevice* device,
 
   VkGraphicsPipelineCreateInfo create_info{};
   create_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-  create_info.flags =
-      VK_PIPELINE_CREATE_FAIL_ON_PIPELINE_COMPILE_REQUIRED_BIT | VK_PIPELINE_CREATE_EARLY_RETURN_ON_FAILURE_BIT;
+  create_info.flags = VK_PIPELINE_CREATE_FAIL_ON_PIPELINE_COMPILE_REQUIRED_BIT;
   create_info.stageCount = static_cast<uint32_t>(shaderStages.size());
   create_info.pStages = shaderStages.data();
   create_info.pVertexInputState = &vertexInputState;
@@ -166,7 +165,15 @@ std::shared_ptr<RenderPipelineVK> RenderPipelineVK::Create(VulkanDevice* device,
 
   VkPipeline pipeline = VK_NULL_HANDLE;
 
-  return std::shared_ptr<RenderPipelineVK>();
+  if (auto ret = vkCreateGraphicsPipelines(device->GetLogicalDevice(), nullptr, 1, &create_info, nullptr, &pipeline) !=
+                 VK_SUCCESS) {
+    CUB_ERROR("[Vulkan backend] Failed create render pipeline !!");
+    return {};
+  }
+
+  return std::make_shared<RenderPipelineVK>(device, pipeline, layout, std::vector<VkDescriptorSetLayout>{});
 }
+
+void RenderPipelineVK::Bind(VkCommandBuffer cmd) { vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipeline); }
 
 }  // namespace cubic

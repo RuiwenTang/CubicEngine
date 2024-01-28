@@ -100,4 +100,66 @@ VkClearValue TypeConvert(float depth, uint32_t stencil) {
   return ret;
 }
 
+VkColorComponentFlags TypeConvert(ColorWriteMask mask) {
+  VkColorComponentFlags ret = 0;
+
+  if (mask & ColorWriteMask::kRed) {
+    ret |= VK_COLOR_COMPONENT_R_BIT;
+  }
+
+  if (mask & ColorWriteMask::kGreen) {
+    ret |= VK_COLOR_COMPONENT_G_BIT;
+  }
+
+  if (mask & ColorWriteMask::kBlue) {
+    ret |= VK_COLOR_COMPONENT_B_BIT;
+  }
+
+  if (mask & ColorWriteMask::kAlpha) {
+    ret |= VK_COLOR_COMPONENT_A_BIT;
+  }
+
+  return ret;
+}
+
+VkBlendFactor TypeConvert(BlendFactor factor) {
+  switch (factor) {
+    case BlendFactor::kZero:
+      return VK_BLEND_FACTOR_ZERO;
+    case BlendFactor::kOne:
+      return VK_BLEND_FACTOR_ONE;
+    case BlendFactor::kSrc:
+      return VK_BLEND_FACTOR_SRC_COLOR;
+    case BlendFactor::kOneMinusSrc:
+      return VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
+    case BlendFactor::kSrcAlpha:
+      return VK_BLEND_FACTOR_SRC_ALPHA;
+    case BlendFactor::kOneMinusSrcAlpha:
+      return VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+    case BlendFactor::kDst:
+      return VK_BLEND_FACTOR_DST_COLOR;
+    case BlendFactor::kOneMinusDst:
+      return VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
+    case BlendFactor::kDstAlpha:
+      return VK_BLEND_FACTOR_DST_ALPHA;
+    case BlendFactor::kOneMinusDstAlpha:
+      return VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
+  }
+}
+
+VkBlendOp TypeConvert(BlendOp op) {
+  switch (op) {
+    case BlendOp::kAdd:
+      return VK_BLEND_OP_ADD;
+    case BlendOp::kSubtract:
+      return VK_BLEND_OP_SUBTRACT;
+    case BlendOp::kReverseSubtract:
+      return VK_BLEND_OP_REVERSE_SUBTRACT;
+    case BlendOp::kMin:
+      return VK_BLEND_OP_MIN;
+    case BlendOp::kMax:
+      return VK_BLEND_OP_MAX;
+  }
+}
+
 }  // namespace cubic::vk
