@@ -31,13 +31,7 @@ VkRenderingAttachmentInfo AttachmentBuilder::Build() {
     info.resolveImageView = mResolveTarget->GetImageView();
     info.resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT;
 
-    if (mResolveTarget->GetDescriptor().usage & TextureUsage::kShaderRead) {
-      info.resolveImageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    } else {
-      info.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-    }
-
-    mResolveTarget->SetImageLayout(info.resolveImageLayout);
+    info.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
   }
 
   info.imageView = mTarget->GetImageView();
@@ -45,13 +39,7 @@ VkRenderingAttachmentInfo AttachmentBuilder::Build() {
   info.storeOp = vk::TypeConvert(mStoreOp);
 
   if (!has_resolve) {
-    if (mTarget->GetDescriptor().usage & TextureUsage::kShaderRead) {
-      info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    } else {
-      info.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-    }
-
-    mTarget->SetImageLayout(info.imageLayout);
+    info.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
   } else {
     info.imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
   }

@@ -143,7 +143,7 @@ VkResult Swapchain::SubmitFrame(CommandQueueVK* queue, std::shared_ptr<TextureVK
     image_barrier.subresourceRange.layerCount = 1;
 
     image_barrier.srcAccessMask = 0;
-    image_barrier.dstAccessMask = 0;
+    image_barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
     image_barrier.oldLayout = texture->GetImageLayout();
     image_barrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
