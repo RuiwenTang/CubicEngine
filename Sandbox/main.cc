@@ -10,6 +10,8 @@ class SandboxClient : public WindowClient {
   ~SandboxClient() override = default;
 
   void OnWindowUpdate(const std::shared_ptr<Texture> &surfaceTexture, RenderSystem *renderSystem) override {
+    InitMSAATextureIfNeed(renderSystem, surfaceTexture);
+
     InitPipelineIfNeed(renderSystem, surfaceTexture->GetDescriptor().format);
 
     auto queue = renderSystem->GetCommandQueue(QueueType::kGraphic);
@@ -24,8 +26,9 @@ class SandboxClient : public WindowClient {
 
     color_attachment.clearValue = GPUColor{0.0, 0.0, flash, 1.0};
     color_attachment.loadOp = LoadOp::kClear;
-    color_attachment.storeOp = StoreOp::kStore;
-    color_attachment.target = surfaceTexture;
+    color_attachment.storeOp = StoreOp::kMSAAResolve;
+    color_attachment.target = mMSAATarget;
+    color_attachment.resolveTarget = surfaceTexture;
 
     desc.colorAttachmentCount = 1;
     desc.pColorAttachments = &color_attachment;
@@ -43,6 +46,25 @@ class SandboxClient : public WindowClient {
     mFrameNum++;
   }
 
+  void InitMSAATextureIfNeed(RenderSystem *renderSystem, const std::shared_ptr<Texture> &target) {
+    if (mMSAATarget) {
+      auto const &msaaDesc = mMSAATarget->GetDescriptor();
+      auto const &targetDesc = target->GetDescriptor();
+
+      if (msaaDesc.width == targetDesc.width && msaaDesc.height == targetDesc.height &&
+          msaaDesc.format == targetDesc.format) {
+        return;
+      }
+    }
+
+    TextureDescirptor desc = target->GetDescriptor();
+
+    desc.sample_count = 4;
+    desc.usage = TextureUsage::kRenderTarget;
+
+    mMSAATarget = renderSystem->CreateTexture(&desc);
+  }
+
   void InitPipelineIfNeed(RenderSystem *renderSystem, TextureFormat format) {
     if (mPipeline) {
       return;
@@ -50,7 +72,7 @@ class SandboxClient : public WindowClient {
 
     const char *vertex_code = R"(#version 450 core
         vec2  positions[3] = vec2[](
-            vec2(0.0, -0.5),
+            vec2(0.45, -0.5),
             vec2(0.5, 0.5),
             vec2(-0.5, 0.5)
         );
@@ -89,12 +111,14 @@ class SandboxClient : public WindowClient {
 
     desc.colorCount = 1;
     desc.pColorTargets = &color1;
+    desc.sampleCount = 4;
 
     mPipeline = renderSystem->CreateRenderPipeline(&desc);
   }
 
  private:
   uint32_t mFrameNum = 0;
+  std::shared_ptr<Texture> mMSAATarget = {};
   std::shared_ptr<RenderPipeline> mPipeline = {};
 };
 

@@ -42,6 +42,7 @@ target_sources(
 	${CMAKE_CURRENT_LIST_DIR}/src/render/render_system_priv.h
 	${CMAKE_CURRENT_LIST_DIR}/src/render/shader_compiler.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/render/shader_compiler.h
+	${CMAKE_CURRENT_LIST_DIR}/src/render/types.cc
 )
 
 if(APPLE)

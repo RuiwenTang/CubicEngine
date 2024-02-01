@@ -6,6 +6,7 @@
 #include "render/mtl/render_pipeline_mtl.h"
 #include "render/mtl/render_system_info_mtl.h"
 #include "render/mtl/shader_module_mtl.h"
+#include "render/mtl/texture_mtl.h"
 #include "render/render_system_priv.h"
 
 namespace cubic {
@@ -63,9 +64,13 @@ std::shared_ptr<RenderPipeline> RenderSystemMTL::CreateRenderPipeline(RenderPipe
   return RenderPipelineMTL::Create(desc, mPriv->GetNativeGPU());
 }
 
+std::shared_ptr<Texture> RenderSystemMTL::CreateTexture(TextureDescirptor* desc) {
+  return TextureMTL::Create(desc, mPriv->GetNativeGPU());
+}
+
 std::shared_ptr<ShaderModule> RenderSystemMTL::CompileBackendShader(ShaderModuleDescriptor* desc,
                                                                     const std::vector<uint32_t>& spv) {
   return ShaderModuleMTL::Compile(mPriv->GetNativeGPU(), desc, spv);
 }
 
-}
+}  // namespace cubic

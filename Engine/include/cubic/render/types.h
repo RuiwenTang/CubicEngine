@@ -15,6 +15,8 @@ enum class TextureFormat {
   kDepth24Stencil8,
 };
 
+uint32_t BytesPerPixel(TextureFormat format);
+
 using TextureUsageMask = uint32_t;
 
 enum TextureUsage : TextureUsageMask {

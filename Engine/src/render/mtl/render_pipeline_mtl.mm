@@ -28,7 +28,7 @@ std::shared_ptr<RenderPipelineMTL> RenderPipelineMTL::Create(RenderPipelineDescr
 
   mtl_desc.vertexFunction = dynamic_cast<ShaderModuleMTL*>(desc->vertexShader.get())->GetEntryPoint();
   mtl_desc.fragmentFunction = dynamic_cast<ShaderModuleMTL*>(desc->fragmentShader.get())->GetEntryPoint();
-
+  mtl_desc.rasterSampleCount = desc->sampleCount;
   for (uint32_t i = 0; i < desc->colorCount; i++) {
     mtl_desc.colorAttachments[i].pixelFormat = TypeConvert(desc->pColorTargets[i].format);
     auto blending = desc->pColorTargets[i].blend;
@@ -71,4 +71,4 @@ std::shared_ptr<RenderPipelineMTL> RenderPipelineMTL::Create(RenderPipelineDescr
   return std::make_shared<RenderPipelineMTL>(pipeline, depthStencilState);
 }
 
-}
+}  // namespace cubic

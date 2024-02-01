@@ -63,7 +63,7 @@ class WindowMTLPriv {
     desc.width = texture.width;
     desc.height = texture.height;
 
-    return std::make_shared<TextureMTL>(desc, texture, mDevice, mQueue);
+    return std::make_shared<TextureMTL>(desc, texture);
   }
 
   void SwapWindowBuffer() {
@@ -76,7 +76,7 @@ class WindowMTLPriv {
     [cmd presentDrawable:mDrawable];
 
     [cmd commit];
-    
+
     [cmd release];
 
     mDrawable = nil;
@@ -110,4 +110,4 @@ std::shared_ptr<Texture> WindowImplMTL::AcquireTexture() { return mPriv->Acquire
 
 void WindowImplMTL::SwapWindowBuffer() { mPriv->SwapWindowBuffer(); }
 
-}
+}  // namespace cubic

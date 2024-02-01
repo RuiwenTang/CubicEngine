@@ -17,4 +17,6 @@ MTLBlendOperation TypeConvert(BlendOp op);
 
 MTLBlendFactor TypeConvert(BlendFactor factor);
 
+MTLTextureUsage TypeConvert(TextureUsageMask usage);
+
 }  // namespace cubic

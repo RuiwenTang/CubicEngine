@@ -24,6 +24,8 @@ class RenderSystemMTL : public RenderSystemPriv {
 
   std::shared_ptr<RenderPipeline> CreateRenderPipeline(RenderPipelineDescriptor* desc) override;
 
+  std::shared_ptr<Texture> CreateTexture(TextureDescirptor* desc) override;
+
   bool Init();
 
  protected:

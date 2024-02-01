@@ -4,6 +4,7 @@
 #include <cubic/render/command_queue.h>
 #include <cubic/render/render_pipeline.h>
 #include <cubic/render/shader_module.h>
+#include <cubic/render/texture.h>
 
 #include <memory>
 
@@ -29,6 +30,8 @@ class CUBIC_API RenderSystem {
   virtual std::shared_ptr<ShaderModule> CreateShaderModule(ShaderModuleDescriptor* desc) = 0;
 
   virtual std::shared_ptr<RenderPipeline> CreateRenderPipeline(RenderPipelineDescriptor* desc) = 0;
+
+  virtual std::shared_ptr<Texture> CreateTexture(TextureDescirptor* desc) = 0;
 };
 
 }  // namespace cubic

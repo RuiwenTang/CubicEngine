@@ -103,4 +103,22 @@ MTLBlendFactor TypeConvert(BlendFactor factor) {
   }
 }
 
+MTLTextureUsage TypeConvert(TextureUsageMask usage) {
+  MTLTextureUsage mtl_usage = 0;
+
+  if (usage & TextureUsage::kShaderRead) {
+    mtl_usage |= MTLTextureUsageShaderRead;
+  }
+
+  if (usage & TextureUsage::kShaderWrite) {
+    mtl_usage |= MTLTextureUsageShaderWrite;
+  }
+
+  if (usage & TextureUsage::kRenderTarget) {
+    mtl_usage |= MTLTextureUsageRenderTarget;
+  }
+
+  return mtl_usage;
 }
+
+}  // namespace cubic

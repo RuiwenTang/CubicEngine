@@ -30,6 +30,7 @@ struct RenderPipelineDescriptor {
   DepthStencilState* depthStencil = {};
   uint32_t colorCount = 0;
   ColorTargetState* pColorTargets = {};
+  uint32_t sampleCount = 1;
 };
 
 class CUBIC_API RenderPipeline {
