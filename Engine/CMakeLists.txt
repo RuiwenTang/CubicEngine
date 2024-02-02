@@ -111,6 +111,12 @@ else()
 
 	target_link_libraries(CubicEngine PRIVATE volk::volk)
 
+	# vma
+	find_package(VulkanMemoryAllocator CONFIG REQUIRED)
+	target_link_libraries(CubicEngine PRIVATE GPUOpen::VulkanMemoryAllocator)
+
+	target_compile_definitions(CubicEngine PRIVATE VK_NO_PROTOTYPES)
+
 	if(WIN32)
 		target_compile_definitions(CubicEngine PRIVATE VK_USE_PLATFORM_WIN32_KHR=1)
 	endif()

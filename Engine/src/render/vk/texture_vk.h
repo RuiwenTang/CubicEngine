@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cubic/render/texture.h>
+#include <vk_mem_alloc.h>
 #include <volk.h>
 
 #include <memory>
@@ -14,6 +15,9 @@ struct TextureDescriptorVK {
   VkImage image = VK_NULL_HANDLE;
   VkImageView view = VK_NULL_HANDLE;
   VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+  VmaAllocator allocator = VK_NULL_HANDLE;
+  VmaAllocation allocation = VK_NULL_HANDLE;
 
   bool owned = false;
 };
@@ -29,8 +33,6 @@ class TextureVK : public Texture {
 
   ~TextureVK() override;
 
-  void UploadData(void* data, uint32_t w, uint32_t h, uint32_t x, uint32_t y) override;
-
   VkImage GetImage() const { return mImage; }
 
   VkImageView GetImageView() const { return mView; }
@@ -44,6 +46,8 @@ class TextureVK : public Texture {
   static std::shared_ptr<TextureVK> WrapSwapchainTexture(uint32_t width, uint32_t height,
                                                          const TextureDescriptorVK& vk_desc, VulkanDevice* device);
 
+  static std::shared_ptr<Texture> Create(TextureDescirptor* desc, VmaAllocator allocator, VulkanDevice* device);
+
  private:
   VkImage mImage = VK_NULL_HANDLE;
   VkImageView mView = VK_NULL_HANDLE;
@@ -54,6 +58,9 @@ class TextureVK : public Texture {
   Source mSource;
 
   bool mOwned = false;
+
+  VmaAllocator mAllocator = {};
+  VmaAllocation mAllocation = {};
 };
 
 }  // namespace cubic

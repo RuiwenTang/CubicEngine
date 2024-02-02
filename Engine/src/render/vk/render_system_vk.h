@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cubic/render/render_system.h>
+#include <vk_mem_alloc.h>
 #include <volk.h>
 
 #include <memory>
@@ -29,6 +30,8 @@ class RenderSystemVk : public RenderSystemPriv {
 
   std::shared_ptr<RenderPipeline> CreateRenderPipeline(RenderPipelineDescriptor* desc) override;
 
+  std::shared_ptr<Texture> CreateTexture(TextureDescirptor* desc) override;
+
  protected:
   std::shared_ptr<ShaderModule> CompileBackendShader(ShaderModuleDescriptor* desc,
                                                      const std::vector<uint32_t>& spv) override;
@@ -48,6 +51,8 @@ class RenderSystemVk : public RenderSystemPriv {
   std::unique_ptr<VulkanDevice> mDevice = {};
 
   RenderSystemInfoVK mInfo = {};
+
+  VmaAllocator mAllocator = {};
 };
 
 }  // namespace cubic

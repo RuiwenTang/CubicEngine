@@ -11,6 +11,10 @@
       "platform": "windows"
     },
     {
+      "name": "vulkan-memory-allocator",
+      "platform": "windows"
+    },
+    {
       "name": "spirv-cross",
       "platform": "osx"
     }

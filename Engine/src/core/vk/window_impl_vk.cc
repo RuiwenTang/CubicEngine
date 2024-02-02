@@ -46,7 +46,7 @@ bool WindowImplVK::Init() {
     return false;
   }
 
-  if (!CreateSemaphore()) {
+  if (!CreateVkSemaphore()) {
     return false;
   }
 
@@ -125,7 +125,7 @@ bool WindowImplVK::CreateSwapchain() {
   return mSwapchain->Resize(w, h, mSurfaceFormat);
 }
 
-bool WindowImplVK::CreateSemaphore() {
+bool WindowImplVK::CreateVkSemaphore() {
   VkSemaphoreCreateInfo create_info{};
   create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 

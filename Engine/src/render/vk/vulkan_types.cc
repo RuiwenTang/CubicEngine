@@ -162,4 +162,35 @@ VkBlendOp TypeConvert(BlendOp op) {
   }
 }
 
+VkImageUsageFlagBits TypeConvert(TextureUsageMask mask, TextureFormat format) {
+  VkFlags flags = {};
+
+  if (mask & TextureUsage::kCopySrc) {
+    flags |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+  }
+
+  if (mask & TextureUsage::kCopyDst) {
+    flags |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+  }
+
+  if (mask & TextureUsage::kRenderTarget) {
+    if (format == TextureFormat::kStencil8 || format == TextureFormat::kDepth24 ||
+        format == TextureFormat::kDepth24Stencil8) {
+      flags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    } else {
+      flags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    }
+  }
+
+  if (mask & TextureUsage::kShaderRead) {
+    flags |= VK_IMAGE_USAGE_SAMPLED_BIT;
+  }
+
+  if (mask & TextureUsage::kShaderWrite) {
+    flags |= VK_IMAGE_USAGE_STORAGE_BIT;
+  }
+
+  return static_cast<VkImageUsageFlagBits>(flags);
+}
+
 }  // namespace cubic::vk

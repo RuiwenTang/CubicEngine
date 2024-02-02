@@ -38,11 +38,7 @@ VkRenderingAttachmentInfo AttachmentBuilder::Build() {
   info.loadOp = vk::TypeConvert(mLoadOp);
   info.storeOp = vk::TypeConvert(mStoreOp);
 
-  if (!has_resolve) {
-    info.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-  } else {
-    info.imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-  }
+  info.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
   return info;
 }

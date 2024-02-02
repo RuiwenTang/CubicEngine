@@ -50,7 +50,7 @@ std::shared_ptr<RenderPipelineVK> RenderPipelineVK::Create(VulkanDevice* device,
   VkPipelineMultisampleStateCreateInfo multisampling{};
   multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
   multisampling.sampleShadingEnable = VK_FALSE;
-  multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+  multisampling.rasterizationSamples = vk::TypeConvert(desc->sampleCount);
   multisampling.minSampleShading = 1.0f;           // Optional
   multisampling.pSampleMask = nullptr;             // Optional
   multisampling.alphaToCoverageEnable = VK_FALSE;  // Optional
@@ -147,7 +147,7 @@ std::shared_ptr<RenderPipelineVK> RenderPipelineVK::Create(VulkanDevice* device,
 
   VkGraphicsPipelineCreateInfo create_info{};
   create_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-  create_info.flags = VK_PIPELINE_CREATE_FAIL_ON_PIPELINE_COMPILE_REQUIRED_BIT;
+  create_info.flags = 0;
   create_info.stageCount = static_cast<uint32_t>(shaderStages.size());
   create_info.pStages = shaderStages.data();
   create_info.pVertexInputState = &vertexInputState;

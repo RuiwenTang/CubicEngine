@@ -1,4 +1,7 @@
-#include "render/vk/render_system_vk.h"
+#define VMA_IMPLEMENTATION
+// implement
+#include <vk_mem_alloc.h>
+// before self header
 
 #include <cubic/core/log.h>
 
@@ -6,7 +9,9 @@
 
 #include "render/vk/command_queue_vk.h"
 #include "render/vk/render_pipeline_vk.h"
+#include "render/vk/render_system_vk.h"
 #include "render/vk/shader_module_vk.h"
+#include "render/vk/texture_vk.h"
 
 namespace cubic {
 
@@ -31,6 +36,8 @@ VKAPI_ATTR VkBool32 VKAPI_CALL _debug_utils_messenger_callback(
 std::unique_ptr<RenderSystemVk> RenderSystemVk::Create() { return std::make_unique<RenderSystemVk>(); }
 
 RenderSystemVk::~RenderSystemVk() {
+  vmaDestroyAllocator(mAllocator);
+
   mDevice.reset();
 
   if (mDebugHandler) {
@@ -66,6 +73,23 @@ bool RenderSystemVk::Init(bool enableDebug) {
   mInfo.instance = mInstance;
   mInfo.device = mDevice.get();
 
+  VmaAllocatorCreateInfo allocator_info{};
+  allocator_info.vulkanApiVersion = VK_API_VERSION_1_3;
+  allocator_info.physicalDevice = mDevice->GetPhysicalDevice();
+  allocator_info.device = mDevice->GetLogicalDevice();
+  allocator_info.instance = mInstance;
+
+  VmaVulkanFunctions vma_functions{};
+  vma_functions.vkGetInstanceProcAddr = vkGetInstanceProcAddr;
+  vma_functions.vkGetDeviceProcAddr = vkGetDeviceProcAddr;
+
+  allocator_info.pVulkanFunctions = &vma_functions;
+
+  if (vmaCreateAllocator(&allocator_info, &mAllocator) != VK_SUCCESS) {
+    CUB_ERROR("[Vulkan backend] Failed init memory allocator !!");
+    return false;
+  }
+
   return true;
 }
 
@@ -86,6 +110,10 @@ CommandQueue* RenderSystemVk::GetCommandQueue(QueueType type) {
 
 std::shared_ptr<RenderPipeline> RenderSystemVk::CreateRenderPipeline(RenderPipelineDescriptor* desc) {
   return RenderPipelineVK::Create(mDevice.get(), desc);
+}
+
+std::shared_ptr<Texture> RenderSystemVk::CreateTexture(TextureDescirptor* desc) {
+  return TextureVK::Create(desc, mAllocator, mDevice.get());
 }
 
 std::shared_ptr<ShaderModule> RenderSystemVk::CompileBackendShader(ShaderModuleDescriptor* desc,

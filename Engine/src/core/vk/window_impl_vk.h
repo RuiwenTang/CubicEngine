@@ -29,7 +29,7 @@ class WindowImplVK : public WindowImpl {
 
   bool CreateSwapchain();
 
-  bool CreateSemaphore();
+  bool CreateVkSemaphore();
 
  private:
   VkInstance mInstance = nullptr;

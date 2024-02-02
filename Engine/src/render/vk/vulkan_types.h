@@ -27,6 +27,8 @@ VkBlendFactor TypeConvert(BlendFactor factor);
 
 VkBlendOp TypeConvert(BlendOp op);
 
+VkImageUsageFlagBits TypeConvert(TextureUsageMask mask, TextureFormat format);
+
 }  // namespace vk
 
 }  // namespace cubic
