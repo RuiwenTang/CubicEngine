@@ -68,6 +68,8 @@ std::shared_ptr<Texture> RenderSystemMTL::CreateTexture(TextureDescirptor* desc)
   return TextureMTL::Create(desc, mPriv->GetNativeGPU());
 }
 
+std::shared_ptr<Buffer> RenderSystemMTL::CreateBuffer(BufferDescriptor* desc) { return {}; }
+
 std::shared_ptr<ShaderModule> RenderSystemMTL::CompileBackendShader(ShaderModuleDescriptor* desc,
                                                                     const std::vector<uint32_t>& spv) {
   return ShaderModuleMTL::Compile(mPriv->GetNativeGPU(), desc, spv);

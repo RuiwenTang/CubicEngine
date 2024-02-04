@@ -10,6 +10,8 @@
 #include <cubic/render/types.h>
 // texture
 #include <cubic/render/texture.h>
+// buffer
+#include <cubic/render/buffer.h>
 // render
 #include <cubic/render/render_system.h>
 // command buffer

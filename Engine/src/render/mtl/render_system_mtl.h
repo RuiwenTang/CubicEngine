@@ -26,6 +26,8 @@ class RenderSystemMTL : public RenderSystemPriv {
 
   std::shared_ptr<Texture> CreateTexture(TextureDescirptor* desc) override;
 
+  std::shared_ptr<Buffer> CreateBuffer(BufferDescriptor* desc) override;
+
   bool Init();
 
  protected:

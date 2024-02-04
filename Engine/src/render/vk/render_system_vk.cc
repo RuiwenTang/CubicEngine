@@ -116,6 +116,8 @@ std::shared_ptr<Texture> RenderSystemVk::CreateTexture(TextureDescirptor* desc) 
   return TextureVK::Create(desc, mAllocator, mDevice.get());
 }
 
+std::shared_ptr<Buffer> RenderSystemVk::CreateBuffer(BufferDescriptor* desc) { return {}; }
+
 std::shared_ptr<ShaderModule> RenderSystemVk::CompileBackendShader(ShaderModuleDescriptor* desc,
                                                                    const std::vector<uint32_t>& spv) {
   return ShaderModuleVK::Compile(mDevice.get(), spv, desc);
