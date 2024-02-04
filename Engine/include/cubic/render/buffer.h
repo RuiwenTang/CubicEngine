@@ -9,6 +9,7 @@ struct BufferDescriptor {
   BufferUsageMask usage = BufferUsage::kBuffCopySrc;
   BufferStorageMode storageMode = BufferStorageMode::kCPUOnly;
   uint64_t size = 0;
+  void* data = nullptr;
 };
 
 class CUBIC_API Buffer {

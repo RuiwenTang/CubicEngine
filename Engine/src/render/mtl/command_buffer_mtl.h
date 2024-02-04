@@ -15,6 +15,9 @@ class CommandBufferMTL : public CommandBuffer {
 
   void EndRenderPass(std::unique_ptr<RenderPass> render_pass) override;
 
+  void CopyBufferToBuffer(const std::shared_ptr<Buffer> &dst, uint64_t dst_offset, const std::shared_ptr<Buffer> &src,
+                          uint64_t src_offset, uint64_t length) override;
+
   id<MTLCommandBuffer> GetNativeCMD() { return mCMD; }
 
  private:

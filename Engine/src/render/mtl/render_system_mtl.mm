@@ -2,6 +2,7 @@
 
 #import <Metal/Metal.h>
 #include "cubic/render/render_system.h"
+#include "render/mtl/buffer_mtl.h"
 #include "render/mtl/command_queue_mtl.h"
 #include "render/mtl/render_pipeline_mtl.h"
 #include "render/mtl/render_system_info_mtl.h"
@@ -68,7 +69,9 @@ std::shared_ptr<Texture> RenderSystemMTL::CreateTexture(TextureDescirptor* desc)
   return TextureMTL::Create(desc, mPriv->GetNativeGPU());
 }
 
-std::shared_ptr<Buffer> RenderSystemMTL::CreateBuffer(BufferDescriptor* desc) { return {}; }
+std::shared_ptr<Buffer> RenderSystemMTL::CreateBuffer(BufferDescriptor* desc) {
+  return BufferMTL::Create(desc, mPriv->GetNativeGPU());
+}
 
 std::shared_ptr<ShaderModule> RenderSystemMTL::CompileBackendShader(ShaderModuleDescriptor* desc,
                                                                     const std::vector<uint32_t>& spv) {

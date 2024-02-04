@@ -1,4 +1,5 @@
 #include "render/mtl/command_buffer_mtl.h"
+#include "render/mtl/buffer_mtl.h"
 #include "render/mtl/mtl_types.h"
 #include "render/mtl/render_pass_mtl.h"
 #include "render/mtl/texture_mtl.h"
@@ -77,6 +78,28 @@ void CommandBufferMTL::EndRenderPass(std::unique_ptr<RenderPass> render_pass) {
   }
 
   [native_render_pass->GetNativeEncoder() endEncoding];
+}
+
+void CommandBufferMTL::CopyBufferToBuffer(const std::shared_ptr<Buffer>& dst, uint64_t dst_offset,
+                                          const std::shared_ptr<Buffer>& src, uint64_t src_offset, uint64_t length) {
+  auto mtl_dst = dynamic_cast<BufferMTL*>(dst.get());
+  auto mtl_src = dynamic_cast<BufferMTL*>(src.get());
+
+  if (mtl_dst == nullptr || mtl_src == nullptr) {
+    return;
+  }
+
+  id<MTLBlitCommandEncoder> encoder = [mCMD blitCommandEncoder];
+
+  [encoder copyFromBuffer:mtl_src->GetNativeBuffer()
+             sourceOffset:src_offset
+                 toBuffer:mtl_dst->GetNativeBuffer()
+        destinationOffset:dst_offset
+                     size:length];
+
+  [encoder endEncoding];
+
+  [encoder release];
 }
 
 }
