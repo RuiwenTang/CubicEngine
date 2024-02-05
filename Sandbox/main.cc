@@ -14,6 +14,8 @@ class SandboxClient : public WindowClient {
 
     InitPipelineIfNeed(renderSystem, surfaceTexture->GetDescriptor().format);
 
+    InitBufferIfNeed(renderSystem);
+
     auto queue = renderSystem->GetCommandQueue(QueueType::kGraphic);
 
     auto cmd = queue->GenCommandBuffer();
@@ -36,6 +38,8 @@ class SandboxClient : public WindowClient {
     auto render_pass = cmd->BeginRenderPass(desc);
 
     render_pass->BindPipeline(mPipeline);
+
+    render_pass->SetVertexBuffer(mBuffer, 0, 0);
 
     render_pass->Draw(3, 0);
 
@@ -70,14 +74,15 @@ class SandboxClient : public WindowClient {
       return;
     }
 
-    const char *vertex_code = R"(#version 450 core
-        vec2  positions[3] = vec2[](
-            vec2(0.45, -0.5),
-            vec2(0.5, 0.5),
-            vec2(-0.5, 0.5)
-        );
+    const char *vertex_code = R"(
+        #version 450 core
+        layout(location = 0) in vec2 aPos;
+        layout(location = 1) in vec3 aColor;
+
+        layout(location = 0) out vec3 vColor;
         void main() {
-            gl_Position = vec4(positions[gl_VertexIndex], 0.0, 1.0);
+            vColor = aColor;
+            gl_Position = vec4(aPos, 0.0, 1.0);
         }
     )";
 
@@ -88,10 +93,13 @@ class SandboxClient : public WindowClient {
 
     auto vs_shader = renderSystem->CreateShaderModule(&vs_desc);
 
-    const char *frag_code = R"(#version 450 core
+    const char *frag_code = R"(
+      #version 450 core
+      layout(location = 0) in vec3 vColor;
+
       layout(location = 0) out vec4 outColor;
       void main() {
-        outColor = vec4(1.0, 0.0, 0.0, 1.0);
+        outColor = vec4(vColor, 1.0);
       }
     )";
 
@@ -105,6 +113,11 @@ class SandboxClient : public WindowClient {
     RenderPipelineDescriptor desc{};
     desc.vertexShader = vs_shader;
     desc.fragmentShader = fs_shader;
+
+    desc.vertexBuffer.emplace_back(VertexBufferLayout{});
+    desc.vertexBuffer[0].stride = 5 * sizeof(float);
+    desc.vertexBuffer[0].attribute.emplace_back(VertexAttribute{VertexFormat::kFloat32x2, 0, 0});
+    desc.vertexBuffer[0].attribute.emplace_back(VertexAttribute{VertexFormat::kFloat32x3, 2 * sizeof(float), 1});
 
     ColorTargetState color1{};
     color1.format = format;
@@ -121,7 +134,11 @@ class SandboxClient : public WindowClient {
       return;
     }
 
-    std::vector<float> raw_vertex = {0.45f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f};
+    std::vector<float> raw_vertex = {
+        0.45f, -0.5f, 1.f, 0.f, 0.f,  // v1
+        0.5f,  0.5f,  0.f, 1.f, 0.f,  // v2
+        -0.5f, 0.5f,  0.f, 0.f, 1.f,  // v3
+    };
 
     BufferDescriptor stage_desc{};
     stage_desc.storageMode = BufferStorageMode::kCPUOnly;

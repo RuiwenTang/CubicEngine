@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cubic/platform.h>
+#include <cubic/render/buffer.h>
 #include <cubic/render/render_pipeline.h>
 #include <cubic/render/texture.h>
 #include <cubic/render/types.h>
@@ -42,6 +43,8 @@ class CUBIC_API RenderPass {
   virtual ~RenderPass() = default;
 
   virtual void BindPipeline(const std::shared_ptr<RenderPipeline>& pipeline) = 0;
+
+  virtual void SetVertexBuffer(const std::shared_ptr<Buffer>& buffer, uint32_t slot, uint64_t offset) = 0;
 
   virtual void Draw(uint32_t numVertex, uint32_t firstVertex) = 0;
 };
