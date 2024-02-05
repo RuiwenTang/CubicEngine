@@ -19,4 +19,8 @@ MTLBlendFactor TypeConvert(BlendFactor factor);
 
 MTLTextureUsage TypeConvert(TextureUsageMask usage);
 
+MTLVertexFormat TypeConvert(VertexFormat format);
+
+MTLVertexStepFunction TypeConvert(VertexStepMode stepMode);
+
 }  // namespace cubic

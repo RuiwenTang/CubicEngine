@@ -5,6 +5,7 @@
 #include <cubic/render/types.h>
 
 #include <memory>
+#include <vector>
 
 namespace cubic {
 
@@ -25,6 +26,7 @@ struct DepthStencilState {
 };
 
 struct RenderPipelineDescriptor {
+  std::vector<VertexBufferLayout> vertexBuffer = {};
   std::shared_ptr<ShaderModule> vertexShader = {};
   std::shared_ptr<ShaderModule> fragmentShader = {};
   DepthStencilState* depthStencil = {};

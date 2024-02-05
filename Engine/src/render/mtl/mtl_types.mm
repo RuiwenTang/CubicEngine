@@ -121,4 +121,26 @@ MTLTextureUsage TypeConvert(TextureUsageMask usage) {
   return mtl_usage;
 }
 
+MTLVertexFormat TypeConvert(VertexFormat format) {
+  switch (format) {
+    case VertexFormat::kFloat32:
+      return MTLVertexFormatFloat;
+    case VertexFormat::kFloat32x2:
+      return MTLVertexFormatFloat2;
+    case VertexFormat::kFloat32x3:
+      return MTLVertexFormatFloat3;
+    case VertexFormat::kFloat32x4:
+      return MTLVertexFormatFloat4;
+  }
+}
+
+MTLVertexStepFunction TypeConvert(VertexStepMode stepMode) {
+  switch (stepMode) {
+    case VertexStepMode::kVertex:
+      return MTLVertexStepFunctionPerVertex;
+    case VertexStepMode::kInstance:
+      return MTLVertexStepFunctionPerInstance;
+  }
+}
+
 }  // namespace cubic

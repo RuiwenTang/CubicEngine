@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <vector>
 
 namespace cubic {
 
@@ -142,6 +143,30 @@ struct StencilFaceState {
   StencilOp failOp = StencilOp::kKeep;
   StencilOp depthFailOp = StencilOp::kKeep;
   StencilOp passOp = StencilOp::kKeep;
+};
+
+enum class VertexFormat {
+  kFloat32,
+  kFloat32x2,
+  kFloat32x3,
+  kFloat32x4,
+};
+
+enum class VertexStepMode {
+  kVertex,
+  kInstance,
+};
+
+struct VertexAttribute {
+  VertexFormat format = VertexFormat::kFloat32;
+  uint64_t offset = 0;
+  uint32_t location = 0;
+};
+
+struct VertexBufferLayout {
+  uint64_t stride = 0;
+  VertexStepMode stepMode = VertexStepMode::kVertex;
+  std::vector<VertexAttribute> attribute = {};
 };
 
 }  // namespace cubic

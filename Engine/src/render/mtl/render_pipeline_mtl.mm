@@ -29,6 +29,24 @@ std::shared_ptr<RenderPipelineMTL> RenderPipelineMTL::Create(RenderPipelineDescr
   mtl_desc.vertexFunction = dynamic_cast<ShaderModuleMTL*>(desc->vertexShader.get())->GetEntryPoint();
   mtl_desc.fragmentFunction = dynamic_cast<ShaderModuleMTL*>(desc->fragmentShader.get())->GetEntryPoint();
   mtl_desc.rasterSampleCount = desc->sampleCount;
+
+  if (!desc->vertexBuffer.empty()) {
+    mtl_desc.vertexDescriptor = [MTLVertexDescriptor new];
+
+    for (size_t i = 0; i < desc->vertexBuffer.size(); i++) {
+      mtl_desc.vertexDescriptor.layouts[i].stride = desc->vertexBuffer[i].stride;
+      mtl_desc.vertexDescriptor.layouts[i].stepFunction = TypeConvert(desc->vertexBuffer[i].stepMode);
+      mtl_desc.vertexDescriptor.layouts[i].stepRate = 1;
+
+      for (size_t j = 0; j < desc->vertexBuffer[i].attribute.size(); j++) {
+        const auto& attr = desc->vertexBuffer[i].attribute[j];
+        mtl_desc.vertexDescriptor.attributes[attr.location].format = TypeConvert(attr.format);
+        mtl_desc.vertexDescriptor.attributes[attr.location].offset = attr.offset;
+        mtl_desc.vertexDescriptor.attributes[attr.location].bufferIndex = i;
+      }
+    }
+  }
+
   for (uint32_t i = 0; i < desc->colorCount; i++) {
     mtl_desc.colorAttachments[i].pixelFormat = TypeConvert(desc->pColorTargets[i].format);
     auto blending = desc->pColorTargets[i].blend;
