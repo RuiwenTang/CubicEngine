@@ -116,10 +116,52 @@ class SandboxClient : public WindowClient {
     mPipeline = renderSystem->CreateRenderPipeline(&desc);
   }
 
+  void InitBufferIfNeed(RenderSystem *renderSystem) {
+    if (mBuffer) {
+      return;
+    }
+
+    std::vector<float> raw_vertex = {0.45f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f};
+
+    BufferDescriptor stage_desc{};
+    stage_desc.storageMode = BufferStorageMode::kCPUOnly;
+    stage_desc.usage = BufferUsage::kBuffCopySrc;
+    stage_desc.size = sizeof(float) * raw_vertex.size();
+    stage_desc.data = raw_vertex.data();
+
+    auto stage_buffer = renderSystem->CreateBuffer(&stage_desc);
+
+    if (stage_buffer == nullptr) {
+      CUB_ERROR("[Sandbox] Faield create stage buffer");
+      exit(-1);
+    }
+
+    BufferDescriptor desc{};
+    desc.storageMode = BufferStorageMode::kGPUOnly;
+    desc.usage = BufferUsage::kBuffCopyDst | BufferUsage::kBuffVertex;
+    desc.size = stage_desc.size;
+
+    mBuffer = renderSystem->CreateBuffer(&desc);
+
+    if (mBuffer == nullptr) {
+      CUB_ERROR("[Sandbox] Failed create gpu buffer");
+      exit(-1);
+    }
+
+    auto queue = renderSystem->GetCommandQueue(cubic::QueueType::kGraphic);
+
+    auto cmd = queue->GenCommandBuffer();
+
+    cmd->CopyBufferToBuffer(mBuffer, 0, stage_buffer, 0, stage_desc.size);
+
+    queue->Submit(std::move(cmd));
+  }
+
  private:
   uint32_t mFrameNum = 0;
   std::shared_ptr<Texture> mMSAATarget = {};
   std::shared_ptr<RenderPipeline> mPipeline = {};
+  std::shared_ptr<Buffer> mBuffer = {};
 };
 
 int main(int argc, const char **argv) {
