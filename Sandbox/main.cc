@@ -41,7 +41,9 @@ class SandboxClient : public WindowClient {
 
     render_pass->SetVertexBuffer(mBuffer, 0, 0);
 
-    render_pass->Draw(3, 0);
+    render_pass->SetIndexBuffer(mBuffer, sizeof(float) * 20);
+
+    render_pass->DrawElements(6, 0);
 
     cmd->EndRenderPass(std::move(render_pass));
 
@@ -138,6 +140,12 @@ class SandboxClient : public WindowClient {
         0.45f, -0.5f, 1.f, 0.f, 0.f,  // v1
         0.5f,  0.5f,  0.f, 1.f, 0.f,  // v2
         -0.5f, 0.5f,  0.f, 0.f, 1.f,  // v3
+        -0.5f, -0.5f, 1.f, 1.f, 0.f,  // v4
+    };
+
+    std::vector<uint32_t> raw_index{
+        0, 1, 2,  // triangle 1
+        3, 0, 2,  // tirangle 2
     };
 
     BufferDescriptor stage_desc{};
@@ -146,17 +154,22 @@ class SandboxClient : public WindowClient {
     stage_desc.size = sizeof(float) * raw_vertex.size();
     stage_desc.data = raw_vertex.data();
 
-    auto stage_buffer = renderSystem->CreateBuffer(&stage_desc);
+    auto stage_buffer1 = renderSystem->CreateBuffer(&stage_desc);
 
-    if (stage_buffer == nullptr) {
+    stage_desc.size = sizeof(uint32_t) * raw_index.size();
+    stage_desc.data = raw_index.data();
+
+    auto stage_buffer2 = renderSystem->CreateBuffer(&stage_desc);
+
+    if (stage_buffer1 == nullptr) {
       CUB_ERROR("[Sandbox] Faield create stage buffer");
       exit(-1);
     }
 
     BufferDescriptor desc{};
     desc.storageMode = BufferStorageMode::kGPUOnly;
-    desc.usage = BufferUsage::kBuffCopyDst | BufferUsage::kBuffVertex;
-    desc.size = stage_desc.size;
+    desc.usage = BufferUsage::kBuffCopyDst | BufferUsage::kBuffVertex | BufferUsage::kBuffIndex;
+    desc.size = sizeof(float) * 20 + sizeof(uint32_t) * 6;
 
     mBuffer = renderSystem->CreateBuffer(&desc);
 
@@ -169,7 +182,9 @@ class SandboxClient : public WindowClient {
 
     auto cmd = queue->GenCommandBuffer();
 
-    cmd->CopyBufferToBuffer(mBuffer, 0, stage_buffer, 0, stage_desc.size);
+    cmd->CopyBufferToBuffer(mBuffer, 0, stage_buffer1, 0, sizeof(float) * raw_vertex.size());
+    cmd->CopyBufferToBuffer(mBuffer, sizeof(float) * raw_vertex.size(), stage_buffer2, 0,
+                            sizeof(uint32_t) * raw_index.size());
 
     queue->Submit(std::move(cmd));
   }

@@ -21,6 +21,17 @@ void RenderPassVK::SetVertexBuffer(const std::shared_ptr<Buffer>& buffer, uint32
   vkCmdBindVertexBuffers(mCMD, slot, 1, &native_buffer, &offset);
 }
 
+void RenderPassVK::SetIndexBuffer(const std::shared_ptr<Buffer>& buffer, uint64_t offset) {
+  auto buffer_vk = dynamic_cast<BufferVK*>(buffer.get());
+  auto native_buffer = buffer_vk->GetNativeBuffer();
+
+  vkCmdBindIndexBuffer(mCMD, native_buffer, offset, VK_INDEX_TYPE_UINT32);
+}
+
 void RenderPassVK::Draw(uint32_t numVertex, uint32_t firstVertex) { vkCmdDraw(mCMD, numVertex, 1, firstVertex, 0); }
+
+void RenderPassVK::DrawElements(uint32_t numIndices, uint32_t firstIndex) {
+  vkCmdDrawIndexed(mCMD, numIndices, 1, firstIndex, 0, 0);
+}
 
 }  // namespace cubic
