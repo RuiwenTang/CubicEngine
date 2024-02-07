@@ -144,6 +144,8 @@ VkBlendFactor TypeConvert(BlendFactor factor) {
       return VK_BLEND_FACTOR_DST_ALPHA;
     case BlendFactor::kOneMinusDstAlpha:
       return VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
+    default:
+      return VK_BLEND_FACTOR_ZERO;
   }
 }
 
@@ -159,17 +161,19 @@ VkBlendOp TypeConvert(BlendOp op) {
       return VK_BLEND_OP_MIN;
     case BlendOp::kMax:
       return VK_BLEND_OP_MAX;
+    default:
+      return VK_BLEND_OP_ADD;
   }
 }
 
 VkImageUsageFlagBits TypeConvert(TextureUsageMask mask, TextureFormat format) {
   VkFlags flags = {};
 
-  if (mask & TextureUsage::kCopySrc) {
+  if (mask & TextureUsage::kTextureCopySrc) {
     flags |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
   }
 
-  if (mask & TextureUsage::kCopyDst) {
+  if (mask & TextureUsage::kTextureCopyDst) {
     flags |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
   }
 
@@ -191,6 +195,61 @@ VkImageUsageFlagBits TypeConvert(TextureUsageMask mask, TextureFormat format) {
   }
 
   return static_cast<VkImageUsageFlagBits>(flags);
+}
+
+VkBufferUsageFlags TypeConvertForBuffer(BufferUsageMask usage) {
+  VkBufferUsageFlags res = 0;
+
+  if (usage & BufferUsage::kBuffCopySrc) {
+    res |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+  }
+
+  if (usage & BufferUsage::kBuffCopyDst) {
+    res |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+  }
+
+  if (usage & BufferUsage::kBuffUniform) {
+    res |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+  }
+
+  if (usage & BufferUsage::kBuffStorage) {
+    res |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+  }
+
+  if (usage & BufferUsage::kBuffIndex) {
+    res |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+  }
+
+  if (usage & BufferUsage::kBuffVertex) {
+    res |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+  }
+
+  return res;
+}
+
+VkVertexInputRate TypeConvert(VertexStepMode mode) {
+  switch (mode) {
+    case VertexStepMode::kVertex:
+      return VK_VERTEX_INPUT_RATE_VERTEX;
+    case VertexStepMode::kInstance:
+      return VK_VERTEX_INPUT_RATE_INSTANCE;
+    default:
+      return VK_VERTEX_INPUT_RATE_VERTEX;
+  }
+}
+
+VkFormat TypeConvertForInput(VertexFormat format) {
+  switch (format) {
+    case VertexFormat::kFloat32:
+      return VK_FORMAT_R32_SFLOAT;
+    case VertexFormat::kFloat32x2:
+      return VK_FORMAT_R32G32_SFLOAT;
+    case VertexFormat::kFloat32x3:
+      return VK_FORMAT_R32G32B32_SFLOAT;
+    case VertexFormat::kFloat32x4:
+      return VK_FORMAT_R32G32B32A32_SFLOAT;
+  }
+  return VK_FORMAT_UNDEFINED;
 }
 
 }  // namespace cubic::vk

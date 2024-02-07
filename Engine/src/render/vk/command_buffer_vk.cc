@@ -5,6 +5,7 @@
 #include <optional>
 #include <vector>
 
+#include "render/vk/buffer_vk.h"
 #include "render/vk/render_pass_vk.h"
 #include "render/vk/texture_vk.h"
 #include "render/vk/util/attachment_builder.h"
@@ -16,7 +17,7 @@ namespace cubic {
 CommandBufferVK::CommandBufferVK(VulkanDevice* device, VkCommandBuffer cmd, uint64_t value)
     : mDevice(device), mCmd(cmd), mSignalValue(value) {}
 
-CommandBufferVK::~CommandBufferVK() {}
+CommandBufferVK::~CommandBufferVK() { mPendingResources.clear(); }
 
 std::unique_ptr<RenderPass> CommandBufferVK::BeginRenderPass(const RenderPassDescriptor& desc) {
   uint32_t width = 0;
@@ -131,6 +132,29 @@ void CommandBufferVK::EndRenderPass(std::unique_ptr<RenderPass> render_pass) {
   }
 
   vkCmdEndRendering(mCmd);
+}
+
+void CommandBufferVK::CopyBufferToBuffer(const std::shared_ptr<Buffer>& dst, uint64_t dst_offset,
+                                         const std::shared_ptr<Buffer>& src, uint64_t src_offset, uint64_t length) {
+  auto buffer_dst = dynamic_cast<BufferVK*>(dst.get());
+  auto buffer_src = dynamic_cast<BufferVK*>(src.get());
+
+  VkBufferCopy copy_region{src_offset, dst_offset, length};
+
+  vkCmdCopyBuffer(mCmd, buffer_src->GetNativeBuffer(), buffer_dst->GetNativeBuffer(), 1, &copy_region);
+
+  RecordResource(src);
+
+}  // namespace cubic
+
+void CommandBufferVK::RecordResource(const std::shared_ptr<Buffer>& buffer) {
+  for (const auto& res : mPendingResources) {
+    if (res == buffer) {
+      return;
+    }
+  }
+
+  mPendingResources.emplace_back(buffer);
 }
 
 }  // namespace cubic

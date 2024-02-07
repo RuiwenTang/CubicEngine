@@ -41,6 +41,31 @@ std::shared_ptr<RenderPipelineVK> RenderPipelineVK::Create(VulkanDevice* device,
   VkPipelineVertexInputStateCreateInfo vertexInputState{};
   vertexInputState.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 
+  std::vector<VkVertexInputBindingDescription> vertex_bindings{};
+  std::vector<VkVertexInputAttributeDescription> vertex_attrs{};
+
+  for (size_t i = 0; i < desc->vertexBuffer.size(); i++) {
+    vertex_bindings.emplace_back(VkVertexInputBindingDescription{
+        static_cast<uint32_t>(i),
+        static_cast<uint32_t>(desc->vertexBuffer[i].stride),
+        vk::TypeConvert(desc->vertexBuffer[i].stepMode),
+    });
+
+    for (auto const& attr : desc->vertexBuffer[i].attribute) {
+      vertex_attrs.emplace_back(VkVertexInputAttributeDescription{
+          attr.location,
+          static_cast<uint32_t>(i),
+          vk::TypeConvertForInput(attr.format),
+          static_cast<uint32_t>(attr.offset),
+      });
+    }
+  }
+
+  vertexInputState.vertexBindingDescriptionCount = static_cast<uint32_t>(vertex_bindings.size());
+  vertexInputState.pVertexBindingDescriptions = vertex_bindings.data();
+  vertexInputState.vertexAttributeDescriptionCount = static_cast<uint32_t>(vertex_attrs.size());
+  vertexInputState.pVertexAttributeDescriptions = vertex_attrs.data();
+
   VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
   inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
   inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;

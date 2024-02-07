@@ -29,6 +29,12 @@ VkBlendOp TypeConvert(BlendOp op);
 
 VkImageUsageFlagBits TypeConvert(TextureUsageMask mask, TextureFormat format);
 
+VkBufferUsageFlags TypeConvertForBuffer(BufferUsageMask usage);
+
+VkVertexInputRate TypeConvert(VertexStepMode mode);
+
+VkFormat TypeConvertForInput(VertexFormat format);
+
 }  // namespace vk
 
 }  // namespace cubic

@@ -7,6 +7,7 @@
 
 #include <vector>
 
+#include "render/vk/buffer_vk.h"
 #include "render/vk/command_queue_vk.h"
 #include "render/vk/render_pipeline_vk.h"
 #include "render/vk/render_system_vk.h"
@@ -116,7 +117,9 @@ std::shared_ptr<Texture> RenderSystemVk::CreateTexture(TextureDescirptor* desc) 
   return TextureVK::Create(desc, mAllocator, mDevice.get());
 }
 
-std::shared_ptr<Buffer> RenderSystemVk::CreateBuffer(BufferDescriptor* desc) { return {}; }
+std::shared_ptr<Buffer> RenderSystemVk::CreateBuffer(BufferDescriptor* desc) {
+  return BufferVK::Create(desc, mAllocator);
+}
 
 std::shared_ptr<ShaderModule> RenderSystemVk::CompileBackendShader(ShaderModuleDescriptor* desc,
                                                                    const std::vector<uint32_t>& spv) {

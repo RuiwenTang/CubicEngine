@@ -15,6 +15,8 @@ class RenderPassVK : public RenderPass {
 
   void BindPipeline(const std::shared_ptr<RenderPipeline>& pipeline) override;
 
+  void SetVertexBuffer(const std::shared_ptr<Buffer>& buffer, uint32_t slot, uint64_t offset) override;
+
   void Draw(uint32_t numVertex, uint32_t firstVertex) override;
 
   VkCommandBuffer GetNativeCMD() const { return mCMD; }
