@@ -89,7 +89,7 @@ class SandboxClient : public WindowClient {
     )";
 
     ShaderModuleDescriptor vs_desc{};
-    vs_desc.stage = ShaderStage::kVertex;
+    vs_desc.stage = ShaderStage::kVertexShader;
     vs_desc.code = vertex_code;
     vs_desc.label = "basic vertex";
 
@@ -106,7 +106,7 @@ class SandboxClient : public WindowClient {
     )";
 
     ShaderModuleDescriptor fs_desc{};
-    fs_desc.stage = ShaderStage::kFragment;
+    fs_desc.stage = ShaderStage::kFragmentShader;
     fs_desc.code = frag_code;
     fs_desc.label = "basic fragment";
 

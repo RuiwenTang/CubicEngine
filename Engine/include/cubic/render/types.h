@@ -20,6 +20,7 @@ uint32_t BytesPerPixel(TextureFormat format);
 
 using TextureUsageMask = uint32_t;
 using BufferUsageMask = uint32_t;
+using ShaderStageMask = uint32_t;
 
 enum TextureUsage : TextureUsageMask {
   kTextureCopySrc = 0x1,
@@ -29,13 +30,20 @@ enum TextureUsage : TextureUsageMask {
   kRenderTarget = (0x1 << 4),
 };
 
-enum BufferUsage : uint32_t {
+enum BufferUsage : BufferUsageMask {
   kBuffCopySrc = 0x1,
   kBuffCopyDst = (0x1 << 1),
   kBuffUniform = (0x1 << 2),
   kBuffStorage = (0x1 << 3),
   kBuffIndex = (0x1 << 4),
   kBuffVertex = (0x1 << 5),
+};
+
+enum ShaderStage : ShaderStageMask {
+  kNoneShader = 0,
+  kVertexShader = 0x1,
+  kFragmentShader = (0x1 << 1),
+  kComputeShader = (0x1 << 2),
 };
 
 enum class BufferStorageMode {

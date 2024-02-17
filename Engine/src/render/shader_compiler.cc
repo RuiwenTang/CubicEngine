@@ -17,7 +17,7 @@ ShaderCompiler& ShaderCompiler::SetDefinition(const std::string& name, const std
 }
 
 std::vector<uint32_t> ShaderCompiler::Compile(const std::string& label, const std::string& source) {
-  if (mStage == ShaderStage::kNone) {
+  if (mStage == ShaderStage::kNoneShader) {
     CUB_ERROR("Can not compile shader [ {} ] with None ShaderStage !!", label);
 
     return {};
@@ -45,11 +45,11 @@ std::vector<uint32_t> ShaderCompiler::Compile(const std::string& label, const st
 }
 
 shaderc_shader_kind ShaderCompiler::GetShadercStage() const {
-  if (mStage == ShaderStage::kVertex) {
+  if (mStage == ShaderStage::kVertexShader) {
     return shaderc_shader_kind::shaderc_vertex_shader;
-  } else if (mStage == ShaderStage::kFragment) {
+  } else if (mStage == ShaderStage::kFragmentShader) {
     return shaderc_shader_kind::shaderc_fragment_shader;
-  } else if (mStage == ShaderStage::kCompute) {
+  } else if (mStage == ShaderStage::kComputeShader) {
     return shaderc_shader_kind::shaderc_compute_shader;
   }
 

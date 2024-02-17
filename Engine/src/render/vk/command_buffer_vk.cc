@@ -144,8 +144,7 @@ void CommandBufferVK::CopyBufferToBuffer(const std::shared_ptr<Buffer>& dst, uin
   vkCmdCopyBuffer(mCmd, buffer_src->GetNativeBuffer(), buffer_dst->GetNativeBuffer(), 1, &copy_region);
 
   RecordResource(src);
-
-}  // namespace cubic
+}
 
 void CommandBufferVK::RecordResource(const std::shared_ptr<Buffer>& buffer) {
   for (const auto& res : mPendingResources) {

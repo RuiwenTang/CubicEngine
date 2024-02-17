@@ -22,7 +22,7 @@ class ShaderCompiler {
   shaderc_shader_kind GetShadercStage() const;
 
  private:
-  ShaderStage mStage = ShaderStage::kNone;
+  ShaderStage mStage = ShaderStage::kNoneShader;
   shaderc::CompileOptions mOptions = {};
 };
 

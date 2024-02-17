@@ -1,20 +1,14 @@
 #pragma once
 
 #include <cubic/platform.h>
+#include <cubic/render/types.h>
 
 #include <string>
 
 namespace cubic {
 
-enum class ShaderStage {
-  kNone,
-  kVertex,
-  kFragment,
-  kCompute,
-};
-
 struct ShaderModuleDescriptor {
-  ShaderStage stage = ShaderStage::kNone;
+  ShaderStage stage = ShaderStage::kNoneShader;
   std::string code = {};
   std::string label = {};
 };
