@@ -61,4 +61,13 @@ std::shared_ptr<ShaderModule> RenderSystemPriv::CreateShaderModule(ShaderModuleD
   return CompileBackendShader(desc, result);
 }
 
+std::shared_ptr<BindGroupLayout> RenderSystemPriv::CreateBindGroupLayout(std::vector<GroupEntryInfo> entries) {
+  return std::make_shared<BindGroupLayout>(std::move(entries));
+}
+
+std::shared_ptr<PipelineLayout> RenderSystemPriv::CreatePipelineLayout(
+    std::vector<std::shared_ptr<BindGroupLayout>> groups) {
+  return std::make_shared<PipelineLayout>(std::move(groups));
+}
+
 }  // namespace cubic

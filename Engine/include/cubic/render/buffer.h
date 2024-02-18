@@ -3,6 +3,8 @@
 #include <cubic/platform.h>
 #include <cubic/render/types.h>
 
+#include <memory>
+
 namespace cubic {
 
 struct BufferDescriptor {
@@ -22,6 +24,12 @@ class CUBIC_API Buffer {
 
  private:
   BufferDescriptor mDesc;
+};
+
+struct BufferView {
+  std::shared_ptr<Buffer> buffer = {};
+  uint64_t offset = 0;
+  uint64_t length = 0;
 };
 
 }  // namespace cubic

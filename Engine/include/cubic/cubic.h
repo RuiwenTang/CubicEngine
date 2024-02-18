@@ -10,6 +10,8 @@
 #include <cubic/render/types.h>
 // texture
 #include <cubic/render/texture.h>
+// bind group
+#include <cubic/render/bind_group.h>
 // buffer
 #include <cubic/render/buffer.h>
 // render
@@ -18,6 +20,8 @@
 #include <cubic/render/command_buffer.h>
 // queue
 #include <cubic/render/command_queue.h>
+// pipeline layout
+#include <cubic/render/pipeline_layout.h>
 // render pass
 #include <cubic/render/render_pass.h>
 // render pipeline

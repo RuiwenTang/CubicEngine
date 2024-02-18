@@ -1,8 +1,10 @@
 #pragma once
 
 #include <cubic/platform.h>
+#include <cubic/render/bind_group.h>
 #include <cubic/render/buffer.h>
 #include <cubic/render/command_queue.h>
+#include <cubic/render/pipeline_layout.h>
 #include <cubic/render/render_pipeline.h>
 #include <cubic/render/shader_module.h>
 #include <cubic/render/texture.h>
@@ -35,6 +37,11 @@ class CUBIC_API RenderSystem {
   virtual std::shared_ptr<Texture> CreateTexture(TextureDescirptor* desc) = 0;
 
   virtual std::shared_ptr<Buffer> CreateBuffer(BufferDescriptor* desc) = 0;
+
+  virtual std::shared_ptr<BindGroupLayout> CreateBindGroupLayout(std::vector<GroupEntryInfo> entries) = 0;
+
+  virtual std::shared_ptr<PipelineLayout> CreatePipelineLayout(
+      std::vector<std::shared_ptr<BindGroupLayout>> groups) = 0;
 };
 
 }  // namespace cubic
