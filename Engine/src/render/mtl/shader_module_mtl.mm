@@ -17,6 +17,8 @@ static void setup_compiler(spirv_cross::CompilerMSL& compiler) {
 #endif
 
   option.msl_version = spirv_cross::CompilerMSL::Options::make_msl_version(2, 0);
+  // use argument buffer to support ** BindGroup **
+  option.argument_buffers = true;
 
   compiler.set_msl_options(option);
 }
@@ -82,4 +84,4 @@ std::shared_ptr<ShaderModule> ShaderModuleMTL::Compile(id<MTLDevice> gpu, Shader
   return shader_module;
 }
 
-}
+}  // namespace cubic

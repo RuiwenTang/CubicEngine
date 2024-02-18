@@ -24,6 +24,31 @@ void RenderPassMTL::SetVertexBuffer(const std::shared_ptr<Buffer> &buffer, uint3
   [mEncoder setVertexBuffer:mtl_buffer->GetNativeBuffer() offset:offset atIndex:slot];
 }
 
+void RenderPassMTL::SetIndexBuffer(const std::shared_ptr<Buffer> &buffer, uint64_t offset) {
+  auto mtl_buffer = dynamic_cast<BufferMTL *>(buffer.get());
+
+  if (mtl_buffer == nullptr) {
+    return;
+  }
+
+  mCurrIndex = buffer;
+  mCurrIndexOffset = offset;
+}
+
+void RenderPassMTL::DrawElements(uint32_t numIndices, uint32_t firstIndex) {
+  if (mCurrIndex == nullptr) {
+    return;
+  }
+
+  id<MTLBuffer> buffer = dynamic_cast<BufferMTL *>(mCurrIndex.get())->GetNativeBuffer();
+
+  [mEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
+                       indexCount:numIndices
+                        indexType:MTLIndexTypeUInt32
+                      indexBuffer:buffer
+                indexBufferOffset:mCurrIndexOffset + sizeof(uint32_t) * firstIndex];
+}
+
 void RenderPassMTL::Draw(uint32_t numVertex, uint32_t firstVertex) {
   [mEncoder drawPrimitives:MTLPrimitiveTypeTriangle
                vertexStart:firstVertex
@@ -32,4 +57,4 @@ void RenderPassMTL::Draw(uint32_t numVertex, uint32_t firstVertex) {
               baseInstance:0];
 }
 
-}
+}  // namespace cubic
