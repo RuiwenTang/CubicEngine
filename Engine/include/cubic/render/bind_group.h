@@ -15,6 +15,7 @@ enum class EntryType {
   kUniformBuffer,
   kStorgeBuffer,
   kTexture,
+  kSampler,
 };
 
 struct GroupEntryInfo {

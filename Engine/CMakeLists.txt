@@ -90,6 +90,8 @@ else()
 		${CMAKE_CURRENT_LIST_DIR}/src/core/vk/window_impl_vk.h
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/util/attachment_builder.cc
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/util/attachment_builder.h
+		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/bind_group_vk.cc
+		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/bind_group_vk.h
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/buffer_vk.cc
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/buffer_vk.h
 		${CMAKE_CURRENT_LIST_DIR}/src/render/vk/command_buffer_vk.cc

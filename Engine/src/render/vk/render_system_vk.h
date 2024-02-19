@@ -34,6 +34,8 @@ class RenderSystemVk : public RenderSystemPriv {
 
   std::shared_ptr<Buffer> CreateBuffer(BufferDescriptor* desc) override;
 
+  std::shared_ptr<BindGroupLayout> CreateBindGroupLayout(std::vector<GroupEntryInfo> entries) override;
+
  protected:
   std::shared_ptr<ShaderModule> CompileBackendShader(ShaderModuleDescriptor* desc,
                                                      const std::vector<uint32_t>& spv) override;

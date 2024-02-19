@@ -7,6 +7,7 @@
 
 #include <vector>
 
+#include "render/vk/bind_group_vk.h"
 #include "render/vk/buffer_vk.h"
 #include "render/vk/command_queue_vk.h"
 #include "render/vk/render_pipeline_vk.h"
@@ -119,6 +120,10 @@ std::shared_ptr<Texture> RenderSystemVk::CreateTexture(TextureDescirptor* desc) 
 
 std::shared_ptr<Buffer> RenderSystemVk::CreateBuffer(BufferDescriptor* desc) {
   return BufferVK::Create(desc, mAllocator);
+}
+
+std::shared_ptr<BindGroupLayout> RenderSystemVk::CreateBindGroupLayout(std::vector<GroupEntryInfo> entries) {
+  return BindGroupLayoutVK::Create(std::move(entries), mDevice.get());
 }
 
 std::shared_ptr<ShaderModule> RenderSystemVk::CompileBackendShader(ShaderModuleDescriptor* desc,

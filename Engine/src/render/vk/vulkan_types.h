@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cubic/render/types.h>
+#include <cubic/render/bind_group.h>
 #include <volk.h>
 
 namespace cubic {
@@ -34,6 +35,10 @@ VkBufferUsageFlags TypeConvertForBuffer(BufferUsageMask usage);
 VkVertexInputRate TypeConvert(VertexStepMode mode);
 
 VkFormat TypeConvertForInput(VertexFormat format);
+
+VkDescriptorType TypeConvert(EntryType type);
+
+VkShaderStageFlags TypeConvertForBinding(ShaderStageMask mask);
 
 }  // namespace vk
 

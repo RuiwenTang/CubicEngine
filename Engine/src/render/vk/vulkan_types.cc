@@ -252,4 +252,39 @@ VkFormat TypeConvertForInput(VertexFormat format) {
   return VK_FORMAT_UNDEFINED;
 }
 
+VkDescriptorType TypeConvert(EntryType type) {
+  switch (type) {
+    case EntryType::kNone:
+      return VK_DESCRIPTOR_TYPE_MAX_ENUM;
+    case EntryType::kUniformBuffer:
+      return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    case EntryType::kStorgeBuffer:
+      return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    case EntryType::kSampler:
+      return VK_DESCRIPTOR_TYPE_SAMPLER;
+    case EntryType::kTexture:
+      return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+  }
+
+  return VkDescriptorType();
+}
+
+VkShaderStageFlags TypeConvertForBinding(ShaderStageMask mask) {
+  VkShaderStageFlags ret{};
+
+  if (mask & ShaderStage::kVertexShader) {
+    ret |= VK_SHADER_STAGE_VERTEX_BIT;
+  }
+
+  if (mask & ShaderStage::kFragmentShader) {
+    ret |= VK_SHADER_STAGE_FRAGMENT_BIT;
+  }
+
+  if (mask & ShaderStage::kComputeShader) {
+    ret |= VK_SHADER_STAGE_COMPUTE_BIT;
+  }
+
+  return ret;
+}
+
 }  // namespace cubic::vk
