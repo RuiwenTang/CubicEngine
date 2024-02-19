@@ -34,15 +34,16 @@ std::shared_ptr<RenderPipelineMTL> RenderPipelineMTL::Create(RenderPipelineDescr
     mtl_desc.vertexDescriptor = [MTLVertexDescriptor new];
 
     for (size_t i = 0; i < desc->vertexBuffer.size(); i++) {
-      mtl_desc.vertexDescriptor.layouts[i].stride = desc->vertexBuffer[i].stride;
-      mtl_desc.vertexDescriptor.layouts[i].stepFunction = TypeConvert(desc->vertexBuffer[i].stepMode);
-      mtl_desc.vertexDescriptor.layouts[i].stepRate = 1;
+      mtl_desc.vertexDescriptor.layouts[i + kVertexIndexOffset].stride = desc->vertexBuffer[i].stride;
+      mtl_desc.vertexDescriptor.layouts[i + kVertexIndexOffset].stepFunction =
+          TypeConvert(desc->vertexBuffer[i].stepMode);
+      mtl_desc.vertexDescriptor.layouts[i + kVertexIndexOffset].stepRate = 1;
 
       for (size_t j = 0; j < desc->vertexBuffer[i].attribute.size(); j++) {
         const auto& attr = desc->vertexBuffer[i].attribute[j];
         mtl_desc.vertexDescriptor.attributes[attr.location].format = TypeConvert(attr.format);
         mtl_desc.vertexDescriptor.attributes[attr.location].offset = attr.offset;
-        mtl_desc.vertexDescriptor.attributes[attr.location].bufferIndex = i;
+        mtl_desc.vertexDescriptor.attributes[attr.location].bufferIndex = i + kVertexIndexOffset;
       }
     }
   }

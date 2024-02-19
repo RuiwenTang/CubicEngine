@@ -1,5 +1,6 @@
 #include "render/mtl/render_pass_mtl.h"
 #include "render/mtl/buffer_mtl.h"
+#include "render/mtl/mtl_types.h"
 #include "render/mtl/render_pipeline_mtl.h"
 
 namespace cubic {
@@ -21,7 +22,7 @@ void RenderPassMTL::SetVertexBuffer(const std::shared_ptr<Buffer> &buffer, uint3
     return;
   }
 
-  [mEncoder setVertexBuffer:mtl_buffer->GetNativeBuffer() offset:offset atIndex:slot];
+  [mEncoder setVertexBuffer:mtl_buffer->GetNativeBuffer() offset:offset atIndex:slot + kVertexIndexOffset];
 }
 
 void RenderPassMTL::SetIndexBuffer(const std::shared_ptr<Buffer> &buffer, uint64_t offset) {

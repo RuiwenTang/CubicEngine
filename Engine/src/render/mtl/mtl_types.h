@@ -3,6 +3,10 @@
 
 namespace cubic {
 
+enum {
+  kVertexIndexOffset = 16,
+};
+
 TextureFormat TypeConvert(MTLPixelFormat format);
 
 MTLPixelFormat TypeConvert(TextureFormat format);
