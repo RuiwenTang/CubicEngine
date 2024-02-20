@@ -7,7 +7,8 @@ namespace cubic {
 
 class RenderPipelineMTL : public RenderPipeline {
  public:
-  RenderPipelineMTL(id<MTLRenderPipelineState> pipeline, id<MTLDepthStencilState> depthStencilState);
+  RenderPipelineMTL(std::shared_ptr<PipelineLayout> layout, id<MTLRenderPipelineState> pipeline,
+                    id<MTLDepthStencilState> depthStencilState);
 
   ~RenderPipelineMTL() override;
 
