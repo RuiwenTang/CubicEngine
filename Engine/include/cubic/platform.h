@@ -17,6 +17,7 @@
  * to ensure that we're running on MAC
  * and not some other Apple platform */
 #if TARGET_IPHONE_SIMULATOR == 1
+#define CUBIC_PLATFORM_IOS_SIMULATOR
 #error "IOS simulator is not supported!"
 #elif TARGET_OS_IPHONE == 1
 #define CUBIC_PLATFORM_IOS

@@ -59,6 +59,14 @@ bool RenderSystemMTL::Init() {
 
 RenderSystemInfo* RenderSystemMTL::GetBackendInfo() { return mPriv->GetBackendInfo(); }
 
+uint32_t RenderSystemMTL::GetMinBufferAlignment() const {
+#if defined(CUBIC_PLATFORM_IOS) || defined(CUBIC_PLATFORM_IOS_SIMULATOR)
+  return 16;
+#else
+  return 256;
+#endif
+}
+
 CommandQueue* RenderSystemMTL::GetCommandQueue(QueueType type) { return mPriv->GetQueueProxy(); }
 
 std::shared_ptr<RenderPipeline> RenderSystemMTL::CreateRenderPipeline(RenderPipelineDescriptor* desc) {

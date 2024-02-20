@@ -18,6 +18,8 @@ class RenderSystemMTL : public RenderSystemPriv {
 
   Backend GetBackend() const override { return Backend::kMetal; }
 
+  uint32_t GetMinBufferAlignment() const override;
+
   RenderSystemInfo* GetBackendInfo() override;
 
   CommandQueue* GetCommandQueue(QueueType type) override;
