@@ -4,26 +4,23 @@
 
 #include <vector>
 
+#include "render/vk/pipeline_layout_vk.h"
 #include "render/vk/shader_module_vk.h"
 #include "render/vk/vulkan_types.h"
 
 namespace cubic {
 
-RenderPipelineVK::RenderPipelineVK(VulkanDevice* device, VkPipeline pipeline, VkPipelineLayout layout,
-                                   std::vector<VkDescriptorSetLayout> slotLayouts)
-    : mDevice(device), mPipeline(pipeline), mLayout(layout), mSlotLayouts(std::move(slotLayouts)) {}
+RenderPipelineVK::RenderPipelineVK(std::shared_ptr<PipelineLayout> layout, VulkanDevice* device, VkPipeline pipeline)
+    : RenderPipeline(std::move(layout)), mDevice(device), mPipeline(pipeline) {}
 
-RenderPipelineVK::~RenderPipelineVK() {
-  vkDestroyPipeline(mDevice->GetLogicalDevice(), mPipeline, nullptr);
-
-  vkDestroyPipelineLayout(mDevice->GetLogicalDevice(), mLayout, nullptr);
-
-  for (auto slot : mSlotLayouts) {
-    vkDestroyDescriptorSetLayout(mDevice->GetLogicalDevice(), slot, nullptr);
-  }
-}
+RenderPipelineVK::~RenderPipelineVK() { vkDestroyPipeline(mDevice->GetLogicalDevice(), mPipeline, nullptr); }
 
 std::shared_ptr<RenderPipelineVK> RenderPipelineVK::Create(VulkanDevice* device, RenderPipelineDescriptor* desc) {
+  if (desc->layout == nullptr) {
+    CUB_ERROR("[Vulkan backend], can not create pipeline with null PipelineLayout !!");
+    return {};
+  }
+
   // shaders
   std::vector<VkPipelineShaderStageCreateInfo> shaderStages(2);
   shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -144,22 +141,6 @@ std::shared_ptr<RenderPipelineVK> RenderPipelineVK::Create(VulkanDevice* device,
   blendState.attachmentCount = static_cast<uint32_t>(colorBlendAttachments.size());
   blendState.pAttachments = colorBlendAttachments.data();
 
-  // pipeline layout
-  VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-  pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-  pipelineLayoutInfo.setLayoutCount = 0;             // Optional
-  pipelineLayoutInfo.pSetLayouts = nullptr;          // Optional
-  pipelineLayoutInfo.pushConstantRangeCount = 0;     // Optional
-  pipelineLayoutInfo.pPushConstantRanges = nullptr;  // Optional
-
-  VkPipelineLayout layout = VK_NULL_HANDLE;
-
-  if (vkCreatePipelineLayout(device->GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &layout) != VK_SUCCESS) {
-    CUB_ERROR("[Vulkan backend] failed create pipeline layout !!");
-
-    return {};
-  }
-
   VkPipelineRenderingCreateInfo rendering_info{};
   rendering_info.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
   rendering_info.colorAttachmentCount = desc->colorCount;
@@ -184,7 +165,7 @@ std::shared_ptr<RenderPipelineVK> RenderPipelineVK::Create(VulkanDevice* device,
   create_info.pDepthStencilState = nullptr;
   create_info.pColorBlendState = &blendState;
   create_info.pDynamicState = &dynamicState;
-  create_info.layout = layout;
+  create_info.layout = dynamic_cast<PipelineLayoutVK*>(desc->layout.get())->GetNativeLayout();
 
   create_info.pNext = &rendering_info;
 
@@ -196,7 +177,7 @@ std::shared_ptr<RenderPipelineVK> RenderPipelineVK::Create(VulkanDevice* device,
     return {};
   }
 
-  return std::make_shared<RenderPipelineVK>(device, pipeline, layout, std::vector<VkDescriptorSetLayout>{});
+  return std::make_shared<RenderPipelineVK>(desc->layout, device, pipeline);
 }
 
 void RenderPipelineVK::Bind(VkCommandBuffer cmd) { vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipeline); }

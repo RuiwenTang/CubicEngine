@@ -10,6 +10,7 @@
 #include "render/vk/bind_group_vk.h"
 #include "render/vk/buffer_vk.h"
 #include "render/vk/command_queue_vk.h"
+#include "render/vk/pipeline_layout_vk.h"
 #include "render/vk/render_pipeline_vk.h"
 #include "render/vk/render_system_vk.h"
 #include "render/vk/shader_module_vk.h"
@@ -110,6 +111,8 @@ CommandQueue* RenderSystemVk::GetCommandQueue(QueueType type) {
   }
 }
 
+uint32_t RenderSystemVk::GetMinBufferAlignment() const { return mDevice->GetMinBufferAlignment(); }
+
 std::shared_ptr<RenderPipeline> RenderSystemVk::CreateRenderPipeline(RenderPipelineDescriptor* desc) {
   return RenderPipelineVK::Create(mDevice.get(), desc);
 }
@@ -124,6 +127,17 @@ std::shared_ptr<Buffer> RenderSystemVk::CreateBuffer(BufferDescriptor* desc) {
 
 std::shared_ptr<BindGroupLayout> RenderSystemVk::CreateBindGroupLayout(std::vector<GroupEntryInfo> entries) {
   return BindGroupLayoutVK::Create(std::move(entries), mDevice.get());
+}
+
+std::shared_ptr<PipelineLayout> RenderSystemVk::CreatePipelineLayout(
+    std::vector<std::shared_ptr<BindGroupLayout>> groups) {
+  return PipelineLayoutVK::Create(std::move(groups), mDevice.get());
+}
+
+std::shared_ptr<BindGroup> RenderSystemVk::CreateBindGroup(const std::shared_ptr<BindGroupLayout>& layout,
+                                                           std::vector<GroupEntry> entries) {
+  // TODO: implement BindGroup
+  return std::shared_ptr<BindGroup>();
 }
 
 std::shared_ptr<ShaderModule> RenderSystemVk::CompileBackendShader(ShaderModuleDescriptor* desc,

@@ -45,6 +45,8 @@ std::unique_ptr<VulkanDevice> VulkanDevice::Create(VkPhysicalDevice gpu) {
   return device;
 }
 
+uint32_t VulkanDevice::GetMinBufferAlignment() const { return mGPUProps.limits.minUniformBufferOffsetAlignment; }
+
 bool VulkanDevice::Init() {
   if (!InitQueueProps()) {
     return false;

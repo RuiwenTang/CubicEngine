@@ -27,6 +27,8 @@ class VulkanDevice {
 
   CommandQueueVK* GetTransferQueue() const { return mTransferProxy.get(); }
 
+  uint32_t GetMinBufferAlignment() const;
+
  private:
   bool Init();
 

@@ -28,6 +28,10 @@ void RenderPassVK::SetIndexBuffer(const std::shared_ptr<Buffer>& buffer, uint64_
   vkCmdBindIndexBuffer(mCMD, native_buffer, offset, VK_INDEX_TYPE_UINT32);
 }
 
+void RenderPassVK::SetBindGroup(uint32_t slot, const std::shared_ptr<BindGroup>& group) {
+  // TODO: implement this function
+}
+
 void RenderPassVK::Draw(uint32_t numVertex, uint32_t firstVertex) { vkCmdDraw(mCMD, numVertex, 1, firstVertex, 0); }
 
 void RenderPassVK::DrawElements(uint32_t numIndices, uint32_t firstIndex) {

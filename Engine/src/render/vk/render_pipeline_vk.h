@@ -8,8 +8,7 @@ namespace cubic {
 
 class RenderPipelineVK : public RenderPipeline {
  public:
-  RenderPipelineVK(VulkanDevice* device, VkPipeline pipeline, VkPipelineLayout layout,
-                   std::vector<VkDescriptorSetLayout> slotLayouts);
+  RenderPipelineVK(std::shared_ptr<PipelineLayout> layout, VulkanDevice* device, VkPipeline pipeline);
 
   ~RenderPipelineVK() override;
 
@@ -20,8 +19,6 @@ class RenderPipelineVK : public RenderPipeline {
  private:
   VulkanDevice* mDevice;
   VkPipeline mPipeline;
-  VkPipelineLayout mLayout;
-  std::vector<VkDescriptorSetLayout> mSlotLayouts;
 };
 
 }  // namespace cubic
