@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cubic/platform.h>
+#include <cubic/render/bind_group.h>
 #include <cubic/render/buffer.h>
 #include <cubic/render/render_pipeline.h>
 #include <cubic/render/texture.h>
@@ -47,6 +48,8 @@ class CUBIC_API RenderPass {
   virtual void SetVertexBuffer(const std::shared_ptr<Buffer>& buffer, uint32_t slot, uint64_t offset) = 0;
 
   virtual void SetIndexBuffer(const std::shared_ptr<Buffer>& buffer, uint64_t offset) = 0;
+
+  virtual void SetBindGroup(uint32_t slot, const std::shared_ptr<BindGroup>& group) = 0;
 
   virtual void Draw(uint32_t numVertex, uint32_t firstVertex) = 0;
 

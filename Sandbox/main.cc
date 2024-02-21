@@ -1,5 +1,6 @@
 #include <cubic/cubic.h>
 
+#include <array>
 #include <cmath>
 
 using namespace cubic;
@@ -15,6 +16,8 @@ class SandboxClient : public WindowClient {
     InitPipelineIfNeed(renderSystem, surfaceTexture->GetDescriptor().format);
 
     InitBufferIfNeed(renderSystem);
+
+    InitBindGroupIfNeed(renderSystem);
 
     auto queue = renderSystem->GetCommandQueue(QueueType::kGraphic);
 
@@ -42,6 +45,8 @@ class SandboxClient : public WindowClient {
     render_pass->SetVertexBuffer(mBuffer, 0, 0);
 
     render_pass->SetIndexBuffer(mBuffer, sizeof(float) * 20);
+
+    render_pass->SetBindGroup(0, mColorGroup);
 
     render_pass->DrawElements(6, 0);
 
@@ -79,11 +84,8 @@ class SandboxClient : public WindowClient {
     const char *vertex_code = R"(
         #version 450 core
         layout(location = 0) in vec2 aPos;
-        layout(location = 1) in vec3 aColor;
 
-        layout(location = 0) out vec3 vColor;
         void main() {
-            vColor = aColor;
             gl_Position = vec4(aPos, 0.0, 1.0);
         }
     )";
@@ -97,11 +99,14 @@ class SandboxClient : public WindowClient {
 
     const char *frag_code = R"(
       #version 450 core
-      layout(location = 0) in vec3 vColor;
+
+      layout(set = 0, binding = 0) uniform UColorInfo {
+        vec4 color;
+      } uColor;
 
       layout(location = 0) out vec4 outColor;
       void main() {
-        outColor = vec4(vColor, 1.0);
+        outColor = uColor.color;
       }
     )";
 
@@ -119,7 +124,6 @@ class SandboxClient : public WindowClient {
     desc.vertexBuffer.emplace_back(VertexBufferLayout{});
     desc.vertexBuffer[0].stride = 5 * sizeof(float);
     desc.vertexBuffer[0].attribute.emplace_back(VertexAttribute{VertexFormat::kFloat32x2, 0, 0});
-    desc.vertexBuffer[0].attribute.emplace_back(VertexAttribute{VertexFormat::kFloat32x3, 2 * sizeof(float), 1});
 
     ColorTargetState color1{};
     color1.format = format;
@@ -127,6 +131,14 @@ class SandboxClient : public WindowClient {
     desc.colorCount = 1;
     desc.pColorTargets = &color1;
     desc.sampleCount = 4;
+
+    auto group = renderSystem->CreateBindGroupLayout({GroupEntryInfo{
+        0,
+        EntryType::kUniformBuffer,
+        ShaderStage::kFragmentShader,
+    }});
+
+    desc.layout = renderSystem->CreatePipelineLayout({group});
 
     mPipeline = renderSystem->CreateRenderPipeline(&desc);
   }
@@ -161,15 +173,36 @@ class SandboxClient : public WindowClient {
 
     auto stage_buffer2 = renderSystem->CreateBuffer(&stage_desc);
 
-    if (stage_buffer1 == nullptr) {
+    uint32_t offset = sizeof(float) * 20 + sizeof(uint32_t) * 6;
+
+    if (offset <= renderSystem->GetMinBufferAlignment()) {
+      offset = renderSystem->GetMinBufferAlignment();
+    } else {
+      auto align = renderSystem->GetMinBufferAlignment();
+      auto details = offset % align;
+
+      offset += (align - details);
+    }
+
+    std::array<float, 4> color{1.f, 0.1f, 0.5f, 1.0f};
+
+    stage_desc.size = sizeof(float) * 4;
+    stage_desc.data = color.data();
+
+    auto stage_buffer3 = renderSystem->CreateBuffer(&stage_desc);
+
+    if (stage_buffer1 == nullptr || stage_buffer2 == nullptr || stage_buffer3 == nullptr) {
       CUB_ERROR("[Sandbox] Faield create stage buffer");
       exit(-1);
     }
 
+    uint32_t buffer_length = offset + stage_desc.size;
+
     BufferDescriptor desc{};
     desc.storageMode = BufferStorageMode::kGPUOnly;
-    desc.usage = BufferUsage::kBuffCopyDst | BufferUsage::kBuffVertex | BufferUsage::kBuffIndex;
-    desc.size = sizeof(float) * 20 + sizeof(uint32_t) * 6;
+    desc.usage =
+        BufferUsage::kBuffCopyDst | BufferUsage::kBuffVertex | BufferUsage::kBuffIndex | BufferUsage::kBuffUniform;
+    desc.size = buffer_length;
 
     mBuffer = renderSystem->CreateBuffer(&desc);
 
@@ -185,15 +218,31 @@ class SandboxClient : public WindowClient {
     cmd->CopyBufferToBuffer(mBuffer, 0, stage_buffer1, 0, sizeof(float) * raw_vertex.size());
     cmd->CopyBufferToBuffer(mBuffer, sizeof(float) * raw_vertex.size(), stage_buffer2, 0,
                             sizeof(uint32_t) * raw_index.size());
+    cmd->CopyBufferToBuffer(mBuffer, offset, stage_buffer3, 0, sizeof(float) * color.size());
 
     queue->Submit(std::move(cmd));
+
+    mUniformOffset = offset;
+  }
+
+  void InitBindGroupIfNeed(RenderSystem *renderSystem) {
+    mColorGroup = renderSystem->CreateBindGroup(mPipeline->GetLayout()->GetGroup(0),
+                                                {
+                                                    GroupEntry{
+                                                        0,
+                                                        EntryType::kUniformBuffer,
+                                                        BindResource(BufferView{mBuffer, mUniformOffset}),
+                                                    },
+                                                });
   }
 
  private:
   uint32_t mFrameNum = 0;
+  uint32_t mUniformOffset = 0;
   std::shared_ptr<Texture> mMSAATarget = {};
   std::shared_ptr<RenderPipeline> mPipeline = {};
   std::shared_ptr<Buffer> mBuffer = {};
+  std::shared_ptr<BindGroup> mColorGroup = {};
 };
 
 int main(int argc, const char **argv) {

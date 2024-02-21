@@ -1,4 +1,5 @@
 #include "render/mtl/render_pass_mtl.h"
+#include "render/mtl/bind_group_mtl.h"
 #include "render/mtl/buffer_mtl.h"
 #include "render/mtl/mtl_types.h"
 #include "render/mtl/render_pipeline_mtl.h"
@@ -34,6 +35,20 @@ void RenderPassMTL::SetIndexBuffer(const std::shared_ptr<Buffer> &buffer, uint64
 
   mCurrIndex = buffer;
   mCurrIndexOffset = offset;
+}
+
+void RenderPassMTL::SetBindGroup(uint32_t slot, const std::shared_ptr<BindGroup> &group) {
+  auto mtl_group = dynamic_cast<BindGroupMTL *>(group.get());
+
+  if (mtl_group == nullptr) {
+    return;
+  }
+
+  if (mtl_group->GetStage() & ShaderStage::kVertexShader) {
+    [mEncoder setVertexBuffer:mtl_group->GetNativeBuffer() offset:0 atIndex:slot];
+  } else if (mtl_group->GetStage() & ShaderStage::kFragmentShader) {
+    [mEncoder setFragmentBuffer:mtl_group->GetNativeBuffer() offset:0 atIndex:slot];
+  }
 }
 
 void RenderPassMTL::DrawElements(uint32_t numIndices, uint32_t firstIndex) {

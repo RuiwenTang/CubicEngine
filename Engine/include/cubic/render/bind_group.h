@@ -44,4 +44,9 @@ class CUBIC_API BindGroupLayout {
   std::vector<GroupEntryInfo> mEntries;
 };
 
+class CUBIC_API BindGroup {
+ public:
+  virtual ~BindGroup() = default;
+};
+
 }  // namespace cubic
