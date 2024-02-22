@@ -6,6 +6,7 @@
     "glfw3",
     "spdlog",
     "shaderc",
+    "glm",
     {
       "name": "volk",
       "platform": "windows"

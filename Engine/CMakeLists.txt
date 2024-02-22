@@ -148,6 +148,10 @@ target_link_libraries(CubicEngine PRIVATE glfw)
 find_package(unofficial-shaderc CONFIG REQUIRED)
 target_link_libraries(CubicEngine PRIVATE unofficial::shaderc::shaderc)
 
+# glm
+find_package(glm CONFIG REQUIRED)
+target_link_libraries(CubicEngine PUBLIC glm::glm)
+
 # spirv-cross for Metal
 if(APPLE)
 	find_package(spirv_cross_core CONFIG REQUIRED)

@@ -4,6 +4,7 @@
 #include <cubic/platform.h>
 #include <spirv_msl.hpp>
 #include <spirv_parser.hpp>
+#include <spirv_reflect.hpp>
 
 namespace cubic {
 
@@ -21,6 +22,26 @@ static void setup_compiler(spirv_cross::CompilerMSL& compiler) {
   option.argument_buffers = true;
 
   compiler.set_msl_options(option);
+}
+
+static void ensure_bind_group(spirv_cross::CompilerMSL& compiler) {
+  auto uniform_resources = compiler.get_shader_resources();
+
+  auto execution_model = compiler.get_execution_model();
+
+  for (const auto& resource : uniform_resources.uniform_buffers) {
+    auto set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
+    auto binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
+
+    spirv_cross::MSLResourceBinding newBinding;
+    newBinding.basetype = spirv_cross::SPIRType::BaseType::Void;
+    newBinding.stage = execution_model;
+    newBinding.desc_set = set;
+    newBinding.binding = binding;
+    newBinding.count = 1;
+    newBinding.msl_texture = newBinding.msl_sampler = newBinding.msl_buffer = binding;
+    compiler.add_msl_resource_binding(newBinding);
+  }
 }
 
 ShaderModuleMTL::ShaderModuleMTL(ShaderStage stage, std::string label, id<MTLLibrary> shader)
@@ -48,6 +69,8 @@ std::shared_ptr<ShaderModule> ShaderModuleMTL::Compile(id<MTLDevice> gpu, Shader
   parser.parse();
 
   spirv_cross::CompilerMSL compiler(parser.get_parsed_ir());
+
+  ensure_bind_group(compiler);
 
   setup_compiler(compiler);
 

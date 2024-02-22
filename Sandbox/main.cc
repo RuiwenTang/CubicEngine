@@ -85,8 +85,12 @@ class SandboxClient : public WindowClient {
         #version 450 core
         layout(location = 0) in vec2 aPos;
 
+        layout(set = 0, binding = 0) uniform UTransform {
+          mat4 matrix;
+        } uTransform;
+
         void main() {
-            gl_Position = vec4(aPos, 0.0, 1.0);
+            gl_Position = uTransform.matrix * vec4(aPos, 0.0, 1.0);
         }
     )";
 
@@ -100,7 +104,7 @@ class SandboxClient : public WindowClient {
     const char *frag_code = R"(
       #version 450 core
 
-      layout(set = 0, binding = 0) uniform UColorInfo {
+      layout(set = 0, binding = 1) uniform UColorInfo {
         vec4 color;
       } uColor;
 
@@ -132,11 +136,18 @@ class SandboxClient : public WindowClient {
     desc.pColorTargets = &color1;
     desc.sampleCount = 4;
 
-    auto group = renderSystem->CreateBindGroupLayout({GroupEntryInfo{
-        0,
-        EntryType::kUniformBuffer,
-        ShaderStage::kFragmentShader,
-    }});
+    auto group = renderSystem->CreateBindGroupLayout({
+        GroupEntryInfo{
+            0,
+            EntryType::kUniformBuffer,
+            ShaderStage::kVertexShader,
+        },
+        GroupEntryInfo{
+            1,
+            EntryType::kUniformBuffer,
+            ShaderStage::kFragmentShader,
+        },
+    });
 
     desc.layout = renderSystem->CreatePipelineLayout({group});
 
@@ -185,18 +196,29 @@ class SandboxClient : public WindowClient {
     }
 
     std::array<float, 4> color{1.f, 0.1f, 0.5f, 1.0f};
+    std::array<float, 16> matrix{
+        1.f, 0.f,  0.f, 0.f,  // r1
+        0.f, 0.5f, 0.f, 0.f,  // r2
+        0.f, 0.f,  1.f, 0.f,  // r3
+        0.f, 0.f,  0.f, 1.f,  // r4
+    };
+
+    stage_desc.size = sizeof(float) * 16;
+    stage_desc.data = matrix.data();
+
+    auto stage_buffer3 = renderSystem->CreateBuffer(&stage_desc);
 
     stage_desc.size = sizeof(float) * 4;
     stage_desc.data = color.data();
 
-    auto stage_buffer3 = renderSystem->CreateBuffer(&stage_desc);
+    auto stage_buffer4 = renderSystem->CreateBuffer(&stage_desc);
 
-    if (stage_buffer1 == nullptr || stage_buffer2 == nullptr || stage_buffer3 == nullptr) {
+    if (stage_buffer1 == nullptr || stage_buffer2 == nullptr || stage_buffer3 == nullptr || stage_buffer4 == nullptr) {
       CUB_ERROR("[Sandbox] Faield create stage buffer");
       exit(-1);
     }
 
-    uint32_t buffer_length = offset + stage_desc.size;
+    uint32_t buffer_length = offset + renderSystem->GetMinBufferAlignment() + stage_desc.size;
 
     BufferDescriptor desc{};
     desc.storageMode = BufferStorageMode::kGPUOnly;
@@ -218,7 +240,10 @@ class SandboxClient : public WindowClient {
     cmd->CopyBufferToBuffer(mBuffer, 0, stage_buffer1, 0, sizeof(float) * raw_vertex.size());
     cmd->CopyBufferToBuffer(mBuffer, sizeof(float) * raw_vertex.size(), stage_buffer2, 0,
                             sizeof(uint32_t) * raw_index.size());
-    cmd->CopyBufferToBuffer(mBuffer, offset, stage_buffer3, 0, sizeof(float) * color.size());
+
+    cmd->CopyBufferToBuffer(mBuffer, offset, stage_buffer3, 0, sizeof(float) * matrix.size());
+    cmd->CopyBufferToBuffer(mBuffer, offset + renderSystem->GetMinBufferAlignment(), stage_buffer4, 0,
+                            sizeof(float) * color.size());
 
     queue->Submit(std::move(cmd));
 
@@ -226,14 +251,20 @@ class SandboxClient : public WindowClient {
   }
 
   void InitBindGroupIfNeed(RenderSystem *renderSystem) {
-    mColorGroup = renderSystem->CreateBindGroup(mPipeline->GetLayout()->GetGroup(0),
-                                                {
-                                                    GroupEntry{
-                                                        0,
-                                                        EntryType::kUniformBuffer,
-                                                        BindResource(BufferView{mBuffer, mUniformOffset}),
-                                                    },
-                                                });
+    mColorGroup = renderSystem->CreateBindGroup(
+        mPipeline->GetLayout()->GetGroup(0),
+        {
+            GroupEntry{
+                0,
+                EntryType::kUniformBuffer,
+                BindResource(BufferView{mBuffer, mUniformOffset}),
+            },
+            GroupEntry{
+                1,
+                EntryType::kUniformBuffer,
+                BindResource(BufferView{mBuffer, mUniformOffset + renderSystem->GetMinBufferAlignment()}),
+            },
+        });
   }
 
  private:

@@ -44,11 +44,7 @@ void RenderPassMTL::SetBindGroup(uint32_t slot, const std::shared_ptr<BindGroup>
     return;
   }
 
-  if (mtl_group->GetStage() & ShaderStage::kVertexShader) {
-    [mEncoder setVertexBuffer:mtl_group->GetNativeBuffer() offset:0 atIndex:slot];
-  } else if (mtl_group->GetStage() & ShaderStage::kFragmentShader) {
-    [mEncoder setFragmentBuffer:mtl_group->GetNativeBuffer() offset:0 atIndex:slot];
-  }
+  mtl_group->Bind(mEncoder, slot);
 }
 
 void RenderPassMTL::DrawElements(uint32_t numIndices, uint32_t firstIndex) {
