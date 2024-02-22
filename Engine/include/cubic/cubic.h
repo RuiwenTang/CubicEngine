@@ -6,6 +6,8 @@
 #include <cubic/core/window.h>
 // log
 #include <cubic/core/log.h>
+// geometry
+#include <cubic/graphic/geometry.h>
 // types
 #include <cubic/render/types.h>
 // texture

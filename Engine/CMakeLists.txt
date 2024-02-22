@@ -22,6 +22,7 @@ target_sources(
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/core/application.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/core/log.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/core/window.h
+	${CMAKE_CURRENT_LIST_DIR}/include/cubic/graphic/geometry.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/bind_group.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/buffer.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/command_buffer.h
@@ -41,6 +42,7 @@ target_sources(
 	${CMAKE_CURRENT_LIST_DIR}/src/core/log.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/core/window_impl.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/core/window_impl.h
+	${CMAKE_CURRENT_LIST_DIR}/src/graphic/plane_geometry.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/render/render_system_priv.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/render/render_system_priv.h
 	${CMAKE_CURRENT_LIST_DIR}/src/render/shader_compiler.cc
