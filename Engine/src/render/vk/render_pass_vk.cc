@@ -1,5 +1,6 @@
 #include "render/vk/render_pass_vk.h"
 
+#include "render/vk/bind_group_vk.h"
 #include "render/vk/buffer_vk.h"
 #include "render/vk/render_pipeline_vk.h"
 #include "render/vk/vulkan_device.h"
@@ -30,6 +31,16 @@ void RenderPassVK::SetIndexBuffer(const std::shared_ptr<Buffer>& buffer, uint64_
 
 void RenderPassVK::SetBindGroup(uint32_t slot, const std::shared_ptr<BindGroup>& group) {
   // TODO: implement this function
+  auto group_vk = dynamic_cast<BindGroupVK*>(group.get());
+
+  if (group_vk == nullptr) {
+    return;
+  }
+
+  auto descriptorSet = group_vk->GetNativeSet();
+
+  vkCmdBindDescriptorSets(mCMD, VK_PIPELINE_BIND_POINT_GRAPHICS, group_vk->GetPipelineLayout(), slot, 1, &descriptorSet,
+                          0, nullptr);
 }
 
 void RenderPassVK::Draw(uint32_t numVertex, uint32_t firstVertex) { vkCmdDraw(mCMD, numVertex, 1, firstVertex, 0); }

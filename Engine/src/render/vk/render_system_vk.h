@@ -12,6 +12,8 @@
 
 namespace cubic {
 
+class BindGroupPool;
+
 class RenderSystemVk : public RenderSystemPriv {
  public:
   static std::unique_ptr<RenderSystemVk> Create();
@@ -64,6 +66,8 @@ class RenderSystemVk : public RenderSystemPriv {
   RenderSystemInfoVK mInfo = {};
 
   VmaAllocator mAllocator = {};
+
+  std::shared_ptr<BindGroupPool> mPool = {};
 };
 
 }  // namespace cubic

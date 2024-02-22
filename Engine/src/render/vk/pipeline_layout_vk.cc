@@ -9,7 +9,11 @@ namespace cubic {
 
 PipelineLayoutVK::PipelineLayoutVK(std::vector<std::shared_ptr<BindGroupLayout>> groups, VulkanDevice* device,
                                    VkPipelineLayout layout)
-    : PipelineLayout(std::move(groups)), mDevice(device), mLayout(layout) {}
+    : PipelineLayout(groups), mDevice(device), mLayout(layout) {
+  for (const auto& group : groups) {
+    dynamic_cast<BindGroupLayoutVK*>(group.get())->SetPipelineLayout(this);
+  }
+}
 
 PipelineLayoutVK::~PipelineLayoutVK() { vkDestroyPipelineLayout(mDevice->GetLogicalDevice(), mLayout, nullptr); }
 

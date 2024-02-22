@@ -41,6 +41,8 @@ std::unique_ptr<RenderSystemVk> RenderSystemVk::Create() { return std::make_uniq
 RenderSystemVk::~RenderSystemVk() {
   vmaDestroyAllocator(mAllocator);
 
+  mPool.reset();
+
   mDevice.reset();
 
   if (mDebugHandler) {
@@ -137,7 +139,20 @@ std::shared_ptr<PipelineLayout> RenderSystemVk::CreatePipelineLayout(
 std::shared_ptr<BindGroup> RenderSystemVk::CreateBindGroup(const std::shared_ptr<BindGroupLayout>& layout,
                                                            std::vector<GroupEntry> entries) {
   // TODO: implement BindGroup
-  return std::shared_ptr<BindGroup>();
+  if (mPool == nullptr) {
+    mPool = BindGroupPool::Create(mDevice.get());
+  }
+
+  auto bind_group = mPool->Allocate(layout, entries);
+
+  if (bind_group == nullptr) {
+    // try again
+    mPool = BindGroupPool::Create(mDevice.get());
+
+    bind_group = mPool->Allocate(layout, entries);
+  }
+
+  return bind_group;
 }
 
 std::shared_ptr<ShaderModule> RenderSystemVk::CompileBackendShader(ShaderModuleDescriptor* desc,

@@ -251,18 +251,23 @@ class SandboxClient : public WindowClient {
   }
 
   void InitBindGroupIfNeed(RenderSystem *renderSystem) {
+    if (mColorGroup) {
+      return;
+    }
+
     mColorGroup = renderSystem->CreateBindGroup(
         mPipeline->GetLayout()->GetGroup(0),
         {
             GroupEntry{
                 0,
                 EntryType::kUniformBuffer,
-                BindResource(BufferView{mBuffer, mUniformOffset}),
+                BindResource(BufferView{mBuffer, mUniformOffset, sizeof(float) * 16}),
             },
             GroupEntry{
                 1,
                 EntryType::kUniformBuffer,
-                BindResource(BufferView{mBuffer, mUniformOffset + renderSystem->GetMinBufferAlignment()}),
+                BindResource(
+                    BufferView{mBuffer, mUniformOffset + renderSystem->GetMinBufferAlignment(), sizeof(float) * 4}),
             },
         });
   }
