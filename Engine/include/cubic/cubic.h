@@ -8,6 +8,9 @@
 #include <cubic/core/log.h>
 // geometry
 #include <cubic/graphic/geometry.h>
+// material
+#include <cubic/graphic/material.h>
+#include <cubic/graphic/material/color_material.h>
 // types
 #include <cubic/render/types.h>
 // texture
