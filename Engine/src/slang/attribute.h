@@ -18,6 +18,8 @@ class Attribute : public Node {
 
   const char* GetName() const override { return mName.c_str(); }
 
+  std::string GenExpression() const override;
+
  private:
   const char* GetTypeString() const;
 

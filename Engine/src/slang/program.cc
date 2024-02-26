@@ -14,14 +14,9 @@ void Program::WriteTo(std::string& source) {
   source += "\n";
   source += "\n";
 
-  // write all inputs
-  for (auto attr : mInputAttrs) {
-    attr->WriteTo(source);
-  }
-
-  // write all outputs
-  for (auto attr : mOutputAttrs) {
-    attr->WriteTo(source);
+  // write all global scope object
+  for (auto& node : mGlobalScope) {
+    node->WriteTo(source);
   }
 
   // write main function
@@ -30,10 +25,6 @@ void Program::WriteTo(std::string& source) {
     mMainFunc->WriteTo(source);
   }
 }
-
-void Program::AddInput(Attribute* attr) { mInputAttrs.emplace_back(attr); }
-
-void Program::AddOutput(Attribute* attr) { mOutputAttrs.emplace_back(attr); }
 
 }  // namespace slang
 }  // namespace cubic

@@ -36,7 +36,15 @@ void Function::WriteTo(std::string& source) {
   source += func;
 }
 
-std::string StatementFunction::GenFunctionBody() { return ""; }
+std::string StatementFunction::GenFunctionBody() {
+  std::string body = {};
+
+  for (const auto& statement : mStatements) {
+    statement->WriteTo(body);
+  }
+
+  return body;
+}
 
 }  // namespace slang
 }  // namespace cubic

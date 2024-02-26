@@ -17,14 +17,12 @@ class Program : public Node {
 
   void WriteTo(std::string& source) override;
 
-  void AddInput(Attribute* attr);
-  void AddOutput(Attribute* attr);
+  void AddToGlobalScope(Node* node) { mGlobalScope.emplace_back(node); }
 
   void SetMainFunc(Function* func) { mMainFunc = func; }
 
  private:
-  std::vector<Attribute*> mInputAttrs = {};
-  std::vector<Attribute*> mOutputAttrs = {};
+  std::vector<Node*> mGlobalScope = {};
 
   Function* mMainFunc = {};
 };

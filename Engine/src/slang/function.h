@@ -3,6 +3,7 @@
 #include <cubic/render/types.h>
 
 #include <optional>
+#include <vector>
 
 #include "slang/node.h"
 
@@ -35,8 +36,13 @@ class StatementFunction : public Function {
 
   ~StatementFunction() = default;
 
+  void AddStatement(Node *statement) { mStatements.emplace_back(statement); }
+
  protected:
   std::string GenFunctionBody() override;
+
+ private:
+  std::vector<Node *> mStatements = {};
 };
 
 }  // namespace slang

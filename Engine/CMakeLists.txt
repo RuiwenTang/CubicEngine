@@ -58,6 +58,8 @@ target_sources(
 	${CMAKE_CURRENT_LIST_DIR}/src/slang/function.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/slang/function.h
 	${CMAKE_CURRENT_LIST_DIR}/src/slang/node.h
+	${CMAKE_CURRENT_LIST_DIR}/src/slang/operation.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/slang/operation.h
 	${CMAKE_CURRENT_LIST_DIR}/src/slang/program.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/slang/program.h
 	${CMAKE_CURRENT_LIST_DIR}/src/slang/statement.cc

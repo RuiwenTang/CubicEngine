@@ -14,6 +14,24 @@ class Node {
   virtual void WriteTo(std::string& source) = 0;
 
   virtual const char* GetName() const { return ""; }
+
+  virtual std::string GenExpression() const { return ""; }
+};
+
+class NamedNode : public Node {
+ public:
+  NamedNode(const char* name) : mName(name) {}
+
+  ~NamedNode() override = default;
+
+  void WriteTo(std::string& source) override { source += mName; }
+
+  const char* GetName() const override { return mName; }
+
+  std::string GenExpression() const override { return mName; }
+
+ private:
+  const char* mName;
 };
 
 class NodeHeap {

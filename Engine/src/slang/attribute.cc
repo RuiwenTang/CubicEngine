@@ -23,5 +23,19 @@ const char* Attribute::GetTypeString() const {
   }
 }
 
+std::string Attribute::GenExpression() const {
+  if (mFormat == VertexFormat::kFloat32) {
+    return fmt::format("vec4({})", mName);
+  } else if (mFormat == VertexFormat::kFloat32x2) {
+    return fmt::format("vec4({}, 0.0, 1.0)", mName);
+  } else if (mFormat == VertexFormat::kFloat32x3) {
+    return fmt::format("vec4({}, 1.0)", mName);
+  } else {
+    return mName;
+  }
+
+  return "";
+}
+
 }  // namespace slang
 }  // namespace cubic

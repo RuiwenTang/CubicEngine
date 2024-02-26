@@ -2,6 +2,8 @@
 
 #include "slang/attribute.h"
 #include "slang/function.h"
+#include "slang/operation.h"
+#include "slang/statement.h"
 
 namespace cubic {
 
@@ -20,8 +22,6 @@ bool ShaderGenerator::Prepare() {
 
   auto frag_inputs = mMaterial->GetInput();
 
-  slang::Attribute* pos_attr = nullptr;
-
   uint32_t out_index = 0;
   // find out what attribute is needed in the final shader
   for (const auto& mi : frag_inputs) {
@@ -35,29 +35,59 @@ bool ShaderGenerator::Prepare() {
 
       auto out_attr = mHeap.Allocate<slang::Attribute>(out_index, mi.format, mi.name, false);
 
-      mVertexShader.AddInput(in_attr);
-      mVertexShader.AddOutput(out_attr);
+      mVertexInputState.emplace_back(in_attr);
+      mStageShareState.emplace_back(out_attr);
 
-      mFragmentShader.AddInput(mHeap.Allocate<slang::Attribute>(out_index, mi.format, mi.name, true));
+      auto statement = mHeap.Allocate<slang::Statement>();
+
+      statement->AddExpression(mHeap.Allocate<slang::BinaryOperation>(slang::Operator::kEqual, out_attr, in_attr));
+
+      mStageShareStatement.emplace_back(statement);
 
       if (it->name == "position") {
-        pos_attr = in_attr;
+        mPosAttribute = in_attr;
       }
     }
   }
 
-  if (pos_attr == nullptr) {
-    pos_attr = mHeap.Allocate<slang::Attribute>(pos_it->attribute.location, pos_it->attribute.format,
-                                                "in_" + pos_it->name, true);
+  if (mPosAttribute == nullptr) {
+    mPosAttribute = mHeap.Allocate<slang::Attribute>(pos_it->attribute.location, pos_it->attribute.format,
+                                                     "in_" + pos_it->name, true);
+    mVertexInputState.emplace_back(mPosAttribute);
+  }
 
-    mVertexShader.AddInput(pos_attr);
+  BuildVertexProgram();
+
+  return true;
+}
+
+void ShaderGenerator::BuildVertexProgram() {
+  for (const auto& i : mVertexInputState) {
+    mVertexShader.AddToGlobalScope(i);
+  }
+
+  for (const auto& o : mStageShareState) {
+    mVertexShader.AddToGlobalScope(o);
   }
 
   auto vs_main = mHeap.Allocate<slang::StatementFunction>("main");
 
-  mVertexShader.SetMainFunc(vs_main);
+  for (auto statemen : mStageShareStatement) {
+    vs_main->AddStatement(statemen);
+  }
 
-  return true;
+  auto pos_out = mHeap.Allocate<slang::Statement>();
+
+  {
+    auto pos_assign = mHeap.Allocate<slang::BinaryOperation>(
+        slang::Operator::kEqual, mHeap.Allocate<slang::NamedNode>("gl_Position"), mPosAttribute);
+
+    pos_out->AddExpression(pos_assign);
+  }
+
+  vs_main->AddStatement(pos_out);
+
+  mVertexShader.SetMainFunc(vs_main);
 }
 
 std::string ShaderGenerator::GenVertexShader() {
