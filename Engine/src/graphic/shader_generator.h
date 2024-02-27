@@ -5,6 +5,7 @@
 
 #include <vector>
 
+#include "slang/attribute.h"
 #include "slang/program.h"
 
 namespace cubic {
@@ -24,17 +25,19 @@ class ShaderGenerator {
  private:
   void BuildVertexProgram();
 
+  void BuildFragmentProgram();
+
  private:
   Geometry* mGeometry;
   Material* mMaterial;
 
   slang::NodeHeap mHeap = {};
 
-  std::vector<slang::Node*> mVertexInputState = {};
-  std::vector<slang::Node*> mStageShareState = {};
+  std::vector<slang::Attribute*> mVertexInputState = {};
+  std::vector<slang::Attribute*> mStageShareState = {};
   std::vector<slang::Node*> mStageShareStatement = {};
 
-  slang::Node* mPosAttribute = {};
+  slang::Attribute* mPosAttribute = {};
 
   slang::Program mVertexShader = {};
   slang::Program mFragmentShader = {};

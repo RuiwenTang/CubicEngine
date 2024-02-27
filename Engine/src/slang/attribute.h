@@ -1,16 +1,15 @@
 #pragma once
 
-#include <cubic/render/types.h>
-
 #include "slang/node.h"
+#include "slang/types.h"
 
 namespace cubic {
 namespace slang {
 
 class Attribute : public Node {
  public:
-  Attribute(uint32_t location, VertexFormat format, std::string name, bool isInput)
-      : mLocation(location), mFormat(format), mName(std::move(name)), mIsInput(isInput) {}
+  Attribute(uint32_t location, ScalarType type, std::string name, bool isInput)
+      : mLocation(location), mType(type), mName(std::move(name)), mIsInput(isInput) {}
 
   ~Attribute() = default;
 
@@ -18,14 +17,13 @@ class Attribute : public Node {
 
   const char* GetName() const override { return mName.c_str(); }
 
-  std::string GenExpression() const override;
+  ScalarType GetScalarType() const { return mType; }
 
- private:
-  const char* GetTypeString() const;
+  uint32_t GetLocation() const { return mLocation; }
 
  private:
   uint32_t mLocation;
-  VertexFormat mFormat;
+  ScalarType mType;
   std::string mName;
   bool mIsInput;
 };

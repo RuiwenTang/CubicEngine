@@ -30,6 +30,8 @@ class CUBIC_API Application {
 
   std::unique_ptr<Window> CreateWindow(WindowProps props);
 
+  RenderSystem* GetRenderSystem() const { return mRenderSystem.get(); }
+
  private:
   Application(Config config);
 

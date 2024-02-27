@@ -1,11 +1,10 @@
 #pragma once
 
-#include <cubic/render/types.h>
-
 #include <optional>
 #include <vector>
 
 #include "slang/node.h"
+#include "slang/types.h"
 
 namespace cubic {
 namespace slang {
@@ -14,7 +13,7 @@ class Function : public Node {
  public:
   Function(std::string name) : mName(std::move(name)) {}
 
-  Function(std::string name, VertexFormat retType) : mName(std::move(name)), mRetType(retType) {}
+  Function(std::string name, ScalarType retType) : mName(std::move(name)), mRetType(retType) {}
 
   ~Function() override = default;
 
@@ -27,7 +26,7 @@ class Function : public Node {
 
  private:
   std::string mName;
-  std::optional<VertexFormat> mRetType = {};
+  std::optional<ScalarType> mRetType = {};
 };
 
 class StatementFunction : public Function {
@@ -43,6 +42,20 @@ class StatementFunction : public Function {
 
  private:
   std::vector<Node *> mStatements = {};
+};
+
+class StringFunction : public Function {
+ public:
+  StringFunction(std::string name, std::string content)
+      : Function(std::move(name), ScalarType::kVec4), mContent(std::move(content)) {}
+
+  ~StringFunction() = default;
+
+ protected:
+  std::string GenFunctionBody() override { return mContent; }
+
+ private:
+  std::string mContent;
 };
 
 }  // namespace slang

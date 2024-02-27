@@ -9,7 +9,7 @@ void Statement::WriteTo(std::string& source) {
   }
 
   for (const auto& exp : mExpresions) {
-    source += exp->GenExpression();
+    exp->WriteTo(source);
     source += " ";
   }
 

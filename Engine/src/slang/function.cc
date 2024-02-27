@@ -5,21 +5,12 @@
 namespace cubic {
 namespace slang {
 
-std::string get_ret_type(const std::optional<VertexFormat>& format) {
+std::string get_ret_type(const std::optional<ScalarType>& format) {
   if (!format.has_value()) {
     return "void";
   }
 
-  switch (format.value()) {
-    case VertexFormat::kFloat32:
-      return "float";
-    case VertexFormat::kFloat32x2:
-      return "vec2";
-    case VertexFormat::kFloat32x3:
-      return "vec3";
-    case VertexFormat::kFloat32x4:
-      return "vec4";
-  }
+  return ScalarTypeString(format.value());
 }
 
 void Function::WriteTo(std::string& source) {
@@ -31,7 +22,7 @@ void Function::WriteTo(std::string& source) {
 
   func += GenFunctionBody();
 
-  func += "}\n";
+  func += "\n}\n";
 
   source += func;
 }

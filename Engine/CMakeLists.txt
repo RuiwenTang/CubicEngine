@@ -64,6 +64,10 @@ target_sources(
 	${CMAKE_CURRENT_LIST_DIR}/src/slang/program.h
 	${CMAKE_CURRENT_LIST_DIR}/src/slang/statement.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/slang/statement.h
+	${CMAKE_CURRENT_LIST_DIR}/src/slang/types.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/slang/types.h
+	${CMAKE_CURRENT_LIST_DIR}/src/slang/uniform.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/slang/uniform.h
 )
 
 if(APPLE)

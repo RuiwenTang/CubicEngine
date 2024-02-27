@@ -18,7 +18,7 @@ class CUBIC_API ColorMaterial : public Material {
 
   std::string GenResourceSet(uint32_t index) const override;
 
-  std::string GenColorFunction(const std::string& name) const override;
+  std::string GenColorFunction() const override;
 
  private:
   std::array<float, 4> mColor = {};

@@ -30,7 +30,7 @@ class CUBIC_API Material {
 
   virtual std::string GenResourceSet(uint32_t index) const = 0;
 
-  virtual std::string GenColorFunction(const std::string& name) const = 0;
+  virtual std::string GenColorFunction() const = 0;
 };
 
 }  // namespace cubic
