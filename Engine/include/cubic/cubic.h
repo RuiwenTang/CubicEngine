@@ -33,3 +33,5 @@
 #include <cubic/render/render_pipeline.h>
 // shader module
 #include <cubic/render/shader_module.h>
+// renderer
+#include <cubic/render/renderer.h>

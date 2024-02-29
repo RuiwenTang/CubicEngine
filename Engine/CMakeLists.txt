@@ -25,6 +25,7 @@ target_sources(
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/graphic/geometry.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/graphic/material/color_material.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/graphic/material.h
+	${CMAKE_CURRENT_LIST_DIR}/include/cubic/graphic/mesh.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/bind_group.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/buffer.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/command_buffer.h
@@ -33,6 +34,7 @@ target_sources(
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/render_pass.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/render_pipeline.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/render_system.h
+	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/renderer.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/shader_module.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/texture.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/types.h
@@ -45,11 +47,13 @@ target_sources(
 	${CMAKE_CURRENT_LIST_DIR}/src/core/window_impl.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/core/window_impl.h
 	${CMAKE_CURRENT_LIST_DIR}/src/graphic/material/color_material.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/graphic/mesh.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/graphic/plane_geometry.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/graphic/shader_generator.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/graphic/shader_generator.h
 	${CMAKE_CURRENT_LIST_DIR}/src/render/render_system_priv.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/render/render_system_priv.h
+	${CMAKE_CURRENT_LIST_DIR}/src/render/renderer.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/render/shader_compiler.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/render/shader_compiler.h
 	${CMAKE_CURRENT_LIST_DIR}/src/render/types.cc
