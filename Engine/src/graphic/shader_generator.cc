@@ -145,4 +145,66 @@ std::string ShaderGenerator::GenFragmentShader() {
   return source;
 }
 
+uint32_t get_attr_offset(const std::vector<BufferAttribute>& attrs, const std::string& name) {
+  for (uint32_t i = 0; i < attrs.size(); i++) {
+    if (attrs[i].name == name) {
+      attrs[i].attribute.offset;
+    }
+  }
+
+  return 0;
+}
+
+VertexFormat get_attr_format(const std::vector<BufferAttribute>& attrs, const std::string& name) {
+  for (uint32_t i = 0; i < attrs.size(); i++) {
+    if (attrs[i].name == name) {
+      return attrs[i].attribute.format;
+    }
+  }
+
+  return VertexFormat::kFloat32;
+}
+
+std::vector<VertexBufferLayout> ShaderGenerator::GenVertexBufferLayout() {
+  uint32_t stride = 0;
+
+  for (const auto& attr : mGeometry->attribute) {
+    switch (attr.attribute.format) {
+      case VertexFormat::kFloat32:
+        stride += 1 * sizeof(float);
+        break;
+      case VertexFormat::kFloat32x2:
+        stride += 2 * sizeof(float);
+        break;
+      case VertexFormat::kFloat32x3:
+        stride += 3 * sizeof(float);
+        break;
+      case VertexFormat::kFloat32x4:
+        stride += 4 * sizeof(float);
+        break;
+      default:
+        break;
+    }
+  }
+
+  VertexBufferLayout layout;
+  layout.stride = stride;
+  layout.stepMode = VertexStepMode::kVertex;
+
+  for (auto const& input : mVertexInputState) {
+    VertexAttribute attr{};
+    attr.location = input->GetLocation();
+    attr.offset = get_attr_offset(mGeometry->attribute, input->GetName());
+    attr.format = get_attr_format(mGeometry->attribute, input->GetName());
+
+    layout.attribute.emplace_back(attr);
+  }
+
+  return {layout};
+}
+
+std::shared_ptr<PipelineLayout> ShaderGenerator::GenPipelineLayout(RenderSystem* renderSystem) {
+  return std::shared_ptr<PipelineLayout>();
+}
+
 }  // namespace cubic

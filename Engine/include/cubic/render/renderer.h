@@ -7,7 +7,19 @@
 #include <cubic/render/render_system.h>
 #include <cubic/render/texture.h>
 
+#include <memory>
+#include <vector>
+
 namespace cubic {
+
+class CUBIC_API RenderObject {
+ public:
+  virtual ~RenderObject() = default;
+
+  virtual bool Prepare(RenderSystem* renderSystem, TextureFormat targetFormat) = 0;
+
+  virtual void Draw(RenderPass* renderPass) = 0;
+};
 
 class CUBIC_API Renderer {
  public:
@@ -21,12 +33,16 @@ class CUBIC_API Renderer {
 
   Renderer& SetAntialiasing(bool value);
 
+  void Render(const std::shared_ptr<RenderObject>& renderObject);
+
   void Flush(const std::shared_ptr<Texture>& target);
 
  private:
   std::unique_ptr<RenderPass> BeginRenderPass(CommandBuffer* cmd, const std::shared_ptr<Texture>& target);
 
   void PrepareAttachments(const std::shared_ptr<Texture>& target);
+
+  void DrawObjects(RenderPass* renderPass, TextureFormat format);
 
  private:
   RenderSystem* mRenderSystem;
@@ -36,6 +52,8 @@ class CUBIC_API Renderer {
 
   std::shared_ptr<Texture> mMSAAColorTexture = {};
   std::shared_ptr<Texture> mDepthTexture = {};
+
+  std::vector<std::shared_ptr<RenderObject>> mRenderObjects;
 };
 
 }  // namespace cubic

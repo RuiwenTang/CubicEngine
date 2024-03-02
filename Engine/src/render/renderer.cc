@@ -20,12 +20,16 @@ Renderer& Renderer::SetAntialiasing(bool value) {
   return *this;
 }
 
+void Renderer::Render(const std::shared_ptr<RenderObject>& renderObject) { mRenderObjects.emplace_back(renderObject); }
+
 void Renderer::Flush(const std::shared_ptr<Texture>& target) {
   auto queue = mRenderSystem->GetCommandQueue(QueueType::kGraphic);
 
   auto cmd = queue->GenCommandBuffer();
 
   auto render_pass = BeginRenderPass(cmd.get(), target);
+
+  DrawObjects(render_pass.get(), target->GetDescriptor().format);
 
   cmd->EndRenderPass(std::move(render_pass));
 
@@ -99,6 +103,20 @@ void Renderer::PrepareAttachments(const std::shared_ptr<Texture>& target) {
 
       mMSAAColorTexture = mRenderSystem->CreateTexture(&desc);
     }
+  }
+}
+
+void Renderer::DrawObjects(RenderPass* renderPass, TextureFormat format) {
+  std::vector<RenderObject*> drawList{};
+
+  for (const auto& object : mRenderObjects) {
+    if (object->Prepare(mRenderSystem, format)) {
+      drawList.emplace_back(object.get());
+    }
+  }
+
+  for (const auto& object : drawList) {
+    object->Draw(renderPass);
   }
 }
 

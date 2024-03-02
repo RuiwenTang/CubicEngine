@@ -2,6 +2,8 @@
 
 #include <cubic/graphic/geometry.h>
 #include <cubic/graphic/material.h>
+#include <cubic/render/pipeline_layout.h>
+#include <cubic/render/types.h>
 
 #include <vector>
 
@@ -9,6 +11,8 @@
 #include "slang/program.h"
 
 namespace cubic {
+
+class RenderSystem;
 
 class ShaderGenerator {
  public:
@@ -21,6 +25,10 @@ class ShaderGenerator {
   std::string GenVertexShader();
 
   std::string GenFragmentShader();
+
+  std::vector<VertexBufferLayout> GenVertexBufferLayout();
+
+  std::shared_ptr<PipelineLayout> GenPipelineLayout(RenderSystem* renderSystem);
 
  private:
   void BuildVertexProgram();
