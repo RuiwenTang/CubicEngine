@@ -1,5 +1,7 @@
 #include "graphic/shader_generator.h"
 
+#include <cubic/render/render_system.h>
+
 #include "slang/attribute.h"
 #include "slang/function.h"
 #include "slang/operation.h"
@@ -109,7 +111,7 @@ void ShaderGenerator::BuildFragmentProgram() {
   mFragmentShader.AddToGlobalScope(out_color);
 
   // material set
-  mFragmentShader.AddToGlobalScope(mHeap.Allocate<slang::StringUniformSet>(mMaterial->GenResourceSet(1)));
+  mFragmentShader.AddToGlobalScope(mHeap.Allocate<slang::StringUniformSet>(mMaterial->GenResourceSet(0)));
 
   auto custom_func = mHeap.Allocate<slang::StringFunction>("CustomColorFunction", mMaterial->GenColorFunction());
 
@@ -204,7 +206,11 @@ std::vector<VertexBufferLayout> ShaderGenerator::GenVertexBufferLayout() {
 }
 
 std::shared_ptr<PipelineLayout> ShaderGenerator::GenPipelineLayout(RenderSystem* renderSystem) {
-  return std::shared_ptr<PipelineLayout>();
+  // TODO generate bind group in vertex shader stage
+
+  auto material_group = renderSystem->CreateBindGroupLayout(mMaterial->GetResourceInfo());
+
+  return renderSystem->CreatePipelineLayout({material_group});
 }
 
 }  // namespace cubic

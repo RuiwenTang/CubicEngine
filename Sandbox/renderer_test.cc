@@ -18,8 +18,17 @@ class SandboxClient : public WindowClient {
       mRenderer->SetNeedDepthBuffer(false);
     }
 
+    if (mMesh == nullptr) {
+      auto geom = Geometry::CreatePlane();
+      auto material = std::make_shared<ColorMaterial>(1.f, 0.f, 0.f, 1.f);
+
+      mMesh = std::make_shared<Mesh>(geom, material);
+    }
+
     float flash = std::abs(std::sin(mFrameNum / 120.f));
     mRenderer->SetClearColor(GPUColor{0.0, 0.0, flash, 1.0});
+
+    mRenderer->Render(mMesh);
 
     mRenderer->Flush(surfaceTexture);
 
@@ -29,6 +38,7 @@ class SandboxClient : public WindowClient {
  private:
   uint32_t mFrameNum = 0;
   std::unique_ptr<Renderer> mRenderer;
+  std::shared_ptr<Mesh> mMesh;
 };
 
 int main(int argc, const char **argv) {

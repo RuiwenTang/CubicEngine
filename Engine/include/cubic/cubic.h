@@ -11,6 +11,8 @@
 // material
 #include <cubic/graphic/material.h>
 #include <cubic/graphic/material/color_material.h>
+// mesh
+#include <cubic/graphic/mesh.h>
 // types
 #include <cubic/render/types.h>
 // texture

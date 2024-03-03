@@ -50,8 +50,20 @@ bool Mesh::PreparePipeline(RenderSystem* renderSystem, TextureFormat targetForma
   desc.vertexShader = vs;
   desc.fragmentShader = fs;
   desc.vertexBuffer = sg.GenVertexBufferLayout();
+  desc.layout = sg.GenPipelineLayout(renderSystem);
 
-  return false;
+  // TODO pass sample count to mesh
+  desc.sampleCount = 4;
+
+  ColorTargetState colorTarget{};
+  colorTarget.format = targetFormat;
+
+  desc.colorCount = 1;
+  desc.pColorTargets = &colorTarget;
+
+  mRenderPipeline = renderSystem->CreateRenderPipeline(&desc);
+
+  return mRenderPipeline != nullptr;
 }
 
 }  // namespace cubic

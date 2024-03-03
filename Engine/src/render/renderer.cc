@@ -34,6 +34,8 @@ void Renderer::Flush(const std::shared_ptr<Texture>& target) {
   cmd->EndRenderPass(std::move(render_pass));
 
   queue->Submit(std::move(cmd));
+
+  mRenderObjects.clear();
 }
 
 std::unique_ptr<RenderPass> Renderer::BeginRenderPass(CommandBuffer* cmd, const std::shared_ptr<Texture>& target) {
