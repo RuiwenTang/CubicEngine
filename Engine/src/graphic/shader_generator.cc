@@ -147,19 +147,19 @@ std::string ShaderGenerator::GenFragmentShader() {
   return source;
 }
 
-uint32_t get_attr_offset(const std::vector<BufferAttribute>& attrs, const std::string& name) {
+uint64_t get_attr_offset(const std::vector<BufferAttribute>& attrs, const uint32_t location) {
   for (uint32_t i = 0; i < attrs.size(); i++) {
-    if (attrs[i].name == name) {
-      attrs[i].attribute.offset;
+    if (attrs[i].attribute.location == location) {
+      return attrs[i].attribute.offset;
     }
   }
 
   return 0;
 }
 
-VertexFormat get_attr_format(const std::vector<BufferAttribute>& attrs, const std::string& name) {
+VertexFormat get_attr_format(const std::vector<BufferAttribute>& attrs, const uint32_t location) {
   for (uint32_t i = 0; i < attrs.size(); i++) {
-    if (attrs[i].name == name) {
+    if (attrs[i].attribute.location == location) {
       return attrs[i].attribute.format;
     }
   }
@@ -196,8 +196,8 @@ std::vector<VertexBufferLayout> ShaderGenerator::GenVertexBufferLayout() {
   for (auto const& input : mVertexInputState) {
     VertexAttribute attr{};
     attr.location = input->GetLocation();
-    attr.offset = get_attr_offset(mGeometry->attribute, input->GetName());
-    attr.format = get_attr_format(mGeometry->attribute, input->GetName());
+    attr.offset = get_attr_offset(mGeometry->attribute, input->GetLocation());
+    attr.format = get_attr_format(mGeometry->attribute, input->GetLocation());
 
     layout.attribute.emplace_back(attr);
   }

@@ -51,6 +51,8 @@ target_sources(
 	${CMAKE_CURRENT_LIST_DIR}/src/graphic/plane_geometry.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/graphic/shader_generator.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/graphic/shader_generator.h
+	${CMAKE_CURRENT_LIST_DIR}/src/graphic/stage_buffer.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/graphic/stage_buffer.h
 	${CMAKE_CURRENT_LIST_DIR}/src/render/render_system_priv.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/render/render_system_priv.h
 	${CMAKE_CURRENT_LIST_DIR}/src/render/renderer.cc

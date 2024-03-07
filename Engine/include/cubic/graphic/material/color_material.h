@@ -16,6 +16,8 @@ class CUBIC_API ColorMaterial : public Material {
 
   std::vector<GroupEntryInfo> GetResourceInfo() const override;
 
+  std::vector<ResourceData> GetResourceData() const override;
+
   std::string GenResourceSet(uint32_t index) const override;
 
   std::string GenColorFunction() const override;

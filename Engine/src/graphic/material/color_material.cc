@@ -20,6 +20,13 @@ std::vector<GroupEntryInfo> ColorMaterial::GetResourceInfo() const {
   }};
 }
 
+std::vector<ResourceData> ColorMaterial::GetResourceData() const {
+  return {ResourceData{
+      const_cast<float*>(mColor.data()),
+      mColor.size() * sizeof(float),
+  }};
+}
+
 std::string ColorMaterial::GenResourceSet(uint32_t index) const {
   return fmt::format(R"(
                 layout(set = {}, binding = 0) uniform CustomColor {{

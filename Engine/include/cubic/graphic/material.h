@@ -20,6 +20,11 @@ enum class ResourceType {
   kTexture,
 };
 
+struct ResourceData {
+  void* data = nullptr;
+  uint64_t length = 0;
+};
+
 class CUBIC_API Material {
  public:
   virtual ~Material() = default;
@@ -27,6 +32,8 @@ class CUBIC_API Material {
   virtual std::vector<MaterialInput> GetInput() const = 0;
 
   virtual std::vector<GroupEntryInfo> GetResourceInfo() const = 0;
+
+  virtual std::vector<ResourceData> GetResourceData() const = 0;
 
   virtual std::string GenResourceSet(uint32_t index) const = 0;
 
