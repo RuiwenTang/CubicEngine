@@ -43,7 +43,8 @@ void Mesh::Draw(RenderPass* renderPass) {
   renderPass->SetIndexBuffer(mIndexData.buffer, mIndexData.offset);
 
   // setup binding group
-  renderPass->SetBindGroup(0, mMaterialBinding);
+  renderPass->SetBindGroup(0, mVertexBinding);
+  renderPass->SetBindGroup(1, mMaterialBinding);
 
   renderPass->DrawElements(mGeometry->indexData.size(), 0);
 }
@@ -54,6 +55,8 @@ bool Mesh::PreparePipeline(RenderSystem* renderSystem, TextureFormat targetForma
   }
 
   ShaderGenerator sg{mGeometry.get(), mMaterial.get()};
+
+  sg.GetConfigration().has_model_matrix = true;
 
   if (!sg.Prepare()) {
     return false;
@@ -123,7 +126,18 @@ void Mesh::AllocBuffer(RenderSystem* renderSystem) {
     mIndexData.length = range.length;
   }
 
-  // TODO allocate uniforms in vertex stage
+  // allocate memory for mesh uniforms
+  {
+    // currently only has model matrix uniform
+    auto range = stageBuffer.Allocate(16 * sizeof(float), true);
+
+    mMeshUniforms.emplace_back(BufferView{
+        nullptr,
+        range.offset,
+        range.length,
+    });
+  }
+
   auto materialData = mMaterial->GetResourceData();
 
   for (size_t i = 0; i < materialData.size(); i++) {
@@ -143,7 +157,11 @@ void Mesh::AllocBuffer(RenderSystem* renderSystem) {
   // copy index data
   std::memcpy(raw_data.data() + mIndexData.offset, mGeometry->indexData.data(), mIndexData.length);
 
-  // TODO copy uniforms in vertex stage
+  // copy uniforms in vertex stage
+  {
+    auto matrix = mTransform.GetModelMatrix();
+    std::memcpy(raw_data.data() + mMeshUniforms[0].offset, &matrix, 16 * sizeof(float));
+  }
 
   // copy uniforms in fragment stage
   for (size_t i = 0; i < mMaterialUniforms.size(); i++) {
@@ -182,6 +200,10 @@ void Mesh::AllocBuffer(RenderSystem* renderSystem) {
   mVertexData.buffer = mRenderData;
   mIndexData.buffer = mRenderData;
 
+  for (auto& view : mMeshUniforms) {
+    view.buffer = mRenderData;
+  }
+
   for (auto& view : mMaterialUniforms) {
     view.buffer = mRenderData;
   }
@@ -190,12 +212,28 @@ void Mesh::AllocBuffer(RenderSystem* renderSystem) {
 bool Mesh::PrepareBindings(RenderSystem* renderSystem) {
   // TODO support mark dirty
 
-  if (mMaterialBinding != nullptr) {
+  if (mVertexBinding != nullptr && mMaterialBinding != nullptr) {
     return true;
   }
 
-  {
+  if (mVertexBinding == nullptr) {
     auto layout = mRenderPipeline->GetLayout()->GetGroup(0);
+
+    std::vector<GroupEntry> entries{};
+
+    entries.emplace_back(GroupEntry{
+        0,
+        EntryType::kUniformBuffer,
+        BindResource{
+            mMeshUniforms[0],
+        },
+    });
+
+    mVertexBinding = renderSystem->CreateBindGroup(layout, std::move(entries));
+  }
+
+  if (mMaterialBinding == nullptr) {
+    auto layout = mRenderPipeline->GetLayout()->GetGroup(1);
 
     std::vector<GroupEntry> entries{};
 

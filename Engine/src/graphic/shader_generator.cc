@@ -78,6 +78,24 @@ void ShaderGenerator::BuildVertexProgram() {
     mVertexShader.AddToGlobalScope(o);
   }
 
+  slang::UniformBinding* model_matrix_binding = nullptr;
+
+  // other uniform set
+  if (mConfigration.has_model_matrix) {
+    if (mVertexUniformSlot == -1) {
+      mVertexUniformSlot = 0;
+    }
+
+    uint32_t uniform_index = 0;
+    auto uniform_set = mHeap.Allocate<slang::UniformSet>(mVertexUniformSlot, uniform_index, "ModelMatrix");
+
+    model_matrix_binding = mHeap.Allocate<slang::UniformBinding>(slang::ScalarType::kMat4, "matrix");
+
+    uniform_set->AddBinding(model_matrix_binding);
+
+    mVertexShader.AddToGlobalScope(uniform_set);
+  }
+
   auto vs_main = mHeap.Allocate<slang::StatementFunction>("main");
 
   for (auto statemen : mStageShareStatement) {
@@ -87,8 +105,14 @@ void ShaderGenerator::BuildVertexProgram() {
   auto pos_out = mHeap.Allocate<slang::Statement>();
 
   {
-    auto pos_attr_convert = mHeap.Allocate<slang::TypeConvertOperation>(slang::ScalarType::kVec4,
-                                                                        mPosAttribute->GetScalarType(), mPosAttribute);
+    slang::Node* pos_attr_convert = mHeap.Allocate<slang::TypeConvertOperation>(
+        slang::ScalarType::kVec4, mPosAttribute->GetScalarType(), mPosAttribute);
+
+    if (model_matrix_binding) {
+      pos_attr_convert =
+          mHeap.Allocate<slang::BinaryOperation>(slang::Operator::kMultiply, model_matrix_binding, pos_attr_convert);
+    }
+
     auto pos_assign = mHeap.Allocate<slang::BinaryOperation>(
         slang::Operator::kEqual, mHeap.Allocate<slang::NamedNode>("gl_Position"), pos_attr_convert);
 
@@ -101,6 +125,12 @@ void ShaderGenerator::BuildVertexProgram() {
 }
 
 void ShaderGenerator::BuildFragmentProgram() {
+  if (mVertexUniformSlot == -1) {
+    mVertexUniformSlot = 0;
+  } else {
+    mFragmentUniformSlot = 1;
+  }
+
   for (const auto& o : mStageShareState) {
     auto i = mHeap.Allocate<slang::Attribute>(o->GetLocation(), o->GetScalarType(), o->GetName(), true);
     mFragmentShader.AddToGlobalScope(i);
@@ -111,7 +141,8 @@ void ShaderGenerator::BuildFragmentProgram() {
   mFragmentShader.AddToGlobalScope(out_color);
 
   // material set
-  mFragmentShader.AddToGlobalScope(mHeap.Allocate<slang::StringUniformSet>(mMaterial->GenResourceSet(0)));
+  mFragmentShader.AddToGlobalScope(
+      mHeap.Allocate<slang::StringUniformSet>(mMaterial->GenResourceSet(mFragmentUniformSlot)));
 
   auto custom_func = mHeap.Allocate<slang::StringFunction>("CustomColorFunction", mMaterial->GenColorFunction());
 
@@ -206,11 +237,19 @@ std::vector<VertexBufferLayout> ShaderGenerator::GenVertexBufferLayout() {
 }
 
 std::shared_ptr<PipelineLayout> ShaderGenerator::GenPipelineLayout(RenderSystem* renderSystem) {
-  // TODO generate bind group in vertex shader stage
+  std::vector<std::shared_ptr<BindGroupLayout>> group_layouts = {};
 
-  auto material_group = renderSystem->CreateBindGroupLayout(mMaterial->GetResourceInfo());
+  if (mConfigration.has_model_matrix) {
+    group_layouts.emplace_back(renderSystem->CreateBindGroupLayout({GroupEntryInfo{
+        0,
+        EntryType::kUniformBuffer,
+        ShaderStage::kVertexShader,
+    }}));
+  }
 
-  return renderSystem->CreatePipelineLayout({material_group});
+  group_layouts.emplace_back(renderSystem->CreateBindGroupLayout(mMaterial->GetResourceInfo()));
+
+  return renderSystem->CreatePipelineLayout(std::move(group_layouts));
 }
 
 }  // namespace cubic

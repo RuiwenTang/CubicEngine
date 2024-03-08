@@ -2,6 +2,7 @@
 
 #include <cubic/graphic/geometry.h>
 #include <cubic/graphic/material.h>
+#include <cubic/graphic/transform.h>
 #include <cubic/platform.h>
 #include <cubic/render/buffer.h>
 #include <cubic/render/render_pipeline.h>
@@ -26,6 +27,8 @@ class CUBIC_API Mesh : public RenderObject {
 
   void Draw(RenderPass* renderPass) override;
 
+  Transform& GetTransform() { return mTransform; }
+
  private:
   bool PreparePipeline(RenderSystem* renderSystem, TextureFormat targetFormat);
 
@@ -36,6 +39,8 @@ class CUBIC_API Mesh : public RenderObject {
   void AllocBuffer(RenderSystem* renderSystem);
 
  private:
+  Transform mTransform = {};
+
   std::shared_ptr<Geometry> mGeometry;
   std::shared_ptr<Material> mMaterial;
 
@@ -48,7 +53,7 @@ class CUBIC_API Mesh : public RenderObject {
   std::vector<BufferView> mMeshUniforms = {};
   std::vector<BufferView> mMaterialUniforms = {};
 
-  std::vector<std::shared_ptr<BindGroup>> mVertexBindings = {};
+  std::shared_ptr<BindGroup> mVertexBinding = {};
   std::shared_ptr<BindGroup> mMaterialBinding = {};
 };
 

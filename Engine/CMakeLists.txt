@@ -26,6 +26,7 @@ target_sources(
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/graphic/material/color_material.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/graphic/material.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/graphic/mesh.h
+	${CMAKE_CURRENT_LIST_DIR}/include/cubic/graphic/transform.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/bind_group.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/buffer.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/command_buffer.h
@@ -53,6 +54,7 @@ target_sources(
 	${CMAKE_CURRENT_LIST_DIR}/src/graphic/shader_generator.h
 	${CMAKE_CURRENT_LIST_DIR}/src/graphic/stage_buffer.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/graphic/stage_buffer.h
+	${CMAKE_CURRENT_LIST_DIR}/src/graphic/transform.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/render/render_system_priv.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/render/render_system_priv.h
 	${CMAKE_CURRENT_LIST_DIR}/src/render/renderer.cc
