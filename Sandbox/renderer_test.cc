@@ -25,7 +25,7 @@ class SandboxClient : public WindowClient {
       mMesh = std::make_shared<Mesh>(geom, material);
     }
 
-    mMesh->GetTransform().Translate({0.2f, 0.f, 0.f});
+    mMesh->GetTransform().Rotate({0.f, 0.f, 0.01f});
 
     float flash = std::abs(std::sin(mFrameNum / 120.f));
     mRenderer->SetClearColor(GPUColor{0.0, 0.0, flash, 1.0});

@@ -38,6 +38,8 @@ class CUBIC_API Mesh : public RenderObject {
 
   void AllocBuffer(RenderSystem* renderSystem);
 
+  void UpdateBuffer(RenderSystem* renderSystem);
+
  private:
   Transform mTransform = {};
 

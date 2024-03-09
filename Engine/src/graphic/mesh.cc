@@ -103,6 +103,8 @@ bool Mesh::PrepareBuffer(RenderSystem* renderSystem) {
     AllocBuffer(renderSystem);
 
   } else {
+    // check if uniform is dirty
+    UpdateBuffer(renderSystem);
   }
 
   return true;
@@ -206,6 +208,33 @@ void Mesh::AllocBuffer(RenderSystem* renderSystem) {
 
   for (auto& view : mMaterialUniforms) {
     view.buffer = mRenderData;
+  }
+
+  // clear dirty flag
+  mTransform.ClearDirty();
+}
+
+void Mesh::UpdateBuffer(RenderSystem* renderSystem) {
+  if (mTransform.IsDirty()) {
+    BufferDescriptor desc{};
+    desc.storageMode = BufferStorageMode::kCPUOnly;
+    desc.size = mMeshUniforms[0].length;
+    desc.usage = BufferUsage::kBuffCopySrc;
+
+    auto matrix = mTransform.GetModelMatrix();
+    desc.data = &matrix;
+
+    auto buffer = renderSystem->CreateBuffer(&desc);
+
+    auto queue = renderSystem->GetCommandQueue(QueueType::kGraphic);
+
+    auto cmd = queue->GenCommandBuffer();
+
+    cmd->CopyBufferToBuffer(mRenderData, mMeshUniforms[0].offset, buffer, 0, mMeshUniforms[0].length);
+
+    queue->Submit(std::move(cmd));
+
+    mTransform.ClearDirty();
   }
 }
 

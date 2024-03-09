@@ -39,6 +39,10 @@ VKAPI_ATTR VkBool32 VKAPI_CALL _debug_utils_messenger_callback(
 std::unique_ptr<RenderSystemVk> RenderSystemVk::Create() { return std::make_unique<RenderSystemVk>(); }
 
 RenderSystemVk::~RenderSystemVk() {
+  mDevice->GetComputeQueue()->ResetPool();
+  mDevice->GetGraphicQueue()->ResetPool();
+  mDevice->GetTransferQueue()->ResetPool();
+
   vmaDestroyAllocator(mAllocator);
 
   mPool.reset();
