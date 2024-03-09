@@ -117,11 +117,13 @@ void CommandQueueVK::ResetPool() {
     return;
   }
 
+  auto value = dynamic_cast<CommandBufferVK*>(mPendingCMD.back().get())->GetSignalValue();
+
   VkSemaphoreWaitInfo wait_info{};
   wait_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
   wait_info.semaphoreCount = 1;
   wait_info.pSemaphores = &mTimelineSemaphore;
-  wait_info.pValues = &mCmdID;
+  wait_info.pValues = &value;
 
   vkWaitSemaphores(mDevice->GetLogicalDevice(), &wait_info, UINT16_MAX);
 
