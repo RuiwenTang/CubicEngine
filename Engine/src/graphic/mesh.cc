@@ -18,8 +18,8 @@ std::shared_ptr<ShaderModule> gen_shader(ShaderStage stage, const std::string& c
 Mesh::Mesh(std::shared_ptr<Geometry> geom, std::shared_ptr<Material> material)
     : mGeometry(std::move(geom)), mMaterial(std::move(material)) {}
 
-bool Mesh::Prepare(RenderSystem* renderSystem, TextureFormat targetFormat) {
-  if (!PreparePipeline(renderSystem, targetFormat)) {
+bool Mesh::Prepare(RenderSystem* renderSystem, const RenderContextInfo& context) {
+  if (!PreparePipeline(renderSystem, context)) {
     return false;
   }
 
@@ -49,7 +49,7 @@ void Mesh::Draw(RenderPass* renderPass) {
   renderPass->DrawElements(mGeometry->indexData.size(), 0);
 }
 
-bool Mesh::PreparePipeline(RenderSystem* renderSystem, TextureFormat targetFormat) {
+bool Mesh::PreparePipeline(RenderSystem* renderSystem, const RenderContextInfo& context) {
   if (mRenderPipeline) {
     return true;
   }
@@ -80,10 +80,19 @@ bool Mesh::PreparePipeline(RenderSystem* renderSystem, TextureFormat targetForma
   desc.sampleCount = 4;
 
   ColorTargetState colorTarget{};
-  colorTarget.format = targetFormat;
+  colorTarget.format = context.colorFormat;
 
   desc.colorCount = 1;
   desc.pColorTargets = &colorTarget;
+
+  DepthStencilState depthStencilState{};
+  if (context.depthFormat != TextureFormat::kInvalid) {
+    depthStencilState.depthWriteEnable = true;
+    depthStencilState.depthCompare = CompareFunction::kLess;
+    depthStencilState.format = context.depthFormat;
+
+    desc.depthStencil = &depthStencilState;
+  }
 
   mRenderPipeline = renderSystem->CreateRenderPipeline(&desc);
 

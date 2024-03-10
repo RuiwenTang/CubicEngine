@@ -111,8 +111,17 @@ void Renderer::PrepareAttachments(const std::shared_ptr<Texture>& target) {
 void Renderer::DrawObjects(RenderPass* renderPass, TextureFormat format) {
   std::vector<RenderObject*> drawList{};
 
+  RenderContextInfo info{};
+
+  info.colorFormat = format;
+  if (mNeedDepthBuffer) {
+    info.depthFormat = mDepthTexture->GetDescriptor().format;
+  }
+
+  info.hasCamera = false;
+
   for (const auto& object : mRenderObjects) {
-    if (object->Prepare(mRenderSystem, format)) {
+    if (object->Prepare(mRenderSystem, info)) {
       drawList.emplace_back(object.get());
     }
   }

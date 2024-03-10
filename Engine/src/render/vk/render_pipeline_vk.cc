@@ -151,6 +151,15 @@ std::shared_ptr<RenderPipelineVK> RenderPipelineVK::Create(VulkanDevice* device,
 
   rendering_info.pColorAttachmentFormats = color_formats.data();
 
+  VkPipelineDepthStencilStateCreateInfo depthStencilState{};
+  depthStencilState.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+  if (desc->depthStencil) {
+    rendering_info.depthAttachmentFormat = vk::TypeConvert(desc->depthStencil->format);
+    depthStencilState.depthTestEnable = VK_TRUE;
+    depthStencilState.depthWriteEnable = VK_TRUE;
+    depthStencilState.depthCompareOp = vk::TypeConvert(desc->depthStencil->depthCompare);
+  }
+
   VkGraphicsPipelineCreateInfo create_info{};
   create_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
   create_info.flags = 0;
@@ -162,7 +171,11 @@ std::shared_ptr<RenderPipelineVK> RenderPipelineVK::Create(VulkanDevice* device,
   create_info.pRasterizationState = &rasterizerState;
   create_info.pMultisampleState = &multisampling;
   // TODO setup depth stencil
-  create_info.pDepthStencilState = nullptr;
+  if (desc->depthStencil) {
+    create_info.pDepthStencilState = &depthStencilState;
+  } else {
+    create_info.pDepthStencilState = nullptr;
+  }
   create_info.pColorBlendState = &blendState;
   create_info.pDynamicState = &dynamicState;
   create_info.layout = dynamic_cast<PipelineLayoutVK*>(desc->layout.get())->GetNativeLayout();

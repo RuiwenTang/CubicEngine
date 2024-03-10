@@ -23,14 +23,14 @@ class CUBIC_API Mesh : public RenderObject {
 
   const std::shared_ptr<Material>& GetMaterial() const { return mMaterial; }
 
-  bool Prepare(RenderSystem* renderSystem, TextureFormat targetFormat) override;
+  bool Prepare(RenderSystem* renderSystem, const RenderContextInfo& context) override;
 
   void Draw(RenderPass* renderPass) override;
 
   Transform& GetTransform() { return mTransform; }
 
  private:
-  bool PreparePipeline(RenderSystem* renderSystem, TextureFormat targetFormat);
+  bool PreparePipeline(RenderSystem* renderSystem, const RenderContextInfo& context);
 
   bool PrepareBuffer(RenderSystem* renderSystem);
 

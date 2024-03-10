@@ -13,6 +13,8 @@
 #include <cubic/graphic/material/color_material.h>
 // mesh
 #include <cubic/graphic/mesh.h>
+// scene
+#include <cubic/graphic/scene.h>
 // types
 #include <cubic/render/types.h>
 // texture

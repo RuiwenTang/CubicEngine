@@ -100,6 +100,54 @@ std::unique_ptr<RenderPass> CommandBufferVK::BeginRenderPass(const RenderPassDes
     }
   }
 
+  if (desc.pDepthStencilAttachment) {
+    auto attachment = desc.pDepthStencilAttachment;
+
+    width = attachment->target->GetDescriptor().width;
+    height = attachment->target->GetDescriptor().height;
+
+    viewports.emplace_back(VkViewport{0, 0, width * 1.f, height * 1.f, 0.f, 1.f});
+    scissors.emplace_back(VkRect2D{{0, 0}, {width, height}});
+
+    auto target = dynamic_cast<TextureVK*>(attachment->target.get());
+
+    vk::AttachmentBuilder builder(target, nullptr);
+
+	builder.SetLoadOp(attachment->depthLoadOp).SetStoreOp(attachment->depthStoreOp);
+
+	depth_attachment_info = builder.Build();
+
+    // FIXME: AttachmentBuilder set all attachment to COLOR_ATTACHMENT_OPTIMAL
+    // TODO: make AttachmentBuilder support depth stencil
+    depth_attachment_info->imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+    depth_attachment_info->clearValue.depthStencil.depth = attachment->depthClearValue;
+    depth_attachment_info->clearValue.depthStencil.stencil = attachment->stencilClearValue;
+
+	if (target->GetImageLayout() != VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+	  VkImageMemoryBarrier barrier{};
+	  barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	  barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	  barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+	  barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+	  barrier.subresourceRange.baseMipLevel = 0;
+	  barrier.subresourceRange.levelCount = 1;
+	  barrier.subresourceRange.baseArrayLayer = 0;
+	  barrier.subresourceRange.layerCount = 1;
+
+	  barrier.srcAccessMask = 0;
+	  barrier.dstAccessMask = 0;
+	  barrier.oldLayout = target->GetImageLayout();
+	  barrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	  barrier.image = target->GetImage();
+
+	  target->SetImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+
+	  attachment_barraiers.emplace_back(barrier);
+	}
+  }
+
   // change layouts
   vkCmdPipelineBarrier(mCmd, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0,
                        nullptr, static_cast<uint32_t>(attachment_barraiers.size()), attachment_barraiers.data());
@@ -111,6 +159,10 @@ std::unique_ptr<RenderPass> CommandBufferVK::BeginRenderPass(const RenderPassDes
   rendering_info.layerCount = 1;
   rendering_info.colorAttachmentCount = static_cast<uint32_t>(attachment_infos.size());
   rendering_info.pColorAttachments = attachment_infos.data();
+
+  if (depth_attachment_info) {
+	rendering_info.pDepthAttachment = &depth_attachment_info.value();
+  }
 
   vkCmdBeginRendering(mCmd, &rendering_info);
 

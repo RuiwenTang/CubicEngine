@@ -12,11 +12,20 @@
 
 namespace cubic {
 
+struct RenderContextInfo {
+  // color attachment format
+  TextureFormat colorFormat = TextureFormat::kInvalid;
+  // depth attachment format
+  TextureFormat depthFormat = TextureFormat::kInvalid;
+  // whether has camera
+  bool hasCamera = false;
+};
+
 class CUBIC_API RenderObject {
  public:
   virtual ~RenderObject() = default;
 
-  virtual bool Prepare(RenderSystem* renderSystem, TextureFormat targetFormat) = 0;
+  virtual bool Prepare(RenderSystem* renderSystem, const RenderContextInfo& context) = 0;
 
   virtual void Draw(RenderPass* renderPass) = 0;
 };

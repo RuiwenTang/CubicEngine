@@ -40,6 +40,8 @@ VkDescriptorType TypeConvert(EntryType type);
 
 VkShaderStageFlags TypeConvertForBinding(ShaderStageMask mask);
 
+VkCompareOp TypeConvert(CompareFunction op);
+
 }  // namespace vk
 
 }  // namespace cubic

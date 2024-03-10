@@ -287,4 +287,29 @@ VkShaderStageFlags TypeConvertForBinding(ShaderStageMask mask) {
   return ret;
 }
 
+VkCompareOp TypeConvert(CompareFunction op) {
+  switch (op) {
+    case cubic::CompareFunction::kUndefined:
+      return VK_COMPARE_OP_ALWAYS;
+    case cubic::CompareFunction::kNever:
+      return VK_COMPARE_OP_NEVER;
+    case cubic::CompareFunction::kLess:
+      return VK_COMPARE_OP_LESS;
+    case cubic::CompareFunction::kLessEqual:
+      return VK_COMPARE_OP_LESS_OR_EQUAL;
+    case cubic::CompareFunction::kGreater:
+      return VK_COMPARE_OP_GREATER;
+    case cubic::CompareFunction::kGreaterEqual:
+      return VK_COMPARE_OP_GREATER_OR_EQUAL;
+    case cubic::CompareFunction::kEqual:
+      return VK_COMPARE_OP_EQUAL;
+    case cubic::CompareFunction::kNotEqual:
+      return VK_COMPARE_OP_NOT_EQUAL;
+    case cubic::CompareFunction::kAlways:
+      return VK_COMPARE_OP_ALWAYS;
+    default:
+      return VK_COMPARE_OP_NEVER;
+  }
+}
+
 }  // namespace cubic::vk

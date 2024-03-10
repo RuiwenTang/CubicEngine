@@ -15,14 +15,19 @@ class SandboxClient : public WindowClient {
       mRenderer = std::make_unique<Renderer>(renderSystem);
 
       mRenderer->SetAntialiasing(true);
-      mRenderer->SetNeedDepthBuffer(false);
+      mRenderer->SetNeedDepthBuffer(true);
     }
 
     if (mMesh == nullptr) {
       auto geom = Geometry::CreatePlane();
       auto material = std::make_shared<ColorMaterial>(1.f, 0.f, 0.f, 1.f);
+      auto material2 = std::make_shared<ColorMaterial>(0.f, 1.f, 0.f, 1.f);
 
       mMesh = std::make_shared<Mesh>(geom, material);
+
+      mMesh2 = std::make_shared<Mesh>(geom, material2);
+
+      mMesh2->GetTransform().Translate({0.2f, 0.f, 0.1f});
     }
 
     mMesh->GetTransform().Rotate({0.f, 0.f, 0.01f});
@@ -31,6 +36,8 @@ class SandboxClient : public WindowClient {
     mRenderer->SetClearColor(GPUColor{0.0, 0.0, flash, 1.0});
 
     mRenderer->Render(mMesh);
+
+    mRenderer->Render(mMesh2);
 
     mRenderer->Flush(surfaceTexture);
 
@@ -41,6 +48,7 @@ class SandboxClient : public WindowClient {
   uint32_t mFrameNum = 0;
   std::unique_ptr<Renderer> mRenderer;
   std::shared_ptr<Mesh> mMesh;
+  std::shared_ptr<Mesh> mMesh2;
 };
 
 int main(int argc, const char **argv) {
