@@ -69,7 +69,13 @@ std::shared_ptr<RenderPipelineMTL> RenderPipelineMTL::Create(RenderPipelineDescr
 
   id<MTLDepthStencilState> depthStencilState = nil;
   if (desc->depthStencil) {
-    // TODO handle depth stencil state
+    MTLDepthStencilDescriptor* ds_desc = [MTLDepthStencilDescriptor new];
+    ds_desc.depthWriteEnabled = desc->depthStencil->depthWriteEnable;
+    ds_desc.depthCompareFunction = TypeConvert(desc->depthStencil->depthCompare);
+
+    depthStencilState = [device newDepthStencilStateWithDescriptor:ds_desc];
+    mtl_desc.depthAttachmentPixelFormat = TypeConvert(desc->depthStencil->format);
+    mtl_desc.stencilAttachmentPixelFormat = mtl_desc.depthAttachmentPixelFormat;
   } else {
     mtl_desc.depthAttachmentPixelFormat = MTLPixelFormatInvalid;
   }

@@ -27,4 +27,6 @@ MTLVertexFormat TypeConvert(VertexFormat format);
 
 MTLVertexStepFunction TypeConvert(VertexStepMode stepMode);
 
+MTLCompareFunction TypeConvert(CompareFunction func);
+
 }  // namespace cubic

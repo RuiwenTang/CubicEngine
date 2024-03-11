@@ -143,4 +143,27 @@ MTLVertexStepFunction TypeConvert(VertexStepMode stepMode) {
   }
 }
 
+MTLCompareFunction TypeConvert(CompareFunction func) {
+  switch (func) {
+    case CompareFunction::kNever:
+      return MTLCompareFunctionNever;
+    case CompareFunction::kLess:
+      return MTLCompareFunctionLess;
+    case CompareFunction::kLessEqual:
+      return MTLCompareFunctionLessEqual;
+    case CompareFunction::kGreater:
+      return MTLCompareFunctionGreater;
+    case CompareFunction::kGreaterEqual:
+      return MTLCompareFunctionGreaterEqual;
+    case CompareFunction::kEqual:
+      return MTLCompareFunctionEqual;
+    case CompareFunction::kNotEqual:
+      return MTLCompareFunctionNotEqual;
+    case CompareFunction::kAlways:
+      return MTLCompareFunctionAlways;
+    default:
+      return MTLCompareFunctionNever;
+  }
+}
+
 }  // namespace cubic
