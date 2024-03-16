@@ -24,6 +24,10 @@ struct CUBIC_API Geometry {
 
   static std::shared_ptr<Geometry> CreatePlane(float width = 1.f, float height = 1.f, uint32_t widthSegment = 1,
                                                uint32_t heightSegment = 1);
+
+  static std::shared_ptr<Geometry> CreateBox(float width = 1.f, float height = 1.f, float depth = 1.f,
+                                             uint32_t widthSegment = 1, uint32_t heightSegment = 1,
+                                             uint32_t depthSegment = 1);
 };
 
 }  // namespace cubic

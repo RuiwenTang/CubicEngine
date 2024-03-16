@@ -13,8 +13,8 @@ enum class Operator {
 
 class TypeConvertOperation : public Node {
  public:
-  TypeConvertOperation(ScalarType targetType, ScalarType nodeType, Node* node)
-      : mTargetType(targetType), mNodeType(nodeType), mNode(node) {}
+  TypeConvertOperation(ScalarType targetType, ScalarType nodeType, Node* node, bool geneous = false)
+      : mTargetType(targetType), mNodeType(nodeType), mNode(node), mGeneous(geneous) {}
 
   ~TypeConvertOperation() override = default;
 
@@ -27,6 +27,7 @@ class TypeConvertOperation : public Node {
   ScalarType mTargetType;
   ScalarType mNodeType;
   Node* mNode;
+  bool mGeneous;
 };
 
 class BinaryOperation : public Node {
@@ -53,6 +54,23 @@ class CallOperation : public Node {
 
  private:
   Node* mNode;
+};
+
+class Declaration : public Node {
+ public:
+  Declaration(const char* name, ScalarType type, Node* initializer)
+      : mName(name), mType(type), mInitializer(initializer) {}
+
+  ~Declaration() override = default;
+
+  void WriteTo(std::string& source) override;
+
+  const char* GetName() const { return mName; }
+
+ private:
+  const char* mName;
+  ScalarType mType;
+  Node* mInitializer = nullptr;
 };
 
 }  // namespace slang

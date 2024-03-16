@@ -49,6 +49,7 @@ target_sources(
 	${CMAKE_CURRENT_LIST_DIR}/src/core/window_impl.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/core/window_impl.h
 	${CMAKE_CURRENT_LIST_DIR}/src/graphic/material/color_material.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/graphic/box_geometry.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/graphic/mesh.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/graphic/plane_geometry.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/graphic/scene.cc

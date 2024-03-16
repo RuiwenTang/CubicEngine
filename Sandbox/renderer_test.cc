@@ -20,17 +20,18 @@ class SandboxClient : public WindowClient {
 
     if (mMesh == nullptr) {
       auto geom = Geometry::CreatePlane();
+      auto box = Geometry::CreateBox(0.1f, 0.1f, 0.1f);
       auto material = std::make_shared<ColorMaterial>(1.f, 0.f, 0.f, 1.f);
       auto material2 = std::make_shared<ColorMaterial>(0.f, 1.f, 0.f, 1.f);
 
-      mMesh = std::make_shared<Mesh>(geom, material);
+      mMesh = std::make_shared<Mesh>(box, material);
 
       mMesh2 = std::make_shared<Mesh>(geom, material2);
 
       mMesh2->GetTransform().Translate({0.2f, 0.f, 0.1f});
     }
 
-    mMesh->GetTransform().Rotate({0.f, 0.f, 0.01f});
+    mMesh->GetTransform().Rotate({0.01f, 0.f, 0.f});
 
     float flash = std::abs(std::sin(mFrameNum / 120.f));
     mRenderer->SetClearColor(GPUColor{0.0, 0.0, flash, 1.0});

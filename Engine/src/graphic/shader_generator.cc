@@ -42,17 +42,20 @@ bool ShaderGenerator::Prepare() {
       mVertexInputState.emplace_back(in_attr);
       mStageShareState.emplace_back(out_attr);
 
-      auto statement = mHeap.Allocate<slang::Statement>();
-
-      statement->AddExpression(mHeap.Allocate<slang::BinaryOperation>(
-          slang::Operator::kEqual, out_attr,
-          mHeap.Allocate<slang::TypeConvertOperation>(out_attr->GetScalarType(), in_attr->GetScalarType(), in_attr)));
-
-      mStageShareStatement.emplace_back(statement);
+      if (it->name != "position" && it->name != "normal") {
+        auto statement = mHeap.Allocate<slang::Statement>();
+        // position and normal need to multiply by model matrix if needed
+        statement->AddExpression(mHeap.Allocate<slang::BinaryOperation>(
+            slang::Operator::kEqual, out_attr,
+            mHeap.Allocate<slang::TypeConvertOperation>(out_attr->GetScalarType(), in_attr->GetScalarType(), in_attr)));
+        mStageShareStatement.emplace_back(statement);
+      }
 
       if (it->name == "position") {
         mPosAttribute = in_attr;
       }
+
+      out_index++;
     }
   }
 
@@ -97,6 +100,69 @@ void ShaderGenerator::BuildVertexProgram() {
   }
 
   auto vs_main = mHeap.Allocate<slang::StatementFunction>("main");
+
+  auto it = std::find_if(mStageShareState.begin(), mStageShareState.end(),
+                         [](slang::Attribute* attr) { return std::strcmp(attr->GetName(), "position") == 0; });
+  if (it != mStageShareState.end()) {
+    // need to generate position output statement
+
+    auto statement = mHeap.Allocate<slang::Statement>();
+
+    if (model_matrix_binding) {
+      auto ts = mHeap.Allocate<slang::BinaryOperation>(
+          slang::Operator::kMultiply, model_matrix_binding,
+          mHeap.Allocate<slang::TypeConvertOperation>(slang::ScalarType::kVec4, mPosAttribute->GetScalarType(),
+                                                      mPosAttribute));
+
+      auto v_pos = mHeap.Allocate<slang::Declaration>("v_pos", slang::ScalarType::kVec4, ts);
+
+      statement->AddExpression(mHeap.Allocate<slang::BinaryOperation>(
+          slang::Operator::kEqual, *it,
+          mHeap.Allocate<slang::TypeConvertOperation>((*it)->GetScalarType(), slang::ScalarType::kVec4, v_pos)));
+
+      mStageShareStatement.emplace_back(v_pos);
+    } else {
+      statement->AddExpression(mHeap.Allocate<slang::BinaryOperation>(
+          slang::Operator::kEqual, *it,
+          mHeap.Allocate<slang::TypeConvertOperation>((*it)->GetScalarType(), mPosAttribute->GetScalarType(),
+                                                      mPosAttribute)));
+    }
+
+    mStageShareStatement.emplace_back(statement);
+  }
+
+  it = std::find_if(mStageShareState.begin(), mStageShareState.end(),
+                    [](slang::Attribute* attr) { return std::strcmp(attr->GetName(), "normal") == 0; });
+
+  if (it != mStageShareState.end()) {
+    // need to generate normal output statement
+
+    auto statement = mHeap.Allocate<slang::Statement>();
+
+    auto it_in = std::find_if(mVertexInputState.begin(), mVertexInputState.end(),
+                              [](slang::Attribute* attr) { return std::strcmp(attr->GetName(), "in_normal") == 0; });
+
+    if (model_matrix_binding) {
+      auto ts = mHeap.Allocate<slang::BinaryOperation>(
+          slang::Operator::kMultiply, model_matrix_binding,
+          mHeap.Allocate<slang::TypeConvertOperation>(slang::ScalarType::kVec4, (*it_in)->GetScalarType(), *it_in,
+                                                      true));
+
+      auto v_normal = mHeap.Allocate<slang::Declaration>("v_normal", slang::ScalarType::kVec4, ts);
+
+      statement->AddExpression(mHeap.Allocate<slang::BinaryOperation>(
+          slang::Operator::kEqual, *it,
+          mHeap.Allocate<slang::TypeConvertOperation>((*it)->GetScalarType(), slang::ScalarType::kVec4, v_normal)));
+
+      mStageShareStatement.emplace_back(v_normal);
+    } else {
+      statement->AddExpression(mHeap.Allocate<slang::BinaryOperation>(
+          slang::Operator::kEqual, *it,
+          mHeap.Allocate<slang::TypeConvertOperation>((*it)->GetScalarType(), (*it_in)->GetScalarType(), *it_in)));
+    }
+
+	mStageShareStatement.emplace_back(statement);
+  }
 
   for (auto statemen : mStageShareStatement) {
     vs_main->AddStatement(statemen);

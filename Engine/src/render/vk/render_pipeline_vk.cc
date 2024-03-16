@@ -106,7 +106,7 @@ std::shared_ptr<RenderPipelineVK> RenderPipelineVK::Create(VulkanDevice* device,
   rasterizerState.depthBiasClamp = 0.0f;           // Optional
   rasterizerState.depthBiasSlopeFactor = 0.0f;     // Optional
   // TODO pass face and cull mode through pipeline descriptor
-  rasterizerState.cullMode = VK_CULL_MODE_NONE;
+  rasterizerState.cullMode = VK_CULL_MODE_BACK_BIT;
   rasterizerState.frontFace = VK_FRONT_FACE_CLOCKWISE;
 
   std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments{};

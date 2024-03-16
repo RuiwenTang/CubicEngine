@@ -37,7 +37,11 @@ void TypeConvertOperation::WriteTypeConvert(std::string& source) {
     if (mNodeType == ScalarType::kVec2) {
       source += fmt::format("vec4({}, 0.0, 1.0)", mNode->GetName());
     } else {
-      source += fmt::format("vec4({}, 1.0)", mNode->GetName());
+      if (mGeneous) {
+        source += fmt::format("vec4({}, 0.0)", mNode->GetName());
+      } else {
+        source += fmt::format("vec4({}, 1.0)", mNode->GetName());
+      }
     }
   }
 }
@@ -51,6 +55,18 @@ void BinaryOperation::WriteTo(std::string& source) {
 }
 
 void CallOperation::WriteTo(std::string& source) { source += fmt::format("{}()", mNode->GetName()); }
+
+void Declaration::WriteTo(std::string& source) {
+  source += fmt::format("{} {}", ScalarTypeString(mType), mName);
+
+  if (mInitializer) {
+    source += "= ";
+    mInitializer->WriteTo(source);
+    source += ";\n";
+  } else {
+    source += ";\n";
+  }
+}
 
 }  // namespace slang
 }  // namespace cubic
