@@ -35,7 +35,7 @@ class CommandQueueVK : public CommandQueue {
 
   uint64_t mCmdID = 0;
 
-  std::vector<std::unique_ptr<CommandBuffer>> mPendingCMD = {};
+  std::vector<std::unique_ptr<CommandBuffer>> mPendingCMD;
 };
 
 }  // namespace cubic

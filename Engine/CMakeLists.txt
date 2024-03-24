@@ -165,6 +165,8 @@ else()
 
 	if(WIN32)
 		target_compile_definitions(CubicEngine PRIVATE VK_USE_PLATFORM_WIN32_KHR=1)
+	else()
+		target_compile_definitions(CubicEngine PRIVATE VK_USE_PLATFORM_XCB_KHR=1)
 	endif()
 endif()
 

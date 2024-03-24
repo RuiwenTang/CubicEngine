@@ -11,7 +11,7 @@ class CommandQueueVK;
 
 class VulkanDevice {
  public:
-  VulkanDevice() = default;
+  VulkanDevice();
 
   ~VulkanDevice();
 
@@ -57,9 +57,9 @@ class VulkanDevice {
   VkQueue mComputeQueue = VK_NULL_HANDLE;
   VkQueue mTransferQueue = VK_NULL_HANDLE;
 
-  std::unique_ptr<CommandQueueVK> mGraphicProxy = {};
-  std::unique_ptr<CommandQueueVK> mComputeProxy = {};
-  std::unique_ptr<CommandQueueVK> mTransferProxy = {};
+  std::unique_ptr<CommandQueueVK> mGraphicProxy;
+  std::unique_ptr<CommandQueueVK> mComputeProxy;
+  std::unique_ptr<CommandQueueVK> mTransferProxy;
 };
 
 }  // namespace cubic

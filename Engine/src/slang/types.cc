@@ -31,6 +31,7 @@ const char* ScalarTypeString(ScalarType type) {
     case ScalarType::kMat4:
       return "mat4";
   }
+  return "vec4";
 }
 
 }  // namespace slang

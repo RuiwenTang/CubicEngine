@@ -17,6 +17,7 @@ uint32_t BytesPerPixel(TextureFormat format) {
     case TextureFormat::kDepth24Stencil8:
       return 4;
   }
+  return 0;
 }
 
 }  // namespace cubic

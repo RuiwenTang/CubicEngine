@@ -8,6 +8,8 @@
 
 namespace cubic {
 
+VulkanDevice::VulkanDevice() = default;
+
 VulkanDevice::~VulkanDevice() {
   vkDeviceWaitIdle(mDevice);
 

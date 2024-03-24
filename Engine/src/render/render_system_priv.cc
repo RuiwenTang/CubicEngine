@@ -4,7 +4,7 @@
 
 #include "render/shader_compiler.h"
 
-#if defined(CUBIC_PLATFORM_WINDOWS)
+#if defined(CUBIC_PLATFORM_WINDOWS) || defined(CUBIC_PLATFORM_LINUX)
 
 #include "render/vk/render_system_vk.h"
 
@@ -17,7 +17,7 @@
 namespace cubic {
 
 std::unique_ptr<RenderSystem> RenderSystemPriv::InitRenderSystem(bool enableDebug) {
-#if defined(CUBIC_PLATFORM_WINDOWS)
+#if defined(CUBIC_PLATFORM_WINDOWS) || defined(CUBIC_PLATFORM_LINUX)
 
   CUB_INFO("Init Vulkan backend...");
 

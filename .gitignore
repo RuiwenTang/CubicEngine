@@ -15,3 +15,6 @@ CMakeSettings.json
 .cache
 .vscode
 out-*
+.idea
+cmake-*
+

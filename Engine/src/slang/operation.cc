@@ -12,6 +12,7 @@ const char* operator_to_string(Operator op) {
     case Operator::kMultiply:
       return "*";
   }
+  return " ";
 }
 
 void TypeConvertOperation::WriteTo(std::string& source) {

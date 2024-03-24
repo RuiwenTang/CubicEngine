@@ -1,5 +1,7 @@
 #include <cubic/graphic/mesh.h>
 
+#include <cstring>
+
 #include "graphic/shader_generator.h"
 #include "graphic/stage_buffer.h"
 

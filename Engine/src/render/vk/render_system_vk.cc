@@ -180,6 +180,8 @@ bool RenderSystemVk::initInstance(bool enableDebug) {
 
 #if defined(CUBIC_PLATFORM_WINDOWS)
   instanceExtensions.emplace_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+#elif defined(CUBIC_PLATFORM_LINUX)
+  instanceExtensions.emplace_back(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
 #endif
 
   std::vector<VkExtensionProperties> supportedExtensions{};

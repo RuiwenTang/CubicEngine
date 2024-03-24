@@ -3,7 +3,7 @@
 #include <cubic/core/log.h>
 #include <cubic/platform.h>
 
-#if defined(CUBIC_PLATFORM_WINDOWS)
+#if defined(CUBIC_PLATFORM_WINDOWS) || defined(CUBIC_PLATFORM_LINUX)
 #include "core/vk/window_impl_vk.h"
 #elif defined(CUBIC_PLATFORM_MACOS)
 #include "core/mtl/window_impl_mtl.h"
@@ -16,7 +16,7 @@ void WindowImpl::InitPlatform() { glfwInit(); }
 void WindowImpl::TerminatePlatform() { glfwTerminate(); }
 
 std::unique_ptr<Window> WindowImpl::Create(WindowProps props, RenderSystem* renderSystem) {
-#if defined(CUBIC_PLATFORM_WINDOWS)
+#if defined(CUBIC_PLATFORM_WINDOWS) || defined(CUBIC_PLATFORM_LINUX)
 
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
   glfwWindowHint(GLFW_RESIZABLE, props.resizeable ? GLFW_TRUE : GLFW_FALSE);

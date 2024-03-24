@@ -18,8 +18,8 @@ std::shared_ptr<Geometry> Geometry::CreatePlane(float width, float height, uint3
   auto width_half = width / 2.f;
   auto height_half = height / 2.f;
 
-  auto grid_x = std::floorf(widthSegment);
-  auto grid_y = std::floorf(heightSegment);
+  auto grid_x = std::floor(widthSegment);
+  auto grid_y = std::floor(heightSegment);
 
   auto grid_x_1 = grid_x + 1;
   auto grid_y_1 = grid_y + 1;

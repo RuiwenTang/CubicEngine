@@ -2,6 +2,9 @@
 
 #include <cubic/render/render_system.h>
 
+#include <algorithm>
+#include <cstring>
+
 #include "slang/attribute.h"
 #include "slang/function.h"
 #include "slang/operation.h"
@@ -161,7 +164,7 @@ void ShaderGenerator::BuildVertexProgram() {
           mHeap.Allocate<slang::TypeConvertOperation>((*it)->GetScalarType(), (*it_in)->GetScalarType(), *it_in)));
     }
 
-	mStageShareStatement.emplace_back(statement);
+    mStageShareStatement.emplace_back(statement);
   }
 
   for (auto statemen : mStageShareStatement) {
