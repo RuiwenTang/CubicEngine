@@ -33,7 +33,9 @@ MTLPixelFormat TypeConvert(TextureFormat format) {
       return MTLPixelFormatStencil8;
     case TextureFormat::kDepth24:
     case TextureFormat::kDepth24Stencil8:
-      return MTLPixelFormatDepth24Unorm_Stencil8;
+      // force to use MTLPixelFormatDepth32Float_Stencil8
+      // since Depth24Stencil8 is not supported by all platforms
+      return MTLPixelFormatDepth32Float_Stencil8;
   }
 }
 

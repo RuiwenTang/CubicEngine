@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.20)
 project(CubicEngine)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 if(WIN32)
 	set(BUILD_SHARED_LIBS TRUE)

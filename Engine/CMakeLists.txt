@@ -64,21 +64,6 @@ target_sources(
 	${CMAKE_CURRENT_LIST_DIR}/src/render/shader_compiler.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/render/shader_compiler.h
 	${CMAKE_CURRENT_LIST_DIR}/src/render/types.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/slang/attribute.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/slang/attribute.h
-	${CMAKE_CURRENT_LIST_DIR}/src/slang/function.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/slang/function.h
-	${CMAKE_CURRENT_LIST_DIR}/src/slang/node.h
-	${CMAKE_CURRENT_LIST_DIR}/src/slang/operation.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/slang/operation.h
-	${CMAKE_CURRENT_LIST_DIR}/src/slang/program.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/slang/program.h
-	${CMAKE_CURRENT_LIST_DIR}/src/slang/statement.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/slang/statement.h
-	${CMAKE_CURRENT_LIST_DIR}/src/slang/types.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/slang/types.h
-	${CMAKE_CURRENT_LIST_DIR}/src/slang/uniform.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/slang/uniform.h
 )
 
 if(APPLE)
@@ -87,8 +72,6 @@ if(APPLE)
 		PRIVATE
 		${CMAKE_CURRENT_LIST_DIR}/src/core/mtl/window_impl_mtl.h
 		${CMAKE_CURRENT_LIST_DIR}/src/core/mtl/window_impl_mtl.mm
-		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/bind_group_mtl.h
-		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/bind_group_mtl.mm
 		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/buffer_mtl.h
 		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/buffer_mtl.mm
 		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/command_buffer_mtl.h

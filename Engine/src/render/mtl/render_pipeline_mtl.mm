@@ -7,9 +7,8 @@
 
 namespace cubic {
 
-RenderPipelineMTL::RenderPipelineMTL(std::shared_ptr<PipelineLayout> layout, id<MTLRenderPipelineState> pipeline,
-                                     id<MTLDepthStencilState> depthStencilState)
-    : RenderPipeline(std::move(layout)), mNativePipeline(pipeline), mDepthStencilState(depthStencilState) {}
+RenderPipelineMTL::RenderPipelineMTL(id<MTLRenderPipelineState> pipeline, id<MTLDepthStencilState> depthStencilState)
+    : RenderPipeline(), mNativePipeline(pipeline), mDepthStencilState(depthStencilState) {}
 
 RenderPipelineMTL::~RenderPipelineMTL() {
   [mDepthStencilState release];
@@ -94,7 +93,7 @@ std::shared_ptr<RenderPipelineMTL> RenderPipelineMTL::Create(RenderPipelineDescr
     return {};
   }
 
-  return std::make_shared<RenderPipelineMTL>(desc->layout, pipeline, depthStencilState);
+  return std::make_shared<RenderPipelineMTL>(pipeline, depthStencilState);
 }
 
 }  // namespace cubic

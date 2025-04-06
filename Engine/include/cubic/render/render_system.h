@@ -39,14 +39,6 @@ class CUBIC_API RenderSystem {
   virtual std::shared_ptr<Texture> CreateTexture(TextureDescirptor* desc) = 0;
 
   virtual std::shared_ptr<Buffer> CreateBuffer(BufferDescriptor* desc) = 0;
-
-  virtual std::shared_ptr<BindGroupLayout> CreateBindGroupLayout(std::vector<GroupEntryInfo> entries) = 0;
-
-  virtual std::shared_ptr<PipelineLayout> CreatePipelineLayout(
-      std::vector<std::shared_ptr<BindGroupLayout>> groups) = 0;
-
-  virtual std::shared_ptr<BindGroup> CreateBindGroup(const std::shared_ptr<BindGroupLayout>& layout,
-                                                     std::vector<GroupEntry> entries) = 0;
 };
 
 }  // namespace cubic

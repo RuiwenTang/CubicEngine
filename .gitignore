@@ -17,4 +17,4 @@ CMakeSettings.json
 out-*
 .idea
 cmake-*
-
+.helix

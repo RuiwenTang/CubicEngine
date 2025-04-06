@@ -46,7 +46,6 @@ class SandboxClient : public WindowClient {
 
     render_pass->SetIndexBuffer(mBuffer, sizeof(float) * 20);
 
-    render_pass->SetBindGroup(0, mColorGroup);
 
     render_pass->DrawElements(6, 0);
 
@@ -135,21 +134,6 @@ class SandboxClient : public WindowClient {
     desc.colorCount = 1;
     desc.pColorTargets = &color1;
     desc.sampleCount = 4;
-
-    auto group = renderSystem->CreateBindGroupLayout({
-        GroupEntryInfo{
-            0,
-            EntryType::kUniformBuffer,
-            ShaderStage::kVertexShader,
-        },
-        GroupEntryInfo{
-            1,
-            EntryType::kUniformBuffer,
-            ShaderStage::kFragmentShader,
-        },
-    });
-
-    desc.layout = renderSystem->CreatePipelineLayout({group});
 
     mPipeline = renderSystem->CreateRenderPipeline(&desc);
   }
@@ -250,27 +234,7 @@ class SandboxClient : public WindowClient {
     mUniformOffset = offset;
   }
 
-  void InitBindGroupIfNeed(RenderSystem *renderSystem) {
-    if (mColorGroup) {
-      return;
-    }
-
-    mColorGroup = renderSystem->CreateBindGroup(
-        mPipeline->GetLayout()->GetGroup(0),
-        {
-            GroupEntry{
-                0,
-                EntryType::kUniformBuffer,
-                BindResource(BufferView{mBuffer, mUniformOffset, sizeof(float) * 16}),
-            },
-            GroupEntry{
-                1,
-                EntryType::kUniformBuffer,
-                BindResource(
-                    BufferView{mBuffer, mUniformOffset + renderSystem->GetMinBufferAlignment(), sizeof(float) * 4}),
-            },
-        });
-  }
+  void InitBindGroupIfNeed(RenderSystem *renderSystem) {}
 
  private:
   uint32_t mFrameNum = 0;
@@ -278,7 +242,6 @@ class SandboxClient : public WindowClient {
   std::shared_ptr<Texture> mMSAATarget = {};
   std::shared_ptr<RenderPipeline> mPipeline = {};
   std::shared_ptr<Buffer> mBuffer = {};
-  std::shared_ptr<BindGroup> mColorGroup = {};
 };
 
 int main(int argc, const char **argv) {

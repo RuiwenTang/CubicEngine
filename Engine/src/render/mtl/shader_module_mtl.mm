@@ -2,11 +2,66 @@
 
 #include <cubic/core/log.h>
 #include <cubic/platform.h>
+#include <algorithm>
 #include <spirv_msl.hpp>
 #include <spirv_parser.hpp>
 #include <spirv_reflect.hpp>
+#include <vector>
 
 namespace cubic {
+
+struct StageEntryInfo {
+  enum class Type {
+    kUnknow,
+    kBuffer,
+    kTexture,
+    kSampler,
+  };
+
+  Type type = Type::kUnknow;
+
+  // binding index in shader
+  uint32_t binding = 0;
+
+  uint32_t slot = 0;
+};
+
+struct StageGroup {
+  uint32_t set = 0;
+
+  std::vector<StageEntryInfo> entries;
+
+  bool AddEntry(StageEntryInfo entry) {
+    auto it = std::find_if(entries.begin(), entries.end(),
+                           [&entry](StageEntryInfo& e) { return e.binding == entry.binding; });
+
+    if (it == entries.end()) {
+      entries.push_back(entry);
+      return true;
+    }
+
+    return false;
+  }
+};
+
+struct StagePipelineInfo {
+  std::vector<StageGroup> groups;
+
+  StageGroup& GetGroup(uint32_t set) {
+    auto it = std::find_if(groups.begin(), groups.end(), [set](StageGroup& g) { return g.set == set; });
+
+    if (it != groups.end()) {
+      return *it;
+    }
+
+    StageGroup group{};
+    group.set = set;
+
+    groups.emplace_back(group);
+
+    return groups.back();
+  }
+};
 
 static void setup_compiler(spirv_cross::CompilerMSL& compiler) {
   auto option = compiler.get_msl_options();
@@ -19,7 +74,7 @@ static void setup_compiler(spirv_cross::CompilerMSL& compiler) {
 
   option.msl_version = spirv_cross::CompilerMSL::Options::make_msl_version(2, 0);
   // use argument buffer to support ** BindGroup **
-  option.argument_buffers = true;
+  option.argument_buffers = false;
 
   compiler.set_msl_options(option);
 }
@@ -29,18 +84,78 @@ static void ensure_bind_group(spirv_cross::CompilerMSL& compiler) {
 
   auto execution_model = compiler.get_execution_model();
 
+  StagePipelineInfo pipeline_info{};
+
+  // skip buffer 0 for vertex shader
+  uint32_t buffer_index = execution_model == spv::ExecutionModelVertex ? 1 : 0;
+  uint32_t texture_index = 0;
+  uint32_t sampler_index = 0;
+
   for (const auto& resource : uniform_resources.uniform_buffers) {
     auto set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
     auto binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
 
-    spirv_cross::MSLResourceBinding newBinding;
-    newBinding.basetype = spirv_cross::SPIRType::BaseType::Void;
-    newBinding.stage = execution_model;
-    newBinding.desc_set = set;
-    newBinding.binding = binding;
-    newBinding.count = 1;
-    newBinding.msl_texture = newBinding.msl_sampler = newBinding.msl_buffer = binding;
-    compiler.add_msl_resource_binding(newBinding);
+    auto& group = pipeline_info.GetGroup(set);
+
+    StageEntryInfo entry{};
+    entry.type = StageEntryInfo::Type::kBuffer;
+    entry.binding = binding;
+    entry.slot = buffer_index++;
+
+    group.AddEntry(entry);
+
+    spirv_cross::MSLResourceBinding binding_info{};
+    binding_info.basetype = spirv_cross::SPIRType::BaseType::Void;
+    binding_info.stage = execution_model;
+    binding_info.desc_set = set;
+    binding_info.binding = binding;
+    binding_info.count = 1;
+    binding_info.msl_buffer = entry.slot;
+
+    compiler.add_msl_resource_binding(binding_info);
+  }
+
+  for (const auto& resource : uniform_resources.separate_images) {
+    auto set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
+    auto binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
+
+    auto& group = pipeline_info.GetGroup(set);
+
+    StageEntryInfo entry{};
+    entry.type = StageEntryInfo::Type::kTexture;
+    entry.binding = binding;
+    group.AddEntry(entry);
+
+    spirv_cross::MSLResourceBinding binding_info{};
+    binding_info.basetype = spirv_cross::SPIRType::BaseType::SampledImage;
+    binding_info.stage = execution_model;
+    binding_info.desc_set = set;
+    binding_info.binding = binding;
+    binding_info.count = 1;
+    binding_info.msl_texture = texture_index++;
+
+    compiler.add_msl_resource_binding(binding_info);
+  }
+
+  for (const auto& resource : uniform_resources.separate_samplers) {
+    auto set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
+    auto binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
+
+    auto& group = pipeline_info.GetGroup(set);
+    StageEntryInfo entry{};
+
+    entry.type = StageEntryInfo::Type::kSampler;
+    entry.binding = binding;
+    group.AddEntry(entry);
+
+    spirv_cross::MSLResourceBinding binding_info{};
+    binding_info.basetype = spirv_cross::SPIRType::BaseType::Sampler;
+    binding_info.stage = execution_model;
+    binding_info.desc_set = set;
+    binding_info.binding = binding;
+    binding_info.count = 1;
+    binding_info.msl_sampler = sampler_index++;
+    compiler.add_msl_resource_binding(binding_info);
   }
 }
 

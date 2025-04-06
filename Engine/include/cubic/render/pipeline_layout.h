@@ -3,27 +3,19 @@
 #include <cubic/platform.h>
 #include <cubic/render/bind_group.h>
 
-#include <memory>
-#include <vector>
-
 namespace cubic {
 
+class BindGroupLayout;
+
 class CUBIC_API PipelineLayout {
+  friend class RenderSystemPriv;
+
  public:
-  PipelineLayout(std::vector<std::shared_ptr<BindGroupLayout>> groups) : mGroups(std::move(groups)) {}
+  PipelineLayout() {}
 
   virtual ~PipelineLayout() = default;
 
-  std::shared_ptr<BindGroupLayout> GetGroup(uint32_t index) {
-    if (index < mGroups.size()) {
-      return mGroups[index];
-    }
-
-    return {};
-  }
-
- private:
-  std::vector<std::shared_ptr<BindGroupLayout>> mGroups;
+  virtual const BindGroupLayout* GetBindGroupLayout(uint32_t slot) const = 0;
 };
 
 }  // namespace cubic

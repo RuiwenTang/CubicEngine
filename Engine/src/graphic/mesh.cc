@@ -51,55 +51,7 @@ void Mesh::Draw(RenderPass* renderPass) {
   renderPass->DrawElements(mGeometry->indexData.size(), 0);
 }
 
-bool Mesh::PreparePipeline(RenderSystem* renderSystem, const RenderContextInfo& context) {
-  if (mRenderPipeline) {
-    return true;
-  }
-
-  ShaderGenerator sg{mGeometry.get(), mMaterial.get()};
-
-  sg.GetConfigration().has_model_matrix = true;
-
-  if (!sg.Prepare()) {
-    return false;
-  }
-
-  auto vs = gen_shader(ShaderStage::kVertexShader, sg.GenVertexShader(), renderSystem);
-  auto fs = gen_shader(ShaderStage::kFragmentShader, sg.GenFragmentShader(), renderSystem);
-
-  if (!vs || !fs) {
-    return false;
-  }
-
-  RenderPipelineDescriptor desc{};
-
-  desc.vertexShader = vs;
-  desc.fragmentShader = fs;
-  desc.vertexBuffer = sg.GenVertexBufferLayout();
-  desc.layout = sg.GenPipelineLayout(renderSystem);
-
-  // TODO pass sample count to mesh
-  desc.sampleCount = 4;
-
-  ColorTargetState colorTarget{};
-  colorTarget.format = context.colorFormat;
-
-  desc.colorCount = 1;
-  desc.pColorTargets = &colorTarget;
-
-  DepthStencilState depthStencilState{};
-  if (context.depthFormat != TextureFormat::kInvalid) {
-    depthStencilState.depthWriteEnable = true;
-    depthStencilState.depthCompare = CompareFunction::kLess;
-    depthStencilState.format = context.depthFormat;
-
-    desc.depthStencil = &depthStencilState;
-  }
-
-  mRenderPipeline = renderSystem->CreateRenderPipeline(&desc);
-
-  return mRenderPipeline != nullptr;
-}
+bool Mesh::PreparePipeline(RenderSystem* renderSystem, const RenderContextInfo& context) { return false; }
 
 bool Mesh::PrepareBuffer(RenderSystem* renderSystem) {
   if (mRenderData == nullptr) {
@@ -249,48 +201,6 @@ void Mesh::UpdateBuffer(RenderSystem* renderSystem) {
   }
 }
 
-bool Mesh::PrepareBindings(RenderSystem* renderSystem) {
-  // TODO support mark dirty
-
-  if (mVertexBinding != nullptr && mMaterialBinding != nullptr) {
-    return true;
-  }
-
-  if (mVertexBinding == nullptr) {
-    auto layout = mRenderPipeline->GetLayout()->GetGroup(0);
-
-    std::vector<GroupEntry> entries{};
-
-    entries.emplace_back(GroupEntry{
-        0,
-        EntryType::kUniformBuffer,
-        BindResource{
-            mMeshUniforms[0],
-        },
-    });
-
-    mVertexBinding = renderSystem->CreateBindGroup(layout, std::move(entries));
-  }
-
-  if (mMaterialBinding == nullptr) {
-    auto layout = mRenderPipeline->GetLayout()->GetGroup(1);
-
-    std::vector<GroupEntry> entries{};
-
-    for (size_t i = 0; i < mMaterialUniforms.size(); i++) {
-      entries.emplace_back(GroupEntry{
-          static_cast<uint32_t>(i),
-          EntryType::kUniformBuffer,
-          BindResource{
-              mMaterialUniforms[i],
-          },
-      });
-    }
-
-    mMaterialBinding = renderSystem->CreateBindGroup(layout, std::move(entries));
-  }
-
-  return true;
-}
+bool Mesh::PrepareBindings(RenderSystem* renderSystem) { return true; }
 
 }  // namespace cubic

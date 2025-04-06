@@ -2,7 +2,6 @@
 
 #import <Metal/Metal.h>
 #include "cubic/render/render_system.h"
-#include "render/mtl/bind_group_mtl.h"
 #include "render/mtl/buffer_mtl.h"
 #include "render/mtl/command_queue_mtl.h"
 #include "render/mtl/render_pipeline_mtl.h"
@@ -85,15 +84,6 @@ std::shared_ptr<Buffer> RenderSystemMTL::CreateBuffer(BufferDescriptor* desc) {
 std::shared_ptr<ShaderModule> RenderSystemMTL::CompileBackendShader(ShaderModuleDescriptor* desc,
                                                                     const std::vector<uint32_t>& spv) {
   return ShaderModuleMTL::Compile(mPriv->GetNativeGPU(), desc, spv);
-}
-
-std::shared_ptr<BindGroup> RenderSystemMTL::CreateBindGroup(const std::shared_ptr<BindGroupLayout>& layout,
-                                                            std::vector<GroupEntry> entries) {
-  if (entries.empty()) {
-    return {};
-  }
-
-  return BindGroupMTL::Create(layout, std::move(entries), mPriv->GetNativeGPU());
 }
 
 }  // namespace cubic

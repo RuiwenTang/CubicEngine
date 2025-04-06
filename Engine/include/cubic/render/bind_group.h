@@ -32,18 +32,6 @@ struct GroupEntry {
   BindResource resource = {};
 };
 
-class CUBIC_API BindGroupLayout {
- public:
-  BindGroupLayout(std::vector<GroupEntryInfo> entries) : mEntries(std::move(entries)) {}
-
-  virtual ~BindGroupLayout() = default;
-
-  const std::vector<GroupEntryInfo>& GetEntries() const { return mEntries; }
-
- private:
-  std::vector<GroupEntryInfo> mEntries;
-};
-
 class CUBIC_API BindGroup {
  public:
   virtual ~BindGroup() = default;

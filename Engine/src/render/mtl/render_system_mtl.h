@@ -30,9 +30,6 @@ class RenderSystemMTL : public RenderSystemPriv {
 
   std::shared_ptr<Buffer> CreateBuffer(BufferDescriptor* desc) override;
 
-  std::shared_ptr<BindGroup> CreateBindGroup(const std::shared_ptr<BindGroupLayout>& layout,
-                                             std::vector<GroupEntry> entries) override;
-
   bool Init();
 
  protected:

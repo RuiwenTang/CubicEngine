@@ -23,10 +23,6 @@ class RenderSystemPriv : public RenderSystem {
 
   std::shared_ptr<ShaderModule> CreateShaderModule(ShaderModuleDescriptor* desc) override;
 
-  std::shared_ptr<BindGroupLayout> CreateBindGroupLayout(std::vector<GroupEntryInfo> entries) override;
-
-  std::shared_ptr<PipelineLayout> CreatePipelineLayout(std::vector<std::shared_ptr<BindGroupLayout>> groups) override;
-
  protected:
   virtual std::shared_ptr<ShaderModule> CompileBackendShader(ShaderModuleDescriptor* desc,
                                                              const std::vector<uint32_t>& spv) = 0;

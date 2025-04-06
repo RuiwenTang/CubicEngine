@@ -5,7 +5,6 @@
 #include <cubic/render/shader_module.h>
 #include <cubic/render/types.h>
 
-#include <memory>
 #include <vector>
 
 namespace cubic {
@@ -30,7 +29,6 @@ struct RenderPipelineDescriptor {
   std::vector<VertexBufferLayout> vertexBuffer = {};
   std::shared_ptr<ShaderModule> vertexShader = {};
   std::shared_ptr<ShaderModule> fragmentShader = {};
-  std::shared_ptr<PipelineLayout> layout = {};
   DepthStencilState* depthStencil = {};
   uint32_t colorCount = 0;
   ColorTargetState* pColorTargets = {};
@@ -39,7 +37,7 @@ struct RenderPipelineDescriptor {
 
 class CUBIC_API RenderPipeline {
  public:
-  RenderPipeline(std::shared_ptr<PipelineLayout> layout) : mLayout(std::move(layout)) {}
+  RenderPipeline() {}
 
   virtual ~RenderPipeline() = default;
 
