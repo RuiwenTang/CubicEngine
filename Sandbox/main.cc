@@ -13,11 +13,11 @@ class SandboxClient : public WindowClient {
   void OnWindowUpdate(const std::shared_ptr<Texture> &surfaceTexture, RenderSystem *renderSystem) override {
     InitMSAATextureIfNeed(renderSystem, surfaceTexture);
 
-    InitPipelineIfNeed(renderSystem, surfaceTexture->GetDescriptor().format);
+    // InitPipelineIfNeed(renderSystem, surfaceTexture->GetDescriptor().format);
 
     InitBufferIfNeed(renderSystem);
 
-    InitBindGroupIfNeed(renderSystem);
+    // InitBindGroupIfNeed(renderSystem);
 
     auto queue = renderSystem->GetCommandQueue(QueueType::kGraphic);
 
@@ -40,14 +40,13 @@ class SandboxClient : public WindowClient {
 
     auto render_pass = cmd->BeginRenderPass(desc);
 
-    render_pass->BindPipeline(mPipeline);
+    // render_pass->BindPipeline(mPipeline);
 
     render_pass->SetVertexBuffer(mBuffer, 0, 0);
 
     render_pass->SetIndexBuffer(mBuffer, sizeof(float) * 20);
 
-
-    render_pass->DrawElements(6, 0);
+    //  render_pass->DrawElements(6, 0);
 
     cmd->EndRenderPass(std::move(render_pass));
 

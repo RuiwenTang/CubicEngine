@@ -131,34 +131,6 @@ std::shared_ptr<Buffer> RenderSystemVk::CreateBuffer(BufferDescriptor* desc) {
   return BufferVK::Create(desc, mAllocator);
 }
 
-std::shared_ptr<BindGroupLayout> RenderSystemVk::CreateBindGroupLayout(std::vector<GroupEntryInfo> entries) {
-  return BindGroupLayoutVK::Create(std::move(entries), mDevice.get());
-}
-
-std::shared_ptr<PipelineLayout> RenderSystemVk::CreatePipelineLayout(
-    std::vector<std::shared_ptr<BindGroupLayout>> groups) {
-  return PipelineLayoutVK::Create(std::move(groups), mDevice.get());
-}
-
-std::shared_ptr<BindGroup> RenderSystemVk::CreateBindGroup(const std::shared_ptr<BindGroupLayout>& layout,
-                                                           std::vector<GroupEntry> entries) {
-  // TODO: implement BindGroup
-  if (mPool == nullptr) {
-    mPool = BindGroupPool::Create(mDevice.get());
-  }
-
-  auto bind_group = mPool->Allocate(layout, entries);
-
-  if (bind_group == nullptr) {
-    // try again
-    mPool = BindGroupPool::Create(mDevice.get());
-
-    bind_group = mPool->Allocate(layout, entries);
-  }
-
-  return bind_group;
-}
-
 std::shared_ptr<ShaderModule> RenderSystemVk::CompileBackendShader(ShaderModuleDescriptor* desc,
                                                                    const std::vector<uint32_t>& spv) {
   return ShaderModuleVK::Compile(mDevice.get(), spv, desc);

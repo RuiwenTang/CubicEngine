@@ -8,7 +8,7 @@ namespace cubic {
 
 class RenderPipelineVK : public RenderPipeline {
  public:
-  RenderPipelineVK(std::shared_ptr<PipelineLayout> layout, VulkanDevice* device, VkPipeline pipeline);
+  RenderPipelineVK(VulkanDevice* device, VkPipeline pipeline);
 
   ~RenderPipelineVK() override;
 

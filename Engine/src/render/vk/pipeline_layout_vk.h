@@ -18,6 +18,8 @@ class PipelineLayoutVK : public PipelineLayout {
   static std::shared_ptr<PipelineLayout> Create(std::vector<std::shared_ptr<BindGroupLayout>> groups,
                                                 VulkanDevice* device);
 
+  const BindGroupLayout* GetBindGroupLayout(uint32_t slot) const override { return nullptr; }
+
  private:
   VulkanDevice* mDevice;
   VkPipelineLayout mLayout;
