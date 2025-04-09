@@ -41,10 +41,7 @@ class CUBIC_API RenderPipeline {
 
   virtual ~RenderPipeline() = default;
 
-  const std::shared_ptr<PipelineLayout>& GetLayout() const { return mLayout; }
-
- private:
-  std::shared_ptr<PipelineLayout> mLayout;
+  virtual const PipelineLayout* GetLayout() const = 0;
 };
 
 }  // namespace cubic

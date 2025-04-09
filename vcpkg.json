@@ -12,8 +12,12 @@
       "platform": "windows"
     },
     {
-      "name": "vulkan-memory-allocator",
-      "platform": "windows|linux"
+        "name": "vulkan-memory-allocator",
+        "platform": "windows|linux"
+    },
+    {
+        "name": "spirv-reflect",
+        "platform": "windows|linux"
     },
     {
       "name": "spirv-cross",

@@ -12,6 +12,8 @@ class RenderPipelineVK : public RenderPipeline {
 
   ~RenderPipelineVK() override;
 
+  const PipelineLayout* GetLayout() const override { return nullptr; }
+
   static std::shared_ptr<RenderPipelineVK> Create(VulkanDevice* device, RenderPipelineDescriptor* desc);
 
   void Bind(VkCommandBuffer cmd);

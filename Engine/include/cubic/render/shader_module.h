@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cubic/platform.h>
+#include <cubic/render/pipeline_layout.h>
 #include <cubic/render/types.h>
 
 #include <string>
@@ -15,7 +16,8 @@ struct ShaderModuleDescriptor {
 
 class CUBIC_API ShaderModule {
  public:
-  ShaderModule(ShaderStage stage, std::string label) : mStage(stage), mLabel(std::move(label)) {}
+  ShaderModule(ShaderStage stage, std::string label, std::vector<BindGroupLayout> groups)
+      : mStage(stage), mLabel(std::move(label)), mGroups(std::move(groups)) {}
 
   virtual ~ShaderModule() = default;
 
@@ -23,9 +25,12 @@ class CUBIC_API ShaderModule {
 
   const std::string& GetLabel() const { return mLabel; }
 
+  const std::vector<BindGroupLayout>& GetGroups() const { return mGroups; }
+
  private:
   ShaderStage mStage;
   std::string mLabel;
+  std::vector<BindGroupLayout> mGroups;
 };
 
 }  // namespace cubic

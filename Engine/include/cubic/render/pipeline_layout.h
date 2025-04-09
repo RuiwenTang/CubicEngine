@@ -3,9 +3,9 @@
 #include <cubic/platform.h>
 #include <cubic/render/bind_group.h>
 
-namespace cubic {
+#include <vector>
 
-class BindGroupLayout;
+namespace cubic {
 
 class CUBIC_API PipelineLayout {
   friend class RenderSystemPriv;
@@ -14,8 +14,6 @@ class CUBIC_API PipelineLayout {
   PipelineLayout() {}
 
   virtual ~PipelineLayout() = default;
-
-  virtual const BindGroupLayout* GetBindGroupLayout(uint32_t slot) const = 0;
 };
 
 }  // namespace cubic

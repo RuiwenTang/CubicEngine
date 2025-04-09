@@ -13,7 +13,7 @@ class SandboxClient : public WindowClient {
   void OnWindowUpdate(const std::shared_ptr<Texture> &surfaceTexture, RenderSystem *renderSystem) override {
     InitMSAATextureIfNeed(renderSystem, surfaceTexture);
 
-    // InitPipelineIfNeed(renderSystem, surfaceTexture->GetDescriptor().format);
+    InitPipelineIfNeed(renderSystem, surfaceTexture->GetDescriptor().format);
 
     InitBufferIfNeed(renderSystem);
 

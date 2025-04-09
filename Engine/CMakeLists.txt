@@ -140,6 +140,10 @@ else()
 
 	target_link_libraries(CubicEngine PRIVATE volk::volk)
 
+	# spirv-reflect
+	find_package(unofficial-spirv-reflect CONFIG REQUIRED)
+	target_link_libraries(CubicEngine PRIVATE unofficial::spirv-reflect)
+
 	# vma
 	find_package(VulkanMemoryAllocator CONFIG REQUIRED)
 	target_link_libraries(CubicEngine PRIVATE GPUOpen::VulkanMemoryAllocator)

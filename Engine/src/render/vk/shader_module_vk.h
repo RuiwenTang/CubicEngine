@@ -6,7 +6,8 @@ namespace cubic {
 
 class ShaderModuleVK : public ShaderModule {
  public:
-  ShaderModuleVK(ShaderStage stage, std::string label, VulkanDevice* device, VkShaderModule shader);
+  ShaderModuleVK(ShaderStage stage, std::string label, std::vector<BindGroupLayout> groups, VulkanDevice* device,
+                 VkShaderModule shader);
 
   ~ShaderModuleVK() override;
 

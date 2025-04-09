@@ -9,20 +9,18 @@ class VulkanDevice;
 
 class PipelineLayoutVK : public PipelineLayout {
  public:
-  PipelineLayoutVK(std::vector<std::shared_ptr<BindGroupLayout>> groups, VulkanDevice* device, VkPipelineLayout layout);
+  PipelineLayoutVK(VulkanDevice* device, VkPipelineLayout layout, std::vector<VkDescriptorSetLayout> setLayouts);
 
   ~PipelineLayoutVK() override;
 
   VkPipelineLayout GetNativeLayout() const { return mLayout; }
 
-  static std::shared_ptr<PipelineLayout> Create(std::vector<std::shared_ptr<BindGroupLayout>> groups,
-                                                VulkanDevice* device);
-
-  const BindGroupLayout* GetBindGroupLayout(uint32_t slot) const override { return nullptr; }
+  static std::unique_ptr<PipelineLayout> Create(const std::vector<BindGroupLayout>& groups, VulkanDevice* device);
 
  private:
   VulkanDevice* mDevice;
   VkPipelineLayout mLayout;
+  std::vector<VkDescriptorSetLayout> mSetLayouts;
 };
 
 }  // namespace cubic

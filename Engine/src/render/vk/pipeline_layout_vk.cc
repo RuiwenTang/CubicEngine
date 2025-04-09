@@ -7,23 +7,87 @@
 
 namespace cubic {
 
-PipelineLayoutVK::PipelineLayoutVK(std::vector<std::shared_ptr<BindGroupLayout>> groups, VulkanDevice* device,
-                                   VkPipelineLayout layout)
-    : PipelineLayout(), mDevice(device), mLayout(layout) {}
+std::vector<VkDescriptorSetLayout> CreateSetLayouts(VulkanDevice* device, const std::vector<BindGroupLayout>& layouts) {
+  if (layouts.empty()) {
+    return {};
+  }
+
+  std::vector<VkDescriptorSetLayout> ret{layouts.size()};
+
+  for (size_t i = 0; i < ret.size(); i++) {
+    const auto& layout = layouts[i];
+
+    std::vector<VkDescriptorSetLayoutBinding> bindings{layout.GetEntries().size()};
+
+    for (size_t j = 0; j < bindings.size(); j++) {
+      const auto& entry = layout.GetEntries()[j];
+      bindings[j].binding = entry.binding;
+
+      bindings[j].descriptorCount = 1;
+      bindings[j].pImmutableSamplers = nullptr;
+
+      if (entry.visibility & ShaderStage::kVertexShader) {
+        bindings[j].stageFlags |= VK_SHADER_STAGE_VERTEX_BIT;
+      }
+
+      if (entry.visibility & ShaderStage::kFragmentShader) {
+        bindings[j].stageFlags |= VK_SHADER_STAGE_FRAGMENT_BIT;
+      }
+
+      if (entry.visibility & ShaderStage::kComputeShader) {
+        bindings[j].stageFlags |= VK_SHADER_STAGE_COMPUTE_BIT;
+      }
+
+      switch (entry.type) {
+        case EntryType::kUniformBuffer:
+          bindings[j].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+          break;
+        case EntryType::kStorgeBuffer:
+          bindings[j].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+          break;
+        case EntryType::kCombinedImageSampler:
+          bindings[j].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+          break;
+        case EntryType::kTexture:
+          bindings[j].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+          break;
+        case EntryType::kSampler:
+          bindings[j].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+          break;
+      }
+    }
+
+    VkDescriptorSetLayoutCreateInfo create_info{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO};
+    create_info.bindingCount = static_cast<uint32_t>(bindings.size());
+    create_info.pBindings = bindings.data();
+
+    auto result = vkCreateDescriptorSetLayout(device->GetLogicalDevice(), &create_info, nullptr, &ret[i]);
+
+    if (result != VK_SUCCESS) {
+      CUB_ERROR("[Vulkan backend] failed create descriptor set layout !!");
+      return {};
+    }
+  }
+
+  return ret;
+}
+
+PipelineLayoutVK::PipelineLayoutVK(VulkanDevice* device, VkPipelineLayout layout,
+                                   std::vector<VkDescriptorSetLayout> setLayouts)
+    : PipelineLayout(), mDevice(device), mLayout(layout), mSetLayouts(std::move(setLayouts)) {}
 
 PipelineLayoutVK::~PipelineLayoutVK() { vkDestroyPipelineLayout(mDevice->GetLogicalDevice(), mLayout, nullptr); }
 
-std::shared_ptr<PipelineLayout> PipelineLayoutVK::Create(std::vector<std::shared_ptr<BindGroupLayout>> groups,
+std::unique_ptr<PipelineLayout> PipelineLayoutVK::Create(const std::vector<BindGroupLayout>& groups,
                                                          VulkanDevice* device) {
   VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
   pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
   pipelineLayoutInfo.pushConstantRangeCount = 0;
   pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
-  pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(groups.size());
+  std::vector<VkDescriptorSetLayout> set_layouts = CreateSetLayouts(device, groups);
 
-  std::vector<VkDescriptorSetLayout> set_layouts{};
-
+  pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(set_layouts.size());
   pipelineLayoutInfo.pSetLayouts = set_layouts.data();
 
   VkPipelineLayout layout = VK_NULL_HANDLE;
@@ -34,7 +98,7 @@ std::shared_ptr<PipelineLayout> PipelineLayoutVK::Create(std::vector<std::shared
     return {};
   }
 
-  return std::make_shared<PipelineLayoutVK>(std::move(groups), device, layout);
+  return std::make_unique<PipelineLayoutVK>(device, layout, set_layouts);
 }
 
 }  // namespace cubic
