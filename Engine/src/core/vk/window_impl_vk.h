@@ -42,6 +42,8 @@ class WindowImplVK : public WindowImpl {
   VkSemaphore mPresentComplete = VK_NULL_HANDLE;
   VkSemaphore mRenderComplete = VK_NULL_HANDLE;
 
+  VkFence mSwapchainFence = VK_NULL_HANDLE;
+
   std::shared_ptr<TextureVK> mCurrentFrame = {};
 };
 

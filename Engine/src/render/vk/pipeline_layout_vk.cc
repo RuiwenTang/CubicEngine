@@ -76,10 +76,16 @@ PipelineLayoutVK::PipelineLayoutVK(VulkanDevice* device, VkPipelineLayout layout
                                    std::vector<VkDescriptorSetLayout> setLayouts)
     : PipelineLayout(), mDevice(device), mLayout(layout), mSetLayouts(std::move(setLayouts)) {}
 
-PipelineLayoutVK::~PipelineLayoutVK() { vkDestroyPipelineLayout(mDevice->GetLogicalDevice(), mLayout, nullptr); }
+PipelineLayoutVK::~PipelineLayoutVK() {
+  vkDestroyPipelineLayout(mDevice->GetLogicalDevice(), mLayout, nullptr);
 
-std::unique_ptr<PipelineLayout> PipelineLayoutVK::Create(const std::vector<BindGroupLayout>& groups,
-                                                         VulkanDevice* device) {
+  for (auto& setLayout : mSetLayouts) {
+    vkDestroyDescriptorSetLayout(mDevice->GetLogicalDevice(), setLayout, nullptr);
+  }
+}
+
+std::unique_ptr<PipelineLayoutVK> PipelineLayoutVK::Create(const std::vector<BindGroupLayout>& groups,
+                                                           VulkanDevice* device) {
   VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
   pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
   pipelineLayoutInfo.pushConstantRangeCount = 0;

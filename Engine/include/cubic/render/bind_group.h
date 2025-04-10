@@ -37,6 +37,8 @@ class BindGroupLayout {
 
   const std::vector<GroupEntryInfo>& GetEntries() const { return mEntries; }
 
+  std::vector<GroupEntryInfo>& GetEntries() { return mEntries; }
+
   void AddBinding(uint32_t binding, EntryType type, ShaderStageMask visibility) {
     mEntries.push_back({binding, type, visibility});
   }

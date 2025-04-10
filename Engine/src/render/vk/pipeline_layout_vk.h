@@ -15,7 +15,7 @@ class PipelineLayoutVK : public PipelineLayout {
 
   VkPipelineLayout GetNativeLayout() const { return mLayout; }
 
-  static std::unique_ptr<PipelineLayout> Create(const std::vector<BindGroupLayout>& groups, VulkanDevice* device);
+  static std::unique_ptr<PipelineLayoutVK> Create(const std::vector<BindGroupLayout>& groups, VulkanDevice* device);
 
  private:
   VulkanDevice* mDevice;

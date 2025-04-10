@@ -4,9 +4,9 @@
 
 #include <vector>
 
+#include "render/vk/command_queue_vk.h"
 #include "render/vk/render_system_vk.h"
 #include "render/vk/vulkan_device.h"
-#include "render/vk/command_queue_vk.h"
 
 namespace cubic {
 
@@ -62,6 +62,10 @@ void WindowImplVK::Terminate() {
     vkDestroySemaphore(mDevice->GetLogicalDevice(), mPresentComplete, nullptr);
   }
 
+  if (mSwapchainFence) {
+    vkDestroyFence(mDevice->GetLogicalDevice(), mSwapchainFence, nullptr);
+  }
+
   mSwapchain.reset();
 
   if (mSurface) {
@@ -70,8 +74,11 @@ void WindowImplVK::Terminate() {
 }
 
 std::shared_ptr<Texture> WindowImplVK::AcquireTexture() {
-  auto state = mSwapchain->AcquireNextFrame(mPresentComplete, VK_NULL_HANDLE);
+  auto state = mSwapchain->AcquireNextFrame(VK_NULL_HANDLE, mSwapchainFence);
 
+  vkWaitForFences(mDevice->GetLogicalDevice(), 1, &mSwapchainFence, VK_TRUE, UINT64_MAX);
+
+  vkResetFences(mDevice->GetLogicalDevice(), 1, &mSwapchainFence);
   if (state.state != VK_SUCCESS) {
     return std::shared_ptr<Texture>();
   }
@@ -137,6 +144,15 @@ bool WindowImplVK::CreateVkSemaphore() {
     return false;
   }
 
+  {
+    VkFenceCreateInfo fence_info{};
+    fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+
+    if (vkCreateFence(mDevice->GetLogicalDevice(), &fence_info, nullptr, &mSwapchainFence) != VK_SUCCESS) {
+      return false;
+    }
+  }
+
   return true;
 }
 
@@ -147,7 +163,7 @@ void WindowImplVK::SwapWindowBuffer() {
 
   auto vk_texture = dynamic_cast<TextureVK*>(mCurrentFrame.get());
 
-  mSwapchain->SubmitFrame(mDevice->GetTransferQueue(), std::move(mCurrentFrame), mPresentComplete);
+  mSwapchain->SubmitFrame(mDevice->GetTransferQueue(), std::move(mCurrentFrame), VK_NULL_HANDLE);
 }
 
 }  // namespace cubic

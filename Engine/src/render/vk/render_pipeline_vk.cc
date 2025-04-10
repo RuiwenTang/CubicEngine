@@ -10,8 +10,39 @@
 
 namespace cubic {
 
-RenderPipelineVK::RenderPipelineVK(VulkanDevice* device, VkPipeline pipeline)
-    : RenderPipeline(), mDevice(device), mPipeline(pipeline) {}
+std::vector<BindGroupLayout> MergeBindGroup(const std::vector<BindGroupLayout>& a,
+                                            const std::vector<BindGroupLayout>& b) {
+  std::vector<BindGroupLayout> result = a;
+
+  for (const auto& group : b) {
+    for (auto& existingGroup : result) {
+      if (existingGroup.GetIndex() != group.GetIndex()) {
+        continue;
+      }
+
+      for (const auto& entry : group.GetEntries()) {
+        for (auto& existingEntry : existingGroup.GetEntries()) {
+          if (existingEntry.binding == entry.binding) {
+            if (existingEntry.type != entry.type) {
+              CUB_ERROR("[Vulkan backend] Bind group entry type mismatch: {} vs {}",
+                        static_cast<uint32_t>(existingEntry.type), static_cast<uint32_t>(entry.type));
+              return {};
+            }
+
+            existingEntry.visibility |= entry.visibility;
+          } else {
+            existingGroup.GetEntries().push_back(entry);
+          }
+        }
+      }
+    }
+  }
+
+  return result;
+}
+
+RenderPipelineVK::RenderPipelineVK(VulkanDevice* device, VkPipeline pipeline, std::unique_ptr<PipelineLayoutVK> layout)
+    : RenderPipeline(), mDevice(device), mPipeline(pipeline), mLayout(std::move(layout)) {}
 
 RenderPipelineVK::~RenderPipelineVK() { vkDestroyPipeline(mDevice->GetLogicalDevice(), mPipeline, nullptr); }
 
@@ -177,6 +208,17 @@ std::shared_ptr<RenderPipelineVK> RenderPipelineVK::Create(VulkanDevice* device,
 
   create_info.pNext = &rendering_info;
 
+  auto groups = MergeBindGroup(desc->vertexShader->GetGroups(), desc->fragmentShader->GetGroups());
+
+  auto layout = PipelineLayoutVK::Create(groups, device);
+
+  if (!layout) {
+    CUB_ERROR("[Vulkan backend] failed create pipeline layout !!");
+    return {};
+  }
+
+  create_info.layout = layout->GetNativeLayout();
+
   VkPipeline pipeline = VK_NULL_HANDLE;
 
   if (auto ret = vkCreateGraphicsPipelines(device->GetLogicalDevice(), nullptr, 1, &create_info, nullptr, &pipeline) !=
@@ -185,7 +227,7 @@ std::shared_ptr<RenderPipelineVK> RenderPipelineVK::Create(VulkanDevice* device,
     return {};
   }
 
-  return std::make_shared<RenderPipelineVK>(device, pipeline);
+  return std::make_shared<RenderPipelineVK>(device, pipeline, std::move(layout));
 }
 
 void RenderPipelineVK::Bind(VkCommandBuffer cmd) { vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipeline); }
