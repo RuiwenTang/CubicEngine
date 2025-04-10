@@ -7,7 +7,8 @@
 
 namespace cubic {
 
-RenderPassVK::RenderPassVK(VulkanDevice* device, VkCommandBuffer cmd) : mDevice(device), mCMD(cmd) {}
+RenderPassVK::RenderPassVK(VulkanDevice* device, VkCommandBuffer cmd)
+    : mDevice(device), mCMD(cmd), mBindGroupPool(BindGroupPool::Create(mDevice)) {}
 
 void RenderPassVK::BindPipeline(const std::shared_ptr<RenderPipeline>& pipeline) {
   auto vk_pipeline = dynamic_cast<RenderPipelineVK*>(pipeline.get());
@@ -29,17 +30,21 @@ void RenderPassVK::SetIndexBuffer(const std::shared_ptr<Buffer>& buffer, uint64_
   vkCmdBindIndexBuffer(mCMD, native_buffer, offset, VK_INDEX_TYPE_UINT32);
 }
 
-void RenderPassVK::SetBindGroup(uint32_t slot, const std::shared_ptr<BindGroup>& group) {
+void RenderPassVK::SetBindGroup(const PipelineLayout* layout, uint32_t slot, const BindGroup& group) {
   // TODO: implement this function
-  auto group_vk = dynamic_cast<BindGroupVK*>(group.get());
+  auto vk_layout = dynamic_cast<const PipelineLayoutVK*>(layout);
 
-  if (group_vk == nullptr) {
+  if (vk_layout == nullptr) {
     return;
   }
 
-  auto descriptorSet = group_vk->GetNativeSet();
+  auto descriptor_set = mBindGroupPool->Allocate(vk_layout, slot, group);
 
-  vkCmdBindDescriptorSets(mCMD, VK_PIPELINE_BIND_POINT_GRAPHICS, group_vk->GetPipelineLayout(), slot, 1, &descriptorSet,
+  if (descriptor_set == VK_NULL_HANDLE) {
+    return;
+  }
+
+  vkCmdBindDescriptorSets(mCMD, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_layout->GetNativeLayout(), slot, 1, &descriptor_set,
                           0, nullptr);
 }
 

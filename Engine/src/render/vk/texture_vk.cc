@@ -67,6 +67,10 @@ std::shared_ptr<Texture> TextureVK::Create(TextureDescirptor* desc, VmaAllocator
   allocation_info.usage = VMA_MEMORY_USAGE_AUTO;
   allocation_info.preferredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
+  if (desc->usage & TextureUsage::kRenderTarget && desc->sample_count > 1) {
+    allocation_info.preferredFlags |= VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT;
+  }
+
   VkImage image = VK_NULL_HANDLE;
   VmaAllocation allocation = VK_NULL_HANDLE;
   if (vmaCreateImage(allocator, &image_info, &allocation_info, &image, &allocation, nullptr) != VK_SUCCESS) {

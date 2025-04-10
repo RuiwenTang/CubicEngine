@@ -7,6 +7,8 @@
 #include <memory>
 #include <vector>
 
+#include "render/vk/bind_group_vk.h"
+
 namespace cubic {
 
 class VulkanDevice;
@@ -30,13 +32,17 @@ class CommandBufferVK : public CommandBuffer {
 
  private:
   void RecordResource(const std::shared_ptr<Buffer>& buffer);
+  void RecordResource(const std::shared_ptr<Texture>& texture);
+  void RecordResource(const std::shared_ptr<BindGroupPool>& bind_group_pool);
 
  private:
   VulkanDevice* mDevice;
   VkCommandBuffer mCmd;
   // signaled value when cmd finished
   uint64_t mSignalValue;
-  std::vector<std::shared_ptr<Buffer>> mPendingResources = {};
+  std::vector<std::shared_ptr<Buffer>> mPendingBuffers = {};
+  std::vector<std::shared_ptr<Texture>> mPendingTextures = {};
+  std::vector<std::shared_ptr<BindGroupPool>> mPendingBindGroupPools = {};
 };
 
 }  // namespace cubic

@@ -107,4 +107,13 @@ std::unique_ptr<PipelineLayoutVK> PipelineLayoutVK::Create(const std::vector<Bin
   return std::make_unique<PipelineLayoutVK>(device, layout, set_layouts);
 }
 
+VkDescriptorSetLayout PipelineLayoutVK::GetNativeSetLayout(uint32_t index) const {
+  if (index >= mSetLayouts.size()) {
+    CUB_ERROR("[Vulkan backend] index out of range !!");
+    return VK_NULL_HANDLE;
+  }
+
+  return mSetLayouts[index];
+}
+
 }  // namespace cubic

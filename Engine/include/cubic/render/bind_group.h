@@ -56,9 +56,23 @@ struct GroupEntry {
   BindResource resource = {};
 };
 
-class CUBIC_API BindGroup {
+class CUBIC_API BindGroup final {
  public:
-  virtual ~BindGroup() = default;
+  explicit BindGroup(uint32_t index) : mIndex(index) {}
+
+  ~BindGroup() = default;
+
+  void AddBinding(uint32_t binding, EntryType type, const BindResource& resource) {
+    mEntries.push_back({binding, type, resource});
+  }
+
+  uint32_t GetIndex() const { return mIndex; }
+
+  const std::vector<GroupEntry>& GetEntries() const { return mEntries; }
+
+ private:
+  uint32_t mIndex;
+  std::vector<GroupEntry> mEntries;
 };
 
 }  // namespace cubic

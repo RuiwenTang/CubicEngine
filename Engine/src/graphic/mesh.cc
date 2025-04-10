@@ -45,8 +45,8 @@ void Mesh::Draw(RenderPass* renderPass) {
   renderPass->SetIndexBuffer(mIndexData.buffer, mIndexData.offset);
 
   // setup binding group
-  renderPass->SetBindGroup(0, mVertexBinding);
-  renderPass->SetBindGroup(1, mMaterialBinding);
+  // renderPass->SetBindGroup(0, mVertexBinding);
+  // renderPass->SetBindGroup(1, mMaterialBinding);
 
   renderPass->DrawElements(mGeometry->indexData.size(), 0);
 }

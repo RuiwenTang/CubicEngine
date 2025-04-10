@@ -3,6 +3,8 @@
 #include <cubic/render/render_pass.h>
 #include <volk.h>
 
+#include "render/vk/bind_group_vk.h"
+
 namespace cubic {
 
 class VulkanDevice;
@@ -19,7 +21,7 @@ class RenderPassVK : public RenderPass {
 
   void SetIndexBuffer(const std::shared_ptr<Buffer>& buffer, uint64_t offset) override;
 
-  void SetBindGroup(uint32_t slot, const std::shared_ptr<BindGroup>& group) override;
+  void SetBindGroup(const PipelineLayout* layout, uint32_t slot, const BindGroup& group) override;
 
   void Draw(uint32_t numVertex, uint32_t firstVertex) override;
 
@@ -27,9 +29,12 @@ class RenderPassVK : public RenderPass {
 
   VkCommandBuffer GetNativeCMD() const { return mCMD; }
 
+  std::shared_ptr<BindGroupPool> GetBindGroupPool() const { return mBindGroupPool; }
+
  private:
   VulkanDevice* mDevice;
   VkCommandBuffer mCMD;
+  std::shared_ptr<BindGroupPool> mBindGroupPool;
 };
 
 }  // namespace cubic

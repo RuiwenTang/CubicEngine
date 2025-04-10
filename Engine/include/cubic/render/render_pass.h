@@ -49,7 +49,7 @@ class CUBIC_API RenderPass {
 
   virtual void SetIndexBuffer(const std::shared_ptr<Buffer>& buffer, uint64_t offset) = 0;
 
-  virtual void SetBindGroup(uint32_t slot, const std::shared_ptr<BindGroup>& group) = 0;
+  virtual void SetBindGroup(const PipelineLayout* layout, uint32_t slot, const BindGroup& group) = 0;
 
   virtual void Draw(uint32_t numVertex, uint32_t firstVertex) = 0;
 

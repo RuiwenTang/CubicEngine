@@ -17,7 +17,11 @@ namespace cubic {
 CommandBufferVK::CommandBufferVK(VulkanDevice* device, VkCommandBuffer cmd, uint64_t value)
     : mDevice(device), mCmd(cmd), mSignalValue(value) {}
 
-CommandBufferVK::~CommandBufferVK() { mPendingResources.clear(); }
+CommandBufferVK::~CommandBufferVK() {
+  mPendingBuffers.clear();
+  mPendingTextures.clear();
+  mPendingBindGroupPools.clear();
+}
 
 std::unique_ptr<RenderPass> CommandBufferVK::BeginRenderPass(const RenderPassDescriptor& desc) {
   uint32_t width = 0;
@@ -52,6 +56,9 @@ std::unique_ptr<RenderPass> CommandBufferVK::BeginRenderPass(const RenderPassDes
     attachment_infos.emplace_back(builder.Build());
 
     attachment_infos.back().clearValue = vk::TypeConvert(attachment->clearValue);
+
+    RecordResource(attachment->target);
+    RecordResource(attachment->resolveTarget);
 
     if (resolve_target && resolve_target->GetImageLayout() != VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
       VkImageMemoryBarrier barrier{};
@@ -111,11 +118,13 @@ std::unique_ptr<RenderPass> CommandBufferVK::BeginRenderPass(const RenderPassDes
 
     auto target = dynamic_cast<TextureVK*>(attachment->target.get());
 
+    RecordResource(attachment->target);
+
     vk::AttachmentBuilder builder(target, nullptr);
 
-	builder.SetLoadOp(attachment->depthLoadOp).SetStoreOp(attachment->depthStoreOp);
+    builder.SetLoadOp(attachment->depthLoadOp).SetStoreOp(attachment->depthStoreOp);
 
-	depth_attachment_info = builder.Build();
+    depth_attachment_info = builder.Build();
 
     // FIXME: AttachmentBuilder set all attachment to COLOR_ATTACHMENT_OPTIMAL
     // TODO: make AttachmentBuilder support depth stencil
@@ -124,28 +133,28 @@ std::unique_ptr<RenderPass> CommandBufferVK::BeginRenderPass(const RenderPassDes
     depth_attachment_info->clearValue.depthStencil.depth = attachment->depthClearValue;
     depth_attachment_info->clearValue.depthStencil.stencil = attachment->stencilClearValue;
 
-	if (target->GetImageLayout() != VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
-	  VkImageMemoryBarrier barrier{};
-	  barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-	  barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	  barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    if (target->GetImageLayout() != VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+      VkImageMemoryBarrier barrier{};
+      barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+      barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+      barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 
-	  barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
-	  barrier.subresourceRange.baseMipLevel = 0;
-	  barrier.subresourceRange.levelCount = 1;
-	  barrier.subresourceRange.baseArrayLayer = 0;
-	  barrier.subresourceRange.layerCount = 1;
+      barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+      barrier.subresourceRange.baseMipLevel = 0;
+      barrier.subresourceRange.levelCount = 1;
+      barrier.subresourceRange.baseArrayLayer = 0;
+      barrier.subresourceRange.layerCount = 1;
 
-	  barrier.srcAccessMask = 0;
-	  barrier.dstAccessMask = 0;
-	  barrier.oldLayout = target->GetImageLayout();
-	  barrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-	  barrier.image = target->GetImage();
+      barrier.srcAccessMask = 0;
+      barrier.dstAccessMask = 0;
+      barrier.oldLayout = target->GetImageLayout();
+      barrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+      barrier.image = target->GetImage();
 
-	  target->SetImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+      target->SetImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
-	  attachment_barraiers.emplace_back(barrier);
-	}
+      attachment_barraiers.emplace_back(barrier);
+    }
   }
 
   // change layouts
@@ -161,7 +170,7 @@ std::unique_ptr<RenderPass> CommandBufferVK::BeginRenderPass(const RenderPassDes
   rendering_info.pColorAttachments = attachment_infos.data();
 
   if (depth_attachment_info) {
-	rendering_info.pDepthAttachment = &depth_attachment_info.value();
+    rendering_info.pDepthAttachment = &depth_attachment_info.value();
   }
 
   vkCmdBeginRendering(mCmd, &rendering_info);
@@ -184,6 +193,8 @@ void CommandBufferVK::EndRenderPass(std::unique_ptr<RenderPass> render_pass) {
   }
 
   vkCmdEndRendering(mCmd);
+
+  RecordResource(render_pass_vk->GetBindGroupPool());
 }
 
 void CommandBufferVK::CopyBufferToBuffer(const std::shared_ptr<Buffer>& dst, uint64_t dst_offset,
@@ -199,13 +210,42 @@ void CommandBufferVK::CopyBufferToBuffer(const std::shared_ptr<Buffer>& dst, uin
 }
 
 void CommandBufferVK::RecordResource(const std::shared_ptr<Buffer>& buffer) {
-  for (const auto& res : mPendingResources) {
+  if (buffer == nullptr) {
+    return;
+  }
+
+  for (const auto& res : mPendingBuffers) {
     if (res == buffer) {
       return;
     }
   }
 
-  mPendingResources.emplace_back(buffer);
+  mPendingBuffers.emplace_back(buffer);
+}
+
+void CommandBufferVK::RecordResource(const std::shared_ptr<Texture>& texture) {
+  if (texture == nullptr) {
+    return;
+  }
+
+  for (const auto& res : mPendingTextures) {
+    if (res == texture) {
+      return;
+    }
+  }
+  mPendingTextures.emplace_back(texture);
+}
+
+void CommandBufferVK::RecordResource(const std::shared_ptr<BindGroupPool>& bind_group_pool) {
+  if (bind_group_pool == nullptr) {
+    return;
+  }
+  for (const auto& res : mPendingBindGroupPools) {
+    if (res == bind_group_pool) {
+      return;
+    }
+  }
+  mPendingBindGroupPools.emplace_back(bind_group_pool);
 }
 
 }  // namespace cubic

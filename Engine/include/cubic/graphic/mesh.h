@@ -54,9 +54,6 @@ class CUBIC_API Mesh : public RenderObject {
 
   std::vector<BufferView> mMeshUniforms = {};
   std::vector<BufferView> mMaterialUniforms = {};
-
-  std::shared_ptr<BindGroup> mVertexBinding = {};
-  std::shared_ptr<BindGroup> mMaterialBinding = {};
 };
 
 }  // namespace cubic

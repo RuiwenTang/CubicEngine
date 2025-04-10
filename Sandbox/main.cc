@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cmath>
+#include <optional>
 
 using namespace cubic;
 
@@ -40,13 +41,15 @@ class SandboxClient : public WindowClient {
 
     auto render_pass = cmd->BeginRenderPass(desc);
 
-    // render_pass->BindPipeline(mPipeline);
+    render_pass->BindPipeline(mPipeline);
 
     render_pass->SetVertexBuffer(mBuffer, 0, 0);
 
     render_pass->SetIndexBuffer(mBuffer, sizeof(float) * 20);
 
-    //  render_pass->DrawElements(6, 0);
+    render_pass->SetBindGroup(mPipeline->GetLayout(), 0, *mBindGroup);
+
+    render_pass->DrawElements(6, 0);
 
     cmd->EndRenderPass(std::move(render_pass));
 
@@ -142,6 +145,17 @@ class SandboxClient : public WindowClient {
       return;
     }
 
+    auto alignment = renderSystem->GetMinBufferAlignment();
+
+    auto align_offset = [alignment](size_t offset) {
+      if (offset % alignment == 0) {
+        return offset;
+      }
+
+      auto details = offset % alignment;
+      return offset + (alignment - details);
+    };
+
     std::vector<float> raw_vertex = {
         0.45f, -0.5f, 1.f, 0.f, 0.f,  // v1
         0.5f,  0.5f,  0.f, 1.f, 0.f,  // v2
@@ -169,14 +183,7 @@ class SandboxClient : public WindowClient {
 
     uint32_t offset = sizeof(float) * 20 + sizeof(uint32_t) * 6;
 
-    if (offset <= renderSystem->GetMinBufferAlignment()) {
-      offset = renderSystem->GetMinBufferAlignment();
-    } else {
-      auto align = renderSystem->GetMinBufferAlignment();
-      auto details = offset % align;
-
-      offset += (align - details);
-    }
+    offset = align_offset(offset);
 
     std::array<float, 4> color{1.f, 0.1f, 0.5f, 1.0f};
     std::array<float, 16> matrix{
@@ -191,6 +198,10 @@ class SandboxClient : public WindowClient {
 
     auto stage_buffer3 = renderSystem->CreateBuffer(&stage_desc);
 
+    auto stage_buffer3_offset = offset;
+
+    offset = align_offset(offset + stage_desc.size);
+
     stage_desc.size = sizeof(float) * 4;
     stage_desc.data = color.data();
 
@@ -201,7 +212,7 @@ class SandboxClient : public WindowClient {
       exit(-1);
     }
 
-    uint32_t buffer_length = offset + renderSystem->GetMinBufferAlignment() + stage_desc.size;
+    uint32_t buffer_length = offset + stage_desc.size;
 
     BufferDescriptor desc{};
     desc.storageMode = BufferStorageMode::kGPUOnly;
@@ -224,23 +235,27 @@ class SandboxClient : public WindowClient {
     cmd->CopyBufferToBuffer(mBuffer, sizeof(float) * raw_vertex.size(), stage_buffer2, 0,
                             sizeof(uint32_t) * raw_index.size());
 
-    cmd->CopyBufferToBuffer(mBuffer, offset, stage_buffer3, 0, sizeof(float) * matrix.size());
-    cmd->CopyBufferToBuffer(mBuffer, offset + renderSystem->GetMinBufferAlignment(), stage_buffer4, 0,
-                            sizeof(float) * color.size());
+    cmd->CopyBufferToBuffer(mBuffer, stage_buffer3_offset, stage_buffer3, 0, sizeof(float) * matrix.size());
+    cmd->CopyBufferToBuffer(mBuffer, offset, stage_buffer4, 0, sizeof(float) * color.size());
 
     queue->Submit(std::move(cmd));
 
-    mUniformOffset = offset;
+    BindGroup bind_group{0};
+
+    bind_group.AddBinding(0, EntryType::kUniformBuffer, BufferView{mBuffer, stage_buffer3_offset, sizeof(float) * 16});
+    bind_group.AddBinding(1, EntryType::kUniformBuffer, BufferView{mBuffer, offset, sizeof(float) * 4});
+
+    mBindGroup = bind_group;
   }
 
   void InitBindGroupIfNeed(RenderSystem *renderSystem) {}
 
  private:
   uint32_t mFrameNum = 0;
-  uint32_t mUniformOffset = 0;
   std::shared_ptr<Texture> mMSAATarget = {};
   std::shared_ptr<RenderPipeline> mPipeline = {};
   std::shared_ptr<Buffer> mBuffer = {};
+  std::optional<BindGroup> mBindGroup = {};
 };
 
 int main(int argc, const char **argv) {

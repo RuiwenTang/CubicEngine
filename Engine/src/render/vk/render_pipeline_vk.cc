@@ -2,6 +2,7 @@
 
 #include <cubic/core/log.h>
 
+#include <algorithm>
 #include <vector>
 
 #include "render/vk/pipeline_layout_vk.h"
@@ -37,6 +38,9 @@ std::vector<BindGroupLayout> MergeBindGroup(const std::vector<BindGroupLayout>& 
       }
     }
   }
+
+  std::sort(result.begin(), result.end(),
+            [](const BindGroupLayout& a, const BindGroupLayout& b) { return a.GetIndex() < b.GetIndex(); });
 
   return result;
 }

@@ -18,28 +18,11 @@ class BindGroupPool : public std::enable_shared_from_this<BindGroupPool> {
 
   static std::shared_ptr<BindGroupPool> Create(VulkanDevice* device);
 
-  std::shared_ptr<BindGroup> Allocate();
+  VkDescriptorSet Allocate(const PipelineLayoutVK* layout, uint32_t slot, const BindGroup& group);
 
  private:
   VulkanDevice* mDevice;
   VkDescriptorPool mPool;
-};
-
-class BindGroupVK : public BindGroup {
- public:
-  BindGroupVK(VkDescriptorSet desccriptorSet, VkPipelineLayout pipelineLayout, std::shared_ptr<BindGroupPool> pool)
-      : mSet(desccriptorSet), mPipelineLayout(pipelineLayout), mPool(std::move(pool)) {}
-
-  ~BindGroupVK() override = default;
-
-  VkDescriptorSet GetNativeSet() const { return mSet; }
-
-  VkPipelineLayout GetPipelineLayout() const { return mPipelineLayout; }
-
- private:
-  VkDescriptorSet mSet;
-  VkPipelineLayout mPipelineLayout;
-  std::shared_ptr<BindGroupPool> mPool;
 };
 
 }  // namespace cubic
