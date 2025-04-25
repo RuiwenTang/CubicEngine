@@ -70,6 +70,16 @@ class CUBIC_API BindGroup final {
 
   const std::vector<GroupEntry>& GetEntries() const { return mEntries; }
 
+  const GroupEntry* GetEntry(uint32_t binding) const {
+    for (const auto& entry : mEntries) {
+      if (entry.binding == binding) {
+        return &entry;
+      }
+    }
+
+    return nullptr;
+  }
+
  private:
   uint32_t mIndex;
   std::vector<GroupEntry> mEntries;

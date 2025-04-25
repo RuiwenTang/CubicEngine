@@ -80,6 +80,8 @@ if(APPLE)
 		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/command_queue_mtl.mm
 		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/mtl_types.h
 		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/mtl_types.mm
+		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/pipeline_layout_mtl.h
+		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/pipeline_layout_mtl.mm
 		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/render_pass_mtl.h
 		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/render_pass_mtl.mm
 		${CMAKE_CURRENT_LIST_DIR}/src/render/mtl/render_pipeline_mtl.h

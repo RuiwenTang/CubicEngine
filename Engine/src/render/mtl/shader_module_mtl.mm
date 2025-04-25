@@ -10,39 +10,27 @@
 
 namespace cubic {
 
-struct StageEntryInfo {
-  enum class Type {
-    kUnknow,
-    kBuffer,
-    kTexture,
-    kSampler,
-  };
+bool StageGroup::AddEntry(StageEntryInfo entry) {
+  auto it =
+      std::find_if(entries.begin(), entries.end(), [&entry](StageEntryInfo& e) { return e.binding == entry.binding; });
 
-  Type type = Type::kUnknow;
-
-  // binding index in shader
-  uint32_t binding = 0;
-
-  uint32_t slot = 0;
-};
-
-struct StageGroup {
-  uint32_t set = 0;
-
-  std::vector<StageEntryInfo> entries;
-
-  bool AddEntry(StageEntryInfo entry) {
-    auto it = std::find_if(entries.begin(), entries.end(),
-                           [&entry](StageEntryInfo& e) { return e.binding == entry.binding; });
-
-    if (it == entries.end()) {
-      entries.push_back(entry);
-      return true;
-    }
-
-    return false;
+  if (it == entries.end()) {
+    entries.push_back(entry);
+    return true;
   }
-};
+
+  return false;
+}
+
+BindGroupLayout StageGroup::GenLayout(ShaderStage stage) {
+  BindGroupLayout layout{set};
+
+  for (auto& entry : entries) {
+    layout.AddBinding(entry.binding, entry.type, stage);
+  }
+
+  return layout;
+}
 
 struct StagePipelineInfo {
   std::vector<StageGroup> groups;
@@ -60,6 +48,16 @@ struct StagePipelineInfo {
     groups.emplace_back(group);
 
     return groups.back();
+  }
+
+  std::vector<BindGroupLayout> GenLayouts(ShaderStage stage) {
+    std::vector<BindGroupLayout> layouts;
+
+    for (auto& group : groups) {
+      layouts.push_back(group.GenLayout(stage));
+    }
+
+    return layouts;
   }
 };
 
@@ -79,7 +77,7 @@ static void setup_compiler(spirv_cross::CompilerMSL& compiler) {
   compiler.set_msl_options(option);
 }
 
-static void ensure_bind_group(spirv_cross::CompilerMSL& compiler) {
+static StagePipelineInfo ensure_bind_group(spirv_cross::CompilerMSL& compiler) {
   auto uniform_resources = compiler.get_shader_resources();
 
   auto execution_model = compiler.get_execution_model();
@@ -98,7 +96,7 @@ static void ensure_bind_group(spirv_cross::CompilerMSL& compiler) {
     auto& group = pipeline_info.GetGroup(set);
 
     StageEntryInfo entry{};
-    entry.type = StageEntryInfo::Type::kBuffer;
+    entry.type = EntryType::kUniformBuffer;
     entry.binding = binding;
     entry.slot = buffer_index++;
 
@@ -122,7 +120,7 @@ static void ensure_bind_group(spirv_cross::CompilerMSL& compiler) {
     auto& group = pipeline_info.GetGroup(set);
 
     StageEntryInfo entry{};
-    entry.type = StageEntryInfo::Type::kTexture;
+    entry.type = EntryType::kTexture;
     entry.binding = binding;
     group.AddEntry(entry);
 
@@ -144,7 +142,7 @@ static void ensure_bind_group(spirv_cross::CompilerMSL& compiler) {
     auto& group = pipeline_info.GetGroup(set);
     StageEntryInfo entry{};
 
-    entry.type = StageEntryInfo::Type::kSampler;
+    entry.type = EntryType::kSampler;
     entry.binding = binding;
     group.AddEntry(entry);
 
@@ -157,10 +155,13 @@ static void ensure_bind_group(spirv_cross::CompilerMSL& compiler) {
     binding_info.msl_sampler = sampler_index++;
     compiler.add_msl_resource_binding(binding_info);
   }
+
+  return pipeline_info;
 }
 
-ShaderModuleMTL::ShaderModuleMTL(ShaderStage stage, std::string label, id<MTLLibrary> shader)
-    : ShaderModule(stage, std::move(label)), mNativeShader(shader) {
+ShaderModuleMTL::ShaderModuleMTL(ShaderStage stage, std::string label, std::vector<BindGroupLayout> groups,
+                                 std::vector<StageGroup> stageGroups, id<MTLLibrary> shader)
+    : ShaderModule(stage, std::move(label), std::move(groups)), mGroups(std::move(stageGroups)), mNativeShader(shader) {
   NSString* name = @"main0";
 
   mEntryPoint = [mNativeShader newFunctionWithName:name];
@@ -185,7 +186,7 @@ std::shared_ptr<ShaderModule> ShaderModuleMTL::Compile(id<MTLDevice> gpu, Shader
 
   spirv_cross::CompilerMSL compiler(parser.get_parsed_ir());
 
-  ensure_bind_group(compiler);
+  auto info = ensure_bind_group(compiler);
 
   setup_compiler(compiler);
 
@@ -212,7 +213,8 @@ std::shared_ptr<ShaderModule> ShaderModuleMTL::Compile(id<MTLDevice> gpu, Shader
     return {};
   }
 
-  auto shader_module = std::make_shared<ShaderModuleMTL>(desc->stage, desc->label, lib);
+  auto shader_module =
+      std::make_shared<ShaderModuleMTL>(desc->stage, desc->label, info.GenLayouts(desc->stage), info.groups, lib);
 
   if (shader_module->GetEntryPoint() == nil) {
     CUB_ERROR("[Metal backend] can not found entry point in shader: [ {} ]", desc->label);

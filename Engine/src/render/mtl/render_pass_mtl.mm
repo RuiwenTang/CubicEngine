@@ -36,7 +36,15 @@ void RenderPassMTL::SetIndexBuffer(const std::shared_ptr<Buffer> &buffer, uint64
   mCurrIndexOffset = offset;
 }
 
-void RenderPassMTL::SetBindGroup(uint32_t slot, const std::shared_ptr<BindGroup> &group) {}
+void RenderPassMTL::SetBindGroup(const PipelineLayout *layout, uint32_t slot, const BindGroup &group) {
+  auto mtl_layout = dynamic_cast<const PipelineLayoutMTL *>(layout);
+  if (mtl_layout == nullptr) {
+    return;
+  }
+
+
+  mtl_layout->SetBindGroup(mEncoder, slot, group);
+}
 
 void RenderPassMTL::DrawElements(uint32_t numIndices, uint32_t firstIndex) {
   if (mCurrIndex == nullptr) {

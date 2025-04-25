@@ -17,7 +17,7 @@ class RenderPassMTL : public RenderPass {
 
   void SetIndexBuffer(const std::shared_ptr<Buffer> &buffer, uint64_t offset) override;
 
-  void SetBindGroup(uint32_t slot, const std::shared_ptr<BindGroup> &group) override;
+  void SetBindGroup(const PipelineLayout *layout, uint32_t slot, const BindGroup &group) override;
 
   void Draw(uint32_t numVertex, uint32_t firstVertex) override;
 
