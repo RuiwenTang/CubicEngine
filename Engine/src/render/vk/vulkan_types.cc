@@ -312,4 +312,15 @@ VkCompareOp TypeConvert(CompareFunction op) {
   }
 }
 
+VkFilter TypeConvert(FilterType filter) {
+  switch (filter) {
+    case FilterType::kLinear:
+      return VK_FILTER_LINEAR;
+    case FilterType::kNearest:
+      return VK_FILTER_NEAREST;
+    default:
+      return VK_FILTER_MAX_ENUM;
+  }
+}
+
 }  // namespace cubic::vk

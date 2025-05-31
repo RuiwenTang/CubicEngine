@@ -123,13 +123,25 @@ std::shared_ptr<RenderPipeline> RenderSystemVk::CreateRenderPipeline(RenderPipel
   return RenderPipelineVK::Create(mDevice.get(), desc);
 }
 
-std::shared_ptr<Texture> RenderSystemVk::CreateTexture(TextureDescirptor* desc) {
+std::shared_ptr<Texture> RenderSystemVk::CreateTexture(TextureDescriptor* desc) {
   return TextureVK::Create(desc, mAllocator, mDevice.get());
 }
 
 std::shared_ptr<Buffer> RenderSystemVk::CreateBuffer(BufferDescriptor* desc) {
   return BufferVK::Create(desc, mAllocator);
 }
+
+VkSampler RenderSystemVk::GetSampler(const Sampler& sampler) {
+  auto it = mSamplers.find(sampler);
+
+  if (it != mSamplers.end()) {
+    return it->second;
+  }
+
+  VkSamplerCreateInfo info{VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO};
+  info.flags = 0;
+}
+
 
 std::shared_ptr<ShaderModule> RenderSystemVk::CompileBackendShader(ShaderModuleDescriptor* desc,
                                                                    const std::vector<uint32_t>& spv) {

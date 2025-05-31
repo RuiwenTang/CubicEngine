@@ -82,7 +82,7 @@ void Renderer::PrepareAttachments(const std::shared_ptr<Texture>& target) {
   if (mNeedDepthBuffer) {
     if (mDepthTexture == nullptr || mDepthTexture->GetDescriptor().width != target->GetDescriptor().width ||
         mDepthTexture->GetDescriptor().height != target->GetDescriptor().height) {
-      TextureDescirptor desc{};
+      TextureDescriptor desc{};
 
       desc.format = TextureFormat::kDepth24Stencil8;
       desc.width = target->GetDescriptor().width;
@@ -98,7 +98,7 @@ void Renderer::PrepareAttachments(const std::shared_ptr<Texture>& target) {
   if (mAntialiasing) {
     if (mMSAAColorTexture == nullptr || mMSAAColorTexture->GetDescriptor().width != target->GetDescriptor().width ||
         mMSAAColorTexture->GetDescriptor().height != target->GetDescriptor().height) {
-      TextureDescirptor desc = target->GetDescriptor();
+      TextureDescriptor desc = target->GetDescriptor();
 
       desc.sample_count = 4;
       desc.usage = TextureUsage::kRenderTarget;

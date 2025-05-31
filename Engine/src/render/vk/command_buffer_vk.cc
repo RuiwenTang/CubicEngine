@@ -209,6 +209,50 @@ void CommandBufferVK::CopyBufferToBuffer(const std::shared_ptr<Buffer>& dst, uin
   RecordResource(src);
 }
 
+void CommandBufferVK::CopyBufferToTexture(const std::shared_ptr<Buffer>& src, uint64_t src_offset,
+                                          const std::shared_ptr<Texture>& texture, const Region& dst_region) {
+  auto buffer_vk = dynamic_cast<BufferVK*>(src.get());
+  auto texture_vk = dynamic_cast<TextureVK*>(texture.get());
+
+  if (texture_vk->GetImageLayout() != VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+    // change layout to TRANSFER_DST
+    VkImageMemoryBarrier barrier{};
+
+    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+    barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_NONE;
+    barrier.subresourceRange.baseArrayLayer = 0;
+    barrier.subresourceRange.baseMipLevel = 0;
+    barrier.subresourceRange.layerCount = 1;
+    barrier.subresourceRange.levelCount = 1;
+
+    barrier.srcAccessMask = 0;
+    barrier.dstAccessMask = 0;
+    barrier.oldLayout = texture_vk->GetImageLayout();
+    barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    barrier.image = texture_vk->GetImage();
+
+    vkCmdPipelineBarrier(mCmd, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr,
+                         0, nullptr, 1, &barrier);
+  }
+
+  VkBufferImageCopy region{};
+  region.bufferOffset = src_offset;
+  region.bufferRowLength = 0;
+  region.bufferImageHeight = 0;
+  region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_NONE;
+  region.imageSubresource.mipLevel = 0;
+  region.imageSubresource.baseArrayLayer = 0;
+  region.imageSubresource.layerCount = 1;
+  region.imageOffset = {static_cast<int32_t>(dst_region.x), static_cast<int32_t>(dst_region.y), 0};
+  region.imageExtent = {dst_region.width, dst_region.height, 1};
+
+  vkCmdCopyBufferToImage(mCmd, buffer_vk->GetNativeBuffer(), texture_vk->GetImage(),
+                         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+}
+
 void CommandBufferVK::RecordResource(const std::shared_ptr<Buffer>& buffer) {
   if (buffer == nullptr) {
     return;

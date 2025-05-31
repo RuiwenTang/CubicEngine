@@ -37,6 +37,7 @@ target_sources(
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/render_pipeline.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/render_system.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/renderer.h
+	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/sampler.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/shader_module.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/texture.h
 	${CMAKE_CURRENT_LIST_DIR}/include/cubic/render/types.h

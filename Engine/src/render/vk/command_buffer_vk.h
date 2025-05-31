@@ -26,6 +26,9 @@ class CommandBufferVK : public CommandBuffer {
   void CopyBufferToBuffer(const std::shared_ptr<Buffer>& dst, uint64_t dst_offset, const std::shared_ptr<Buffer>& src,
                           uint64_t src_offset, uint64_t length) override;
 
+  void CopyBufferToTexture(const std::shared_ptr<Buffer>& src, uint64_t src_offset,
+                           const std::shared_ptr<Texture>& texture, const Region& dst_region) override;
+
   VkCommandBuffer GetNativeBuffer() const { return mCmd; }
 
   uint64_t GetSignalValue() const { return mSignalValue; }

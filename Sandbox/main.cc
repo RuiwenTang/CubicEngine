@@ -18,6 +18,8 @@ class SandboxClient : public WindowClient {
 
     InitBufferIfNeed(renderSystem);
 
+    InitBGTexture(renderSystem);
+
     // InitBindGroupIfNeed(renderSystem);
 
     auto queue = renderSystem->GetCommandQueue(QueueType::kGraphic);
@@ -69,7 +71,7 @@ class SandboxClient : public WindowClient {
       }
     }
 
-    TextureDescirptor desc = target->GetDescriptor();
+    TextureDescriptor desc = target->GetDescriptor();
 
     desc.sample_count = 4;
     desc.usage = TextureUsage::kRenderTarget;
@@ -250,9 +252,43 @@ class SandboxClient : public WindowClient {
 
   void InitBindGroupIfNeed(RenderSystem *renderSystem) {}
 
+  void InitBGTexture(RenderSystem* renderSystem) {
+    TextureDescriptor desc{};
+
+    desc.format = TextureFormat::kRGBA8Unorm;
+    desc.sample_count = 1;
+    desc.width = 25;
+    desc.height = 25;
+    desc.usage = TextureUsage::kShaderRead | TextureUsage::kTextureCopyDst;
+
+    mBGTexture = renderSystem->CreateTexture(&desc);
+
+    if (mBGTexture == nullptr) {
+      return;
+    }
+
+    {
+      std::vector<uint8_t> pixels(25 * 25 * 4);
+
+      for (int32_t x = 0; x < 25; x++) {
+        for (int32_t y = 0; y < 25; y++) {
+
+        }
+      }
+    }
+
+
+    auto queue = renderSystem->GetCommandQueue(QueueType::kGraphic);
+    auto cmd = queue->GenCommandBuffer();
+
+
+
+  }
+
  private:
   uint32_t mFrameNum = 0;
   std::shared_ptr<Texture> mMSAATarget = {};
+  std::shared_ptr<Texture> mBGTexture = {};
   std::shared_ptr<RenderPipeline> mPipeline = {};
   std::shared_ptr<Buffer> mBuffer = {};
   std::optional<BindGroup> mBindGroup = {};
@@ -277,8 +313,8 @@ int main(int argc, const char **argv) {
   WindowProps props{};
 
   props.title = "Hello Sandbox";
-  props.width = 1000;
-  props.height = 1000;
+  props.width = 800;
+  props.height = 600;
   props.resizeable = false;
 
   auto window = app->CreateWindow(props);

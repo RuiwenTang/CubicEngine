@@ -29,7 +29,7 @@ class TextureVK : public Texture {
     kUser,
   };
 
-  TextureVK(const TextureDescirptor& desc, const TextureDescriptorVK& vk_desc, VulkanDevice* device, Source source);
+  TextureVK(const TextureDescriptor& desc, const TextureDescriptorVK& vk_desc, VulkanDevice* device, Source source);
 
   ~TextureVK() override;
 
@@ -46,7 +46,7 @@ class TextureVK : public Texture {
   static std::shared_ptr<TextureVK> WrapSwapchainTexture(uint32_t width, uint32_t height,
                                                          const TextureDescriptorVK& vk_desc, VulkanDevice* device);
 
-  static std::shared_ptr<Texture> Create(TextureDescirptor* desc, VmaAllocator allocator, VulkanDevice* device);
+  static std::shared_ptr<Texture> Create(TextureDescriptor* desc, VmaAllocator allocator, VulkanDevice* device);
 
  private:
   VkImage mImage = VK_NULL_HANDLE;

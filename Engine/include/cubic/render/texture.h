@@ -7,7 +7,7 @@
 
 namespace cubic {
 
-struct TextureDescirptor {
+struct TextureDescriptor {
   TextureFormat format = TextureFormat::kRGBA8Unorm;
   TextureUsageMask usage = TextureUsage::kShaderRead;
   uint32_t sample_count = 1;
@@ -17,14 +17,14 @@ struct TextureDescirptor {
 
 class CUBIC_API Texture {
  public:
-  Texture(const TextureDescirptor& desc) : mDesc(desc) {}
+  Texture(const TextureDescriptor& desc) : mDesc(desc) {}
 
   virtual ~Texture() = default;
 
-  const TextureDescirptor& GetDescriptor() const { return mDesc; }
+  const TextureDescriptor& GetDescriptor() const { return mDesc; }
 
  private:
-  TextureDescirptor mDesc;
+  TextureDescriptor mDesc;
 };
 
 }  // namespace cubic

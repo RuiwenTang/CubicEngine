@@ -4,6 +4,7 @@
 #include <cubic/render/buffer.h>
 #include <cubic/render/texture.h>
 #include <cubic/render/types.h>
+#include <cubic/render/sampler.h>
 
 #include <variant>
 #include <vector>
@@ -48,7 +49,7 @@ class BindGroupLayout {
   std::vector<GroupEntryInfo> mEntries;
 };
 
-using BindResource = std::variant<BufferView, std::shared_ptr<Texture>>;
+using BindResource = std::variant<BufferView, std::shared_ptr<Texture>, Sampler>;
 
 struct GroupEntry {
   uint32_t binding = 0;

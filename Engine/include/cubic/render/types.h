@@ -177,4 +177,24 @@ struct VertexBufferLayout {
   std::vector<VertexAttribute> attribute = {};
 };
 
+struct Region {
+  uint32_t x;
+  uint32_t y;
+  uint32_t width;
+  uint32_t height;
+};
+
+enum class FilterType {
+  kLinear,
+  kNearest,
+};
+
+enum class AddressMode {
+  kRepeat = 0,
+  kMirror,
+  kClampToEdge,
+};
+
+
+
 }  // namespace cubic

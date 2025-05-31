@@ -42,6 +42,10 @@ VkShaderStageFlags TypeConvertForBinding(ShaderStageMask mask);
 
 VkCompareOp TypeConvert(CompareFunction op);
 
+VkFilter TypeConvert(FilterType filter);
+
+VkSamplerAddressMode TypeConvert(AddressMode mode);
+
 }  // namespace vk
 
 }  // namespace cubic

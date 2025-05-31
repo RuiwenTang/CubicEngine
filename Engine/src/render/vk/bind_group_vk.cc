@@ -72,7 +72,7 @@ VkDescriptorSet BindGroupPool::Allocate(const PipelineLayoutVK* layout, uint32_t
 
   std::vector<VkWriteDescriptorSet> write_sets{};
   std::vector<VkDescriptorBufferInfo*> buffer_infos{};
-  std::vector<VkDescriptorImageInfo> image_infos{};
+  std::vector<VkDescriptorImageInfo*> image_infos{};
 
   for (const auto& entry : group.GetEntries()) {
     if (entry.type == EntryType::kUniformBuffer) {
@@ -94,6 +94,34 @@ VkDescriptorSet BindGroupPool::Allocate(const PipelineLayoutVK* layout, uint32_t
 
       set.pBufferInfo = buffer_infos.back();
     } else if (entry.type == EntryType::kTexture) {
+      auto texture = std::get<std::shared_ptr<Texture>>(entry.resource);
+
+      auto vk_texture = dynamic_cast<TextureVK*>(texture.get());
+
+      if (vk_texture == nullptr) {
+        CUB_ERROR("invalid texture passed to BindGroup !!");
+        continue;
+      }
+
+      image_infos.emplace_back(new VkDescriptorImageInfo);
+
+      image_infos.back()->imageView = vk_texture->GetImageView();
+      image_infos.back()->imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+      image_infos.back()->sampler = VK_NULL_HANDLE;
+
+      write_sets.emplace_back();
+
+      auto& set = write_sets.back();
+
+      set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+      set.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+      set.dstSet = descriptor_set;
+      set.dstBinding = entry.binding;
+      set.descriptorCount = 1;
+
+      set.pImageInfo = image_infos.back();
+    } else if (entry.type == EntryType::kSampler) {
+
     }
   }
 

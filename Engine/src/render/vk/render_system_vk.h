@@ -1,10 +1,12 @@
 #pragma once
 
 #include <cubic/render/render_system.h>
+#include <cubic/render/types.h>
 #include <vk_mem_alloc.h>
 #include <volk.h>
 
 #include <memory>
+#include <map>
 
 #include "render/render_system_priv.h"
 #include "render/vk/render_system_info_vk.h"
@@ -34,9 +36,11 @@ class RenderSystemVk : public RenderSystemPriv {
 
   std::shared_ptr<RenderPipeline> CreateRenderPipeline(RenderPipelineDescriptor* desc) override;
 
-  std::shared_ptr<Texture> CreateTexture(TextureDescirptor* desc) override;
+  std::shared_ptr<Texture> CreateTexture(TextureDescriptor* desc) override;
 
   std::shared_ptr<Buffer> CreateBuffer(BufferDescriptor* desc) override;
+
+  VkSampler GetSampler(const Sampler& sampler);
 
  protected:
   std::shared_ptr<ShaderModule> CompileBackendShader(ShaderModuleDescriptor* desc,
@@ -61,6 +65,8 @@ class RenderSystemVk : public RenderSystemPriv {
   VmaAllocator mAllocator = {};
 
   std::shared_ptr<BindGroupPool> mPool = {};
+
+  std::map<Sampler, VkSampler> mSamplers = {};
 };
 
 }  // namespace cubic

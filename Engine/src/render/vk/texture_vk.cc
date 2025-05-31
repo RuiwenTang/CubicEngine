@@ -7,7 +7,7 @@
 
 namespace cubic {
 
-TextureVK::TextureVK(const TextureDescirptor& desc, const TextureDescriptorVK& vk_desc, VulkanDevice* device,
+TextureVK::TextureVK(const TextureDescriptor& desc, const TextureDescriptorVK& vk_desc, VulkanDevice* device,
                      Source source)
     : Texture(desc),
       mImage(vk_desc.image),
@@ -39,7 +39,7 @@ TextureVK::~TextureVK() {
 
 std::shared_ptr<TextureVK> TextureVK::WrapSwapchainTexture(uint32_t width, uint32_t height,
                                                            const TextureDescriptorVK& vk_desc, VulkanDevice* device) {
-  TextureDescirptor desc{};
+  TextureDescriptor desc{};
   desc.width = width;
   desc.height = height;
   desc.usage = TextureUsage::kRenderTarget;
@@ -48,7 +48,7 @@ std::shared_ptr<TextureVK> TextureVK::WrapSwapchainTexture(uint32_t width, uint3
   return std::make_shared<TextureVK>(desc, vk_desc, device, TextureVK::Source::kSwapchain);
 }
 
-std::shared_ptr<Texture> TextureVK::Create(TextureDescirptor* desc, VmaAllocator allocator, VulkanDevice* device) {
+std::shared_ptr<Texture> TextureVK::Create(TextureDescriptor* desc, VmaAllocator allocator, VulkanDevice* device) {
   VkImageCreateInfo image_info{};
   image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
   image_info.extent.width = desc->width;
