@@ -13,6 +13,10 @@ namespace cubic {
 
 std::vector<BindGroupLayout> MergeBindGroup(const std::vector<BindGroupLayout>& a,
                                             const std::vector<BindGroupLayout>& b) {
+  if (a.empty()) {
+    return b;
+  }
+
   std::vector<BindGroupLayout> result = a;
 
   for (const auto& group : b) {

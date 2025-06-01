@@ -15,6 +15,7 @@
 #include "render/vk/render_system_vk.h"
 #include "render/vk/shader_module_vk.h"
 #include "render/vk/texture_vk.h"
+#include "render/vk/vulkan_types.h"
 
 namespace cubic {
 
@@ -140,8 +141,34 @@ VkSampler RenderSystemVk::GetSampler(const Sampler& sampler) {
 
   VkSamplerCreateInfo info{VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO};
   info.flags = 0;
-}
+  info.addressModeU = vk::TypeConvert(sampler.map_u);
+  info.addressModeV = vk::TypeConvert(sampler.map_v);
+  info.addressModeW = vk::TypeConvert(sampler.map_w);
 
+  info.magFilter = vk::TypeConvert(sampler.mag_filter);
+  info.minFilter = vk::TypeConvert(sampler.min_filter);
+
+  info.anisotropyEnable = VK_FALSE;
+  info.maxAnisotropy = 1.0f;
+  info.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
+  info.unnormalizedCoordinates = VK_FALSE;
+
+  info.compareEnable = VK_FALSE;
+  info.compareOp = VK_COMPARE_OP_ALWAYS;
+
+  info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+
+  VkSampler samplerHandle = VK_NULL_HANDLE;
+
+  if (vkCreateSampler(mDevice->GetLogicalDevice(), &info, nullptr, &samplerHandle) != VK_SUCCESS) {
+    CUB_ERROR("Failed create sampler !!");
+    return VK_NULL_HANDLE;
+  }
+
+  mSamplers[sampler] = samplerHandle;
+
+  return samplerHandle;
+}
 
 std::shared_ptr<ShaderModule> RenderSystemVk::CompileBackendShader(ShaderModuleDescriptor* desc,
                                                                    const std::vector<uint32_t>& spv) {

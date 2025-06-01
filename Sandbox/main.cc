@@ -20,8 +20,6 @@ class SandboxClient : public WindowClient {
 
     InitBGTexture(renderSystem);
 
-    // InitBindGroupIfNeed(renderSystem);
-
     auto queue = renderSystem->GetCommandQueue(QueueType::kGraphic);
 
     auto cmd = queue->GenCommandBuffer();
@@ -80,11 +78,9 @@ class SandboxClient : public WindowClient {
   }
 
   void InitPipelineIfNeed(RenderSystem *renderSystem, TextureFormat format) {
-    if (mPipeline) {
-      return;
-    }
-
-    const char *vertex_code = R"(
+    // Pipeline for shape
+    if (mPipeline == nullptr) {
+      const char *vertex_code = R"(
         #version 450 core
         layout(location = 0) in vec2 aPos;
 
@@ -97,14 +93,14 @@ class SandboxClient : public WindowClient {
         }
     )";
 
-    ShaderModuleDescriptor vs_desc{};
-    vs_desc.stage = ShaderStage::kVertexShader;
-    vs_desc.code = vertex_code;
-    vs_desc.label = "basic vertex";
+      ShaderModuleDescriptor vs_desc{};
+      vs_desc.stage = ShaderStage::kVertexShader;
+      vs_desc.code = vertex_code;
+      vs_desc.label = "basic vertex";
 
-    auto vs_shader = renderSystem->CreateShaderModule(&vs_desc);
+      auto vs_shader = renderSystem->CreateShaderModule(&vs_desc);
 
-    const char *frag_code = R"(
+      const char *frag_code = R"(
       #version 450 core
 
       layout(set = 0, binding = 1) uniform UColorInfo {
@@ -117,29 +113,90 @@ class SandboxClient : public WindowClient {
       }
     )";
 
-    ShaderModuleDescriptor fs_desc{};
-    fs_desc.stage = ShaderStage::kFragmentShader;
-    fs_desc.code = frag_code;
-    fs_desc.label = "basic fragment";
+      ShaderModuleDescriptor fs_desc{};
+      fs_desc.stage = ShaderStage::kFragmentShader;
+      fs_desc.code = frag_code;
+      fs_desc.label = "basic fragment";
 
-    auto fs_shader = renderSystem->CreateShaderModule(&fs_desc);
+      auto fs_shader = renderSystem->CreateShaderModule(&fs_desc);
 
-    RenderPipelineDescriptor desc{};
-    desc.vertexShader = vs_shader;
-    desc.fragmentShader = fs_shader;
+      RenderPipelineDescriptor desc{};
+      desc.vertexShader = vs_shader;
+      desc.fragmentShader = fs_shader;
 
-    desc.vertexBuffer.emplace_back(VertexBufferLayout{});
-    desc.vertexBuffer[0].stride = 5 * sizeof(float);
-    desc.vertexBuffer[0].attribute.emplace_back(VertexAttribute{VertexFormat::kFloat32x2, 0, 0});
+      desc.vertexBuffer.emplace_back(VertexBufferLayout{});
+      desc.vertexBuffer[0].stride = 5 * sizeof(float);
+      desc.vertexBuffer[0].attribute.emplace_back(VertexAttribute{VertexFormat::kFloat32x2, 0, 0});
 
-    ColorTargetState color1{};
-    color1.format = format;
+      ColorTargetState color1{};
+      color1.format = format;
 
-    desc.colorCount = 1;
-    desc.pColorTargets = &color1;
-    desc.sampleCount = 4;
+      desc.colorCount = 1;
+      desc.pColorTargets = &color1;
+      desc.sampleCount = 4;
 
-    mPipeline = renderSystem->CreateRenderPipeline(&desc);
+      mPipeline = renderSystem->CreateRenderPipeline(&desc);
+    }
+
+    // pipeline for background
+    if (mBGPipeline == nullptr) {
+      const char *vertex_code = R"(
+        #version 450 core
+
+        layout(location = 0) in vec2 aPos;
+        layout(location = 1) in vec2 aUV;
+
+        layout(location = 0) out vec2 vUV;
+
+        void main() {
+            gl_Position = vec4(aPos, 0.0, 1.0);
+            vUV = aUV;
+        }
+      )";
+
+      ShaderModuleDescriptor vs_desc{};
+      vs_desc.stage = ShaderStage::kVertexShader;
+      vs_desc.code = vertex_code;
+      vs_desc.label = "bg vertex";
+
+      auto vs_shader = renderSystem->CreateShaderModule(&vs_desc);
+
+      const char *frag_code = R"(
+        #version 450 core
+        layout(location = 0) in vec2 vUV;
+        layout(set = 0, binding = 0) uniform sampler uSampler;
+        layout(set = 0, binding = 1) uniform texture2D uTexture;
+        layout(location = 0) out vec4 outColor;
+        void main() {
+            outColor = texture(sampler2D(uTexture, uSampler), vUV);
+        }
+      )";
+
+      ShaderModuleDescriptor fs_desc{};
+      fs_desc.stage = ShaderStage::kFragmentShader;
+      fs_desc.code = frag_code;
+      fs_desc.label = "bg fragment";
+      auto fs_shader = renderSystem->CreateShaderModule(&fs_desc);
+
+      RenderPipelineDescriptor desc{};
+      desc.vertexShader = vs_shader;
+      desc.fragmentShader = fs_shader;
+      desc.vertexBuffer.emplace_back(VertexBufferLayout{});
+      desc.vertexBuffer[0].stride = 4 * sizeof(float);
+      desc.vertexBuffer[0].attribute.emplace_back(VertexAttribute{VertexFormat::kFloat32x2, 0, 0});
+      desc.vertexBuffer[0].attribute.emplace_back(VertexAttribute{VertexFormat::kFloat32x2, 2 * sizeof(float), 1});
+      desc.colorCount = 1;
+      
+
+      ColorTargetState color1{};
+      color1.format = format;
+
+      desc.colorCount = 1;
+      desc.pColorTargets = &color1;
+      desc.sampleCount = 4;
+
+      mBGPipeline = renderSystem->CreateRenderPipeline(&desc);
+    }
   }
 
   void InitBufferIfNeed(RenderSystem *renderSystem) {
@@ -250,9 +307,7 @@ class SandboxClient : public WindowClient {
     mBindGroup = bind_group;
   }
 
-  void InitBindGroupIfNeed(RenderSystem *renderSystem) {}
-
-  void InitBGTexture(RenderSystem* renderSystem) {
+  void InitBGTexture(RenderSystem *renderSystem) {
     TextureDescriptor desc{};
 
     desc.format = TextureFormat::kRGBA8Unorm;
@@ -272,17 +327,48 @@ class SandboxClient : public WindowClient {
 
       for (int32_t x = 0; x < 25; x++) {
         for (int32_t y = 0; y < 25; y++) {
+          bool is_transparent = (x / 5 + y / 5) % 2 == 0;
 
+          if (is_transparent) {
+            pixels[(x * 25 + y) * 4 + 0] = 128;  // R
+            pixels[(x * 25 + y) * 4 + 1] = 128;  // G
+            pixels[(x * 25 + y) * 4 + 2] = 128;  // B
+            pixels[(x * 25 + y) * 4 + 3] = 128;  // A
+          } else {
+            pixels[(x * 25 + y) * 4 + 0] = 255;  // R
+            pixels[(x * 25 + y) * 4 + 1] = 255;  // G
+            pixels[(x * 25 + y) * 4 + 2] = 255;  // B
+            pixels[(x * 25 + y) * 4 + 3] = 255;  // A
+          }
         }
       }
+
+      BufferDescriptor stage_desc{};
+      stage_desc.storageMode = BufferStorageMode::kCPUOnly;
+      stage_desc.usage = BufferUsage::kBuffCopySrc;
+      stage_desc.size = sizeof(uint8_t) * pixels.size();
+      stage_desc.data = pixels.data();
+
+      auto stage_buffer = renderSystem->CreateBuffer(&stage_desc);
+
+      if (stage_buffer == nullptr) {
+        CUB_ERROR("[Sandbox] Failed create stage buffer for background texture");
+        return;
+      }
+
+      auto queue = renderSystem->GetCommandQueue(QueueType::kGraphic);
+      auto cmd = queue->GenCommandBuffer();
+
+      cmd->CopyBufferToTexture(stage_buffer, 0, mBGTexture,
+                               Region{
+                                   0,
+                                   0,
+                                   25,
+                                   25,
+                               });
+
+      queue->Submit(std::move(cmd));
     }
-
-
-    auto queue = renderSystem->GetCommandQueue(QueueType::kGraphic);
-    auto cmd = queue->GenCommandBuffer();
-
-
-
   }
 
  private:
@@ -290,6 +376,7 @@ class SandboxClient : public WindowClient {
   std::shared_ptr<Texture> mMSAATarget = {};
   std::shared_ptr<Texture> mBGTexture = {};
   std::shared_ptr<RenderPipeline> mPipeline = {};
+  std::shared_ptr<RenderPipeline> mBGPipeline = {};
   std::shared_ptr<Buffer> mBuffer = {};
   std::optional<BindGroup> mBindGroup = {};
 };

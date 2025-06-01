@@ -323,4 +323,15 @@ VkFilter TypeConvert(FilterType filter) {
   }
 }
 
+VkSamplerAddressMode TypeConvert(AddressMode mode) {
+  switch (mode) {
+    case AddressMode::kRepeat:
+      return VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    case AddressMode::kClampToEdge:
+      return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    default:
+      return VK_SAMPLER_ADDRESS_MODE_MAX_ENUM;
+  }
+}
+
 }  // namespace cubic::vk

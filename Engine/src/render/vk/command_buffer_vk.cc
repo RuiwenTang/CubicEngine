@@ -222,7 +222,7 @@ void CommandBufferVK::CopyBufferToTexture(const std::shared_ptr<Buffer>& src, ui
     barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 
-    barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_NONE;
+    barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     barrier.subresourceRange.baseArrayLayer = 0;
     barrier.subresourceRange.baseMipLevel = 0;
     barrier.subresourceRange.layerCount = 1;
@@ -242,7 +242,7 @@ void CommandBufferVK::CopyBufferToTexture(const std::shared_ptr<Buffer>& src, ui
   region.bufferOffset = src_offset;
   region.bufferRowLength = 0;
   region.bufferImageHeight = 0;
-  region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_NONE;
+  region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
   region.imageSubresource.mipLevel = 0;
   region.imageSubresource.baseArrayLayer = 0;
   region.imageSubresource.layerCount = 1;
@@ -251,6 +251,8 @@ void CommandBufferVK::CopyBufferToTexture(const std::shared_ptr<Buffer>& src, ui
 
   vkCmdCopyBufferToImage(mCmd, buffer_vk->GetNativeBuffer(), texture_vk->GetImage(),
                          VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+
+  mPendingBuffers.emplace_back(src);
 }
 
 void CommandBufferVK::RecordResource(const std::shared_ptr<Buffer>& buffer) {
