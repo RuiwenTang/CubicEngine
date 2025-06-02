@@ -1,7 +1,9 @@
 #pragma once
 
+#include <cubic/render/sampler.h>
 #include <volk.h>
 
+#include <map>
 #include <memory>
 #include <vector>
 
@@ -28,6 +30,8 @@ class VulkanDevice {
   CommandQueueVK* GetTransferQueue() const { return mTransferProxy.get(); }
 
   uint32_t GetMinBufferAlignment() const;
+
+  VkSampler GetSampler(const Sampler& sampler);
 
  private:
   bool Init();
@@ -60,6 +64,8 @@ class VulkanDevice {
   std::unique_ptr<CommandQueueVK> mGraphicProxy;
   std::unique_ptr<CommandQueueVK> mComputeProxy;
   std::unique_ptr<CommandQueueVK> mTransferProxy;
+
+  std::map<Sampler, VkSampler> mSamplers = {};
 };
 
 }  // namespace cubic

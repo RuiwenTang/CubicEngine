@@ -187,7 +187,7 @@ VkImageUsageFlagBits TypeConvert(TextureUsageMask mask, TextureFormat format) {
   }
 
   if (mask & TextureUsage::kShaderRead) {
-    flags |= VK_IMAGE_USAGE_SAMPLED_BIT;
+    flags |= VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
   }
 
   if (mask & TextureUsage::kShaderWrite) {
@@ -329,6 +329,8 @@ VkSamplerAddressMode TypeConvert(AddressMode mode) {
       return VK_SAMPLER_ADDRESS_MODE_REPEAT;
     case AddressMode::kClampToEdge:
       return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    case AddressMode::kMirror:
+      return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
     default:
       return VK_SAMPLER_ADDRESS_MODE_MAX_ENUM;
   }

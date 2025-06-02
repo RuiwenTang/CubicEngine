@@ -6,7 +6,6 @@
 #include <volk.h>
 
 #include <memory>
-#include <map>
 
 #include "render/render_system_priv.h"
 #include "render/vk/render_system_info_vk.h"
@@ -40,7 +39,7 @@ class RenderSystemVk : public RenderSystemPriv {
 
   std::shared_ptr<Buffer> CreateBuffer(BufferDescriptor* desc) override;
 
-  VkSampler GetSampler(const Sampler& sampler);
+  bool PrepareTexture(const std::shared_ptr<Texture>& texture, TextureUsage usage) override;
 
  protected:
   std::shared_ptr<ShaderModule> CompileBackendShader(ShaderModuleDescriptor* desc,
@@ -65,8 +64,6 @@ class RenderSystemVk : public RenderSystemPriv {
   VmaAllocator mAllocator = {};
 
   std::shared_ptr<BindGroupPool> mPool = {};
-
-  std::map<Sampler, VkSampler> mSamplers = {};
 };
 
 }  // namespace cubic

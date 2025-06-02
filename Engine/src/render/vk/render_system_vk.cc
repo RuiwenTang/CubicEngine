@@ -9,6 +9,7 @@
 
 #include "render/vk/bind_group_vk.h"
 #include "render/vk/buffer_vk.h"
+#include "render/vk/command_buffer_vk.h"
 #include "render/vk/command_queue_vk.h"
 #include "render/vk/pipeline_layout_vk.h"
 #include "render/vk/render_pipeline_vk.h"
@@ -132,42 +133,76 @@ std::shared_ptr<Buffer> RenderSystemVk::CreateBuffer(BufferDescriptor* desc) {
   return BufferVK::Create(desc, mAllocator);
 }
 
-VkSampler RenderSystemVk::GetSampler(const Sampler& sampler) {
-  auto it = mSamplers.find(sampler);
-
-  if (it != mSamplers.end()) {
-    return it->second;
+bool RenderSystemVk::PrepareTexture(const std::shared_ptr<Texture>& texture, TextureUsage usage) {
+  if (texture == nullptr) {
+    return false;
   }
 
-  VkSamplerCreateInfo info{VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO};
-  info.flags = 0;
-  info.addressModeU = vk::TypeConvert(sampler.map_u);
-  info.addressModeV = vk::TypeConvert(sampler.map_v);
-  info.addressModeW = vk::TypeConvert(sampler.map_w);
+  auto vk_texture = dynamic_cast<TextureVK*>(texture.get());
 
-  info.magFilter = vk::TypeConvert(sampler.mag_filter);
-  info.minFilter = vk::TypeConvert(sampler.min_filter);
-
-  info.anisotropyEnable = VK_FALSE;
-  info.maxAnisotropy = 1.0f;
-  info.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
-  info.unnormalizedCoordinates = VK_FALSE;
-
-  info.compareEnable = VK_FALSE;
-  info.compareOp = VK_COMPARE_OP_ALWAYS;
-
-  info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-
-  VkSampler samplerHandle = VK_NULL_HANDLE;
-
-  if (vkCreateSampler(mDevice->GetLogicalDevice(), &info, nullptr, &samplerHandle) != VK_SUCCESS) {
-    CUB_ERROR("Failed create sampler !!");
-    return VK_NULL_HANDLE;
+  if (vk_texture == nullptr) {
+    return false;
   }
 
-  mSamplers[sampler] = samplerHandle;
+  VkImageLayout target_layout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-  return samplerHandle;
+  switch (usage) {
+    case kRenderTarget:
+      target_layout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
+      break;
+    case kShaderRead:
+      target_layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+      break;
+    case kTextureCopySrc:
+      target_layout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+      break;
+    case kTextureCopyDst:
+      target_layout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+      break;
+    default:
+      break;
+  }
+
+  if (target_layout == VK_IMAGE_LAYOUT_UNDEFINED) {
+    return false;
+  }
+
+  if (target_layout == vk_texture->GetImageLayout()) {
+    return true;
+  }
+
+  // change image layout with barrier
+  VkImageMemoryBarrier barrier{};
+  barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+  barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+  barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+  barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+  barrier.subresourceRange.baseMipLevel = 0;
+  barrier.subresourceRange.levelCount = 1;
+  barrier.subresourceRange.baseArrayLayer = 0;
+  barrier.subresourceRange.layerCount = 1;
+
+  barrier.srcAccessMask = 0;
+  barrier.dstAccessMask = 0;
+  barrier.oldLayout = vk_texture->GetImageLayout();
+  barrier.newLayout = target_layout;
+  barrier.image = vk_texture->GetImage();
+
+  auto queue = mDevice->GetGraphicQueue();
+
+  auto cmd = queue->GenCommandBuffer();
+
+  auto cmd_vk = dynamic_cast<CommandBufferVK*>(cmd.get());
+
+  vkCmdPipelineBarrier(cmd_vk->GetNativeBuffer(), VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+                       VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+
+  queue->Submit(std::move(cmd));
+
+  vk_texture->SetImageLayout(target_layout);
+
+  return true;
 }
 
 std::shared_ptr<ShaderModule> RenderSystemVk::CompileBackendShader(ShaderModuleDescriptor* desc,

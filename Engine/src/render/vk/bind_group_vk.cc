@@ -121,7 +121,28 @@ VkDescriptorSet BindGroupPool::Allocate(const PipelineLayoutVK* layout, uint32_t
 
       set.pImageInfo = image_infos.back();
     } else if (entry.type == EntryType::kSampler) {
+      auto sampler = std::get<Sampler>(entry.resource);
 
+      auto vk_sampler = mDevice->GetSampler(sampler);
+
+      if (vk_sampler == VK_NULL_HANDLE) {
+        CUB_ERROR("invalid sampler passed to BindGroup !!");
+        continue;
+      }
+
+      image_infos.emplace_back(new VkDescriptorImageInfo);
+      image_infos.back()->sampler = vk_sampler;
+
+      write_sets.emplace_back();
+
+      auto& set = write_sets.back();
+      set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+      set.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+      set.dstSet = descriptor_set;
+      set.dstBinding = entry.binding;
+      set.descriptorCount = 1;
+
+      set.pImageInfo = image_infos.back();
     }
   }
 

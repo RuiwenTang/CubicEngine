@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "render/vk/command_queue_vk.h"
+#include "render/vk/vulkan_types.h"
 
 namespace cubic {
 
@@ -48,6 +49,44 @@ std::unique_ptr<VulkanDevice> VulkanDevice::Create(VkPhysicalDevice gpu) {
 }
 
 uint32_t VulkanDevice::GetMinBufferAlignment() const { return mGPUProps.limits.minUniformBufferOffsetAlignment; }
+
+VkSampler VulkanDevice::GetSampler(const Sampler& sampler) {
+  auto it = mSamplers.find(sampler);
+
+  if (it != mSamplers.end()) {
+    return it->second;
+  }
+
+  VkSamplerCreateInfo info{VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO};
+  info.flags = 0;
+  info.addressModeU = vk::TypeConvert(sampler.map_u);
+  info.addressModeV = vk::TypeConvert(sampler.map_v);
+  info.addressModeW = vk::TypeConvert(sampler.map_w);
+
+  info.magFilter = vk::TypeConvert(sampler.mag_filter);
+  info.minFilter = vk::TypeConvert(sampler.min_filter);
+
+  info.anisotropyEnable = VK_FALSE;
+  info.maxAnisotropy = 1.0f;
+  info.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
+  info.unnormalizedCoordinates = VK_FALSE;
+
+  info.compareEnable = VK_FALSE;
+  info.compareOp = VK_COMPARE_OP_ALWAYS;
+
+  info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+
+  VkSampler samplerHandle = VK_NULL_HANDLE;
+
+  if (vkCreateSampler(mDevice, &info, nullptr, &samplerHandle) != VK_SUCCESS) {
+    CUB_ERROR("Failed create sampler !!");
+    return VK_NULL_HANDLE;
+  }
+
+  mSamplers[sampler] = samplerHandle;
+
+  return samplerHandle;
+}
 
 bool VulkanDevice::Init() {
   if (!InitQueueProps()) {

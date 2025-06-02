@@ -16,9 +16,11 @@ class SandboxClient : public WindowClient {
 
     InitPipelineIfNeed(renderSystem, surfaceTexture->GetDescriptor().format);
 
-    InitBufferIfNeed(renderSystem);
-
     InitBGTexture(renderSystem);
+
+    InitBufferIfNeed(renderSystem, surfaceTexture->GetDescriptor().width, surfaceTexture->GetDescriptor().height);
+
+    renderSystem->PrepareTexture(mBGTexture, TextureUsage::kShaderRead);
 
     auto queue = renderSystem->GetCommandQueue(QueueType::kGraphic);
 
@@ -41,11 +43,19 @@ class SandboxClient : public WindowClient {
 
     auto render_pass = cmd->BeginRenderPass(desc);
 
+    render_pass->SetIndexBuffer(mBuffer, sizeof(float) * 36);
+
+    render_pass->BindPipeline(mBGPipeline);
+
+    render_pass->SetVertexBuffer(mBuffer, 0, sizeof(float) * 20);
+
+    render_pass->SetBindGroup(mBGPipeline->GetLayout(), 0, *mBGGroup);
+
+    render_pass->DrawElements(6, 0);
+
     render_pass->BindPipeline(mPipeline);
 
     render_pass->SetVertexBuffer(mBuffer, 0, 0);
-
-    render_pass->SetIndexBuffer(mBuffer, sizeof(float) * 20);
 
     render_pass->SetBindGroup(mPipeline->GetLayout(), 0, *mBindGroup);
 
@@ -186,7 +196,6 @@ class SandboxClient : public WindowClient {
       desc.vertexBuffer[0].attribute.emplace_back(VertexAttribute{VertexFormat::kFloat32x2, 0, 0});
       desc.vertexBuffer[0].attribute.emplace_back(VertexAttribute{VertexFormat::kFloat32x2, 2 * sizeof(float), 1});
       desc.colorCount = 1;
-      
 
       ColorTargetState color1{};
       color1.format = format;
@@ -199,7 +208,7 @@ class SandboxClient : public WindowClient {
     }
   }
 
-  void InitBufferIfNeed(RenderSystem *renderSystem) {
+  void InitBufferIfNeed(RenderSystem *renderSystem, uint32_t width, uint32_t height) {
     if (mBuffer) {
       return;
     }
@@ -215,11 +224,46 @@ class SandboxClient : public WindowClient {
       return offset + (alignment - details);
     };
 
+    auto uv_scale = 3.f;
+
     std::vector<float> raw_vertex = {
-        0.45f, -0.5f, 1.f, 0.f, 0.f,  // v1
-        0.5f,  0.5f,  0.f, 1.f, 0.f,  // v2
-        -0.5f, 0.5f,  0.f, 0.f, 1.f,  // v3
-        -0.5f, -0.5f, 1.f, 1.f, 0.f,  // v4
+        0.45f,
+        -0.5f,
+        1.f,
+        0.f,
+        0.f,  // v1
+        0.5f,
+        0.5f,
+        0.f,
+        1.f,
+        0.f,  // v2
+        -0.5f,
+        0.5f,
+        0.f,
+        0.f,
+        1.f,  // v3
+        -0.5f,
+        -0.5f,
+        1.f,
+        1.f,
+        0.f,  // v4
+
+        -1.f,
+        -1.f,
+        0.f * uv_scale,
+        0.f * uv_scale,  // left bottom
+        1.f,
+        -1.f,
+        1.f * uv_scale,
+        0.f * uv_scale,  // right bottom
+        1.f,
+        1.f,
+        1.f * uv_scale,
+        1.f * uv_scale,  // right top
+        -1.f,
+        1.f,
+        0.f * uv_scale,
+        1.f * uv_scale,  // left top
     };
 
     std::vector<uint32_t> raw_index{
@@ -240,7 +284,7 @@ class SandboxClient : public WindowClient {
 
     auto stage_buffer2 = renderSystem->CreateBuffer(&stage_desc);
 
-    uint32_t offset = sizeof(float) * 20 + sizeof(uint32_t) * 6;
+    uint32_t offset = sizeof(float) * 36 + sizeof(uint32_t) * 6;
 
     offset = align_offset(offset);
 
@@ -299,21 +343,38 @@ class SandboxClient : public WindowClient {
 
     queue->Submit(std::move(cmd));
 
-    BindGroup bind_group{0};
+    {
+      BindGroup bind_group{0};
 
-    bind_group.AddBinding(0, EntryType::kUniformBuffer, BufferView{mBuffer, stage_buffer3_offset, sizeof(float) * 16});
-    bind_group.AddBinding(1, EntryType::kUniformBuffer, BufferView{mBuffer, offset, sizeof(float) * 4});
+      bind_group.AddBinding(0, EntryType::kUniformBuffer,
+                            BufferView{mBuffer, stage_buffer3_offset, sizeof(float) * 16});
+      bind_group.AddBinding(1, EntryType::kUniformBuffer, BufferView{mBuffer, offset, sizeof(float) * 4});
 
-    mBindGroup = bind_group;
+      mBindGroup = bind_group;
+    }
+
+    {
+      BindGroup bind_group{0};
+
+      bind_group.AddBinding(0, EntryType::kSampler, Sampler{});
+
+      bind_group.AddBinding(1, EntryType::kTexture, mBGTexture);
+
+      mBGGroup = bind_group;
+    }
   }
 
   void InitBGTexture(RenderSystem *renderSystem) {
+    if (mBGTexture != nullptr) {
+      return;
+    }
+
     TextureDescriptor desc{};
 
     desc.format = TextureFormat::kRGBA8Unorm;
     desc.sample_count = 1;
-    desc.width = 25;
-    desc.height = 25;
+    desc.width = 30;
+    desc.height = 30;
     desc.usage = TextureUsage::kShaderRead | TextureUsage::kTextureCopyDst;
 
     mBGTexture = renderSystem->CreateTexture(&desc);
@@ -323,22 +384,22 @@ class SandboxClient : public WindowClient {
     }
 
     {
-      std::vector<uint8_t> pixels(25 * 25 * 4);
+      std::vector<uint8_t> pixels(30 * 30 * 4);
 
-      for (int32_t x = 0; x < 25; x++) {
-        for (int32_t y = 0; y < 25; y++) {
+      for (int32_t x = 0; x < 30; x++) {
+        for (int32_t y = 0; y < 30; y++) {
           bool is_transparent = (x / 5 + y / 5) % 2 == 0;
 
           if (is_transparent) {
-            pixels[(x * 25 + y) * 4 + 0] = 128;  // R
-            pixels[(x * 25 + y) * 4 + 1] = 128;  // G
-            pixels[(x * 25 + y) * 4 + 2] = 128;  // B
-            pixels[(x * 25 + y) * 4 + 3] = 128;  // A
+            pixels[(y * 30 + x) * 4 + 0] = 128;  // R
+            pixels[(y * 30 + x) * 4 + 1] = 128;  // G
+            pixels[(y * 30 + x) * 4 + 2] = 128;  // B
+            pixels[(y * 30 + x) * 4 + 3] = 128;  // A
           } else {
-            pixels[(x * 25 + y) * 4 + 0] = 255;  // R
-            pixels[(x * 25 + y) * 4 + 1] = 255;  // G
-            pixels[(x * 25 + y) * 4 + 2] = 255;  // B
-            pixels[(x * 25 + y) * 4 + 3] = 255;  // A
+            pixels[(y * 30 + x) * 4 + 0] = 255;  // R
+            pixels[(y * 30 + x) * 4 + 1] = 255;  // G
+            pixels[(y * 30 + x) * 4 + 2] = 255;  // B
+            pixels[(y * 30 + x) * 4 + 3] = 255;  // A
           }
         }
       }
@@ -363,8 +424,8 @@ class SandboxClient : public WindowClient {
                                Region{
                                    0,
                                    0,
-                                   25,
-                                   25,
+                                   30,
+                                   30,
                                });
 
       queue->Submit(std::move(cmd));
@@ -378,6 +439,7 @@ class SandboxClient : public WindowClient {
   std::shared_ptr<RenderPipeline> mPipeline = {};
   std::shared_ptr<RenderPipeline> mBGPipeline = {};
   std::shared_ptr<Buffer> mBuffer = {};
+  std::optional<BindGroup> mBGGroup = {};
   std::optional<BindGroup> mBindGroup = {};
 };
 

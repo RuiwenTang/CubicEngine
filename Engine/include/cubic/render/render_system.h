@@ -37,6 +37,8 @@ class CUBIC_API RenderSystem {
   virtual std::shared_ptr<Texture> CreateTexture(TextureDescriptor* desc) = 0;
 
   virtual std::shared_ptr<Buffer> CreateBuffer(BufferDescriptor* desc) = 0;
+
+  virtual bool PrepareTexture(const std::shared_ptr<Texture>& texture, TextureUsage usage) = 0;
 };
 
 }  // namespace cubic
